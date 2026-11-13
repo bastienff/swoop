@@ -126,6 +126,8 @@ final class AppSettings {
     var vscodeSearchBoost: Bool { didSet { save("vscodeSearchBoost", vscodeSearchBoost) } }
     var windowOrder: WindowOrder { didSet { save("windowOrder", windowOrder.rawValue) } }
     var debugLogging: Bool { didSet { save("debugLogging", debugLogging) } }
+    /// Diagnostics reports include window titles only when this is on.
+    var diagnosticsIncludeTitles: Bool { didSet { save("diagnosticsIncludeTitles", diagnosticsIncludeTitles) } }
     var onboardingCompleted: Bool { didSet { save("onboardingCompleted", onboardingCompleted) } }
 
     init(defaults: UserDefaults = .standard) {
@@ -155,6 +157,7 @@ final class AppSettings {
         windowOrder = WindowOrder(rawValue: defaults.string(forKey: "windowOrder") ?? "")
             ?? (b("sortByRecent", true) ? .smart : .name)
         debugLogging = b("debugLogging", false)
+        diagnosticsIncludeTitles = b("diagnosticsIncludeTitles", false)
         onboardingCompleted = b("onboardingCompleted", false)
     }
 

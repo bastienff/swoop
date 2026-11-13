@@ -40,6 +40,9 @@ final class DebugCommands {
         case "demo": loadDemo()
         case "draggable": controller.settings.panelDraggable = arg == "on"
         case "mode": controller.settings.switcherMode = SwitcherMode(rawValue: arg) ?? .stayOpen
+        case "report":
+            // report <path>: writes a diagnostics report to <path>.
+            Task { @MainActor in try? await DiagnosticsReport.make(controller).write(toFile: arg, atomically: true, encoding: .utf8) }
         case "bugurl": try? controller.bugReportURL.absoluteString.write(toFile: arg, atomically: true, encoding: .utf8)
         case "order": controller.settings.windowOrder = WindowOrder(rawValue: arg) ?? .smart
         case "results":

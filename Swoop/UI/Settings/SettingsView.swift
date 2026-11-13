@@ -324,14 +324,25 @@ private struct AdvancedSettings: View {
                     Task { await controller.registry.refresh(); status = "Refreshed: \(controller.registry.entries.count) windows." }
                 }
                 Button("Reset Recent Usage") { controller.recents.reset(); status = "Recent usage cleared." }
-                Button("Copy Diagnostics") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(diagnostics(), forType: .string)
-                    status = "Diagnostics copied to the clipboard (stays on this Mac unless you paste it)."
-                }
                 if !status.isEmpty { Text(status).font(.footnote).foregroundStyle(.secondary) }
             } footer: {
-                Text("Debug logging writes window titles to the system log (subsystem com.bastienff.swoop) instead of redacting them.")
+                Text("Debug logging writes the window list, with titles, to the system log (subsystem com.bastienff.swoop).")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
+            Section("Diagnostics") {
+                Toggle("Include window titles in reports", isOn: $settings.diagnosticsIncludeTitles)
+                HStack {
+                    Button("Save Diagnostics Report…") {
+                        Task {
+                            if let url = await DiagnosticsReport.saveAndReveal(controller) { status = "Saved \(url.lastPathComponent)." }
+                        }
+                    }
+                    Button("Show Reports Folder") {
+                        try? FileManager.default.createDirectory(at: DiagnosticsReport.folder, withIntermediateDirectories: true)
+                        NSWorkspace.shared.open(DiagnosticsReport.folder)
+                    }
+                }
+                Text("Attach the report to a bug report on GitHub. It has Swoop's version, settings and this session's log, and lists your windows' apps; titles are left out unless you include them. It stays on this Mac until you attach it.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section {
@@ -339,15 +350,5 @@ private struct AdvancedSettings: View {
             }
         }
         .formStyle(.grouped)
-    }
-
-    private func diagnostics() -> String {
-        let info = ProcessInfo.processInfo
-        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
-        var s = "Swoop \(version) on macOS \(info.operatingSystemVersionString)\n"
-        s += "Accessibility: \(controller.permissions.isAccessibilityTrusted)\n"
-        s += "Shortcut: \(controller.settings.effectiveShortcut?.displayString ?? "none") error: \(controller.shortcutError ?? "none")\n\n"
-        s += controller.registry.dump()
-        return s
     }
 }

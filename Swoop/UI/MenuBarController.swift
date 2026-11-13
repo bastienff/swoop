@@ -12,6 +12,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     /// Opens GitHub's pre-filled bug report / feature request form.
     var onReportProblem: (() -> Void)?
     var onSuggestFeature: (() -> Void)?
+    var onSaveDiagnostics: (() -> Void)?
     var shortcutDisplay: () -> String = { "" }
     var isAccessibilityTrusted: () -> Bool = { false }
     /// Screen frame of the menu-bar icon.
@@ -90,6 +91,13 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         report.target = self
         report.image = NSImage(systemSymbolName: "exclamationmark.bubble", accessibilityDescription: nil)
         menu.addItem(report)
+        // ⌥ reveals it in place of "Report a Problem…" (standard alternate menu item).
+        let diagnostics = NSMenuItem(title: "Save Diagnostics Report", action: #selector(saveDiagnostics), keyEquivalent: "")
+        diagnostics.target = self
+        diagnostics.image = NSImage(systemSymbolName: "doc.text.magnifyingglass", accessibilityDescription: nil)
+        diagnostics.isAlternate = true
+        diagnostics.keyEquivalentModifierMask = .option
+        menu.addItem(diagnostics)
         let suggest = NSMenuItem(title: "Suggest a Feature…", action: #selector(suggestFeature), keyEquivalent: "")
         suggest.target = self
         suggest.image = NSImage(systemSymbolName: "lightbulb", accessibilityDescription: nil)
@@ -115,6 +123,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     @objc private func toggleLaunchAtLogin() { LaunchAtLogin.set(!LaunchAtLogin.isEnabled) }
     @objc private func reportProblem() { onReportProblem?() }
     @objc private func suggestFeature() { onSuggestFeature?() }
+    @objc private func saveDiagnostics() { onSaveDiagnostics?() }
     @objc private func buyMeACoffee() { NSWorkspace.shared.open(AppLinks.buyMeACoffee) }
     @objc private func about() {
         NSApp.activate()

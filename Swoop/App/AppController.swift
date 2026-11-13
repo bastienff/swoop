@@ -6,6 +6,7 @@ import SwoopCore
 /// Composition root: owns services and wires events (ARCHITECTURE §8).
 @MainActor
 final class AppController {
+    let launchedAt = Date()
     let settings = AppSettings()
     let recents = RecentWindowsStore()
     let permissions = PermissionManager()
@@ -47,7 +48,11 @@ final class AppController {
         menuBar.onOpenSwoop = { [weak self] in self?.showPanel() }
         menuBar.onOpenSettings = { [weak self] in self?.openSettingsHandler?() }
         menuBar.onOpenPermissions = { [weak self] in self?.openOnboardingHandler?() }
-        menuBar.onReportProblem = { [weak self] in self?.openBugReport() }
+        menuBar.onReportProblem = { [weak self] in self?.reportProblem() }
+        menuBar.onSaveDiagnostics = { [weak self] in
+            guard let self else { return }
+            Task { await DiagnosticsReport.saveAndReveal(self) }
+        }
         menuBar.onSuggestFeature = { NSWorkspace.shared.open(AppLinks.newIssue(.featureRequest)) }
         menuBar.shortcutDisplay = { [weak self] in self?.settings.effectiveShortcut?.displayString ?? "" }
         menuBar.isAccessibilityTrusted = { [weak self] in self?.permissions.isAccessibilityTrusted ?? false }
@@ -95,6 +100,31 @@ final class AppController {
     /// GitHub's bug report form, pre-filled with version, system and layout (no window titles).
     func openBugReport() {
         NSWorkspace.shared.open(bugReportURL)
+    }
+
+    /// Menu → Report a Problem…: offers to save a diagnostics report (revealed in Finder, to drag into
+    /// the form) before opening the GitHub form.
+    func reportProblem() {
+        NSApp.activate()
+        let alert = NSAlert()
+        alert.messageText = "Report a Problem"
+        alert.informativeText = """
+            Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on             GitHub. It has Swoop's version and settings, this session's log and your windows' apps,             \(settings.diagnosticsIncludeTitles ? "including window titles — check it for anything private" : "without window titles").             Nothing is sent until you submit the report.
+            """
+        alert.addButton(withTitle: "Save Report & Open GitHub")
+        alert.addButton(withTitle: "Open GitHub Only")
+        alert.addButton(withTitle: "Cancel")
+        switch alert.runModal() {
+        case .alertFirstButtonReturn:
+            Task {
+                await DiagnosticsReport.saveAndReveal(self)
+                openBugReport()
+            }
+        case .alertSecondButtonReturn:
+            openBugReport()
+        default:
+            break
+        }
     }
 
     var bugReportURL: URL {

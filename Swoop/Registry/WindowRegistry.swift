@@ -290,17 +290,14 @@ final class WindowRegistry {
     }
 
     /// Debug description for Settings → Advanced and diagnostics.
-    func dump() -> String {
+    /// `includeTitles: false` replaces titles with their length (diagnostics reports without opt-in).
+    func dump(includeTitles: Bool = true) -> String {
         var s = "Registry @ \(lastRefresh.map { "\($0)" } ?? "never") — \(entries.count) entries, full refresh \(Int(lastRefreshDuration * 1000)) ms\n"
         for e in entries {
             let t = targets[e.id]
-            let route: String = switch t?.route {
-            case .element: "element"
-            case .tab: "tab"
-            case .menu: "menu"
-            case nil: "?"
-            }
-            s += "\(e.appName) | \(e.title) | src=\(e.source) route=\(route) cur=\(e.isOnCurrentSpace) min=\(e.isMinimized) tabsRisk=\(t?.mayHaveHiddenTabs ?? false) mult=\(t?.titleMultiplicity ?? 0)\n"
+            let route = t?.route.kind ?? "?"
+            let title = includeTitles ? e.title : "‹title, \(e.title.count) chars›"
+            s += "\(e.appName) | \(title) | src=\(e.source) route=\(route) cur=\(e.isOnCurrentSpace) min=\(e.isMinimized) tabsRisk=\(t?.mayHaveHiddenTabs ?? false) mult=\(t?.titleMultiplicity ?? 0)\n"
         }
         for (pid, badge) in badges.sorted(by: { $0.key < $1.key }) {
             let name = snapshots[pid]?.app.name ?? "\(pid)"

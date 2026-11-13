@@ -83,11 +83,14 @@ body:
   - type: textarea
     id: diagnostics
     attributes:
-      label: Diagnostics (optional)
+      label: Diagnostics report
       description: |
-        Settings → Advanced → **Copy Diagnostics**, then paste here. It lists your open windows' titles:
-        remove anything private before posting.
-      render: text
+        Helps a lot. Menu-bar icon → **Report a Problem…** → **Save Report & Open GitHub** saves one and shows it
+        in Finder (or Settings → Advanced → **Save Diagnostics Report…**). Drag the `.txt` file here.
+        It has Swoop's version, settings, this session's log and your windows' apps, **without window titles**
+        unless you turned on "Include window titles in reports". If possible, reproduce the problem first:
+        the log only covers Swoop's current session.
+      placeholder: Drag Swoop-diagnostics-….txt here
 
   - type: checkboxes
     id: checks
