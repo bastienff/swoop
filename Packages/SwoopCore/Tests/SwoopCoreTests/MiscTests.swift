@@ -71,6 +71,22 @@ struct ShortcutTests {
         #expect(Shortcut(keyCode: Shortcut.tabKeyCode, modifiers: []).knownConflict != nil)
     }
 
+    @Test func holdModifiersIgnoreShiftUnlessAlone() {
+        #expect(Shortcut.default.holdModifiers == [.option])
+        #expect(Shortcut(keyCode: 0x30, modifiers: [.command, .shift]).holdModifiers == [.command])
+        #expect(Shortcut(keyCode: 0x30, modifiers: [.shift]).holdModifiers == [.shift])
+        #expect(Shortcut(keyCode: 0x30, modifiers: []).holdModifiers.isEmpty)
+    }
+
+    @Test func isHeld() {
+        let s = Shortcut(keyCode: 0x30, modifiers: [.command, .option])
+        #expect(s.isHeld(by: [.command, .option]))
+        #expect(s.isHeld(by: [.command, .option, .shift]))
+        #expect(!s.isHeld(by: [.command]))
+        #expect(!s.isHeld(by: []))
+        #expect(!Shortcut(keyCode: 0x30, modifiers: []).isHeld(by: []))
+    }
+
     @Test func displayOrderFollowsMacConvention() {
         #expect(Shortcut(keyCode: 0x01, modifiers: [.command, .shift, .option, .control]).displayString == "⌃⌥⇧⌘S")
     }

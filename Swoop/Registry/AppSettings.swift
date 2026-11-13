@@ -48,6 +48,21 @@ enum PanelDisplay: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+/// What happens when the shortcut's modifier key is released.
+enum SwitcherMode: String, CaseIterable, Identifiable, Sendable {
+    /// The switcher stays open until you pick a window or dismiss it (PRD §3 default).
+    case stayOpen
+    /// Like macOS ⌘Tab: hold the modifier, press the key to cycle, release to switch.
+    case switchOnRelease
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .stayOpen: "Keep the switcher open"
+        case .switchOnRelease: "Switch to the selected window"
+        }
+    }
+}
+
 /// User preferences persisted in `UserDefaults`.
 @MainActor
 @Observable
@@ -58,6 +73,7 @@ final class AppSettings {
     var shortcut: Shortcut { didSet { saveCodable("shortcut", shortcut) } }
     /// Must be explicitly enabled before an unmodified Tab can be recorded/registered.
     var allowBareTab: Bool { didSet { save("allowBareTab", allowBareTab) } }
+    var switcherMode: SwitcherMode { didSet { save("switcherMode", switcherMode.rawValue) } }
 
     var appearance: AppearanceMode { didSet { save("appearance", appearance.rawValue) } }
     var iconSize: IconSize { didSet { save("iconSize", iconSize.rawValue) } }
@@ -101,6 +117,7 @@ final class AppSettings {
         shortcutEnabled = b("shortcutEnabled", true)
         shortcut = (defaults.data(forKey: "shortcut")).flatMap { try? JSONDecoder().decode(Shortcut.self, from: $0) } ?? .default
         allowBareTab = b("allowBareTab", false)
+        switcherMode = SwitcherMode(rawValue: defaults.string(forKey: "switcherMode") ?? "") ?? .stayOpen
         appearance = AppearanceMode(rawValue: defaults.string(forKey: "appearance") ?? "") ?? .system
         iconSize = IconSize(rawValue: defaults.string(forKey: "iconSize") ?? "") ?? .large
         maxVisibleRows = defaults.object(forKey: "maxVisibleRows") as? Int ?? 4

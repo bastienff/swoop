@@ -43,6 +43,10 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
     private var repeatTask: Task<Void, Never>?
     static let repeatDelay: Duration = .milliseconds(400)
     static let repeatInterval: Duration = .milliseconds(100)
+    /// Switch on release (Settings → Keyboard): watches the shortcut's modifiers while the panel is open.
+    private var releaseWatch: Task<Void, Never>?
+    private var flagsMonitor: Any?
+    static let releasePollInterval: Duration = .milliseconds(15)
     private var previousApp: NSRunningApplication?
     private var targetScreen: NSScreen?
     private(set) var isVisible = false
@@ -63,6 +67,48 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         guard isVisible else { show(); return }
         model.step(reverse ? -1 : 1)
         beginKeyRepeat(reverse: reverse)
+        armSwitchOnRelease()
+    }
+
+    // MARK: Switch on release
+
+    /// In "switch on release" mode, activates the selection as soon as the shortcut's modifier is
+    /// released. Only armed by the shortcut (never when opened from the menu bar, where nothing is held).
+    /// A bare-key shortcut has no modifier to release, so it keeps the panel open.
+    func armSwitchOnRelease() {
+        guard isVisible, releaseWatch == nil, settings.switcherMode == .switchOnRelease,
+              let s = settings.effectiveShortcut, !s.holdModifiers.isEmpty else { return }
+        // flagsChanged reaches us once the panel is key; polling covers the moment before that (and
+        // releases that happen while another app still has focus). No Input Monitoring needed.
+        flagsMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            self?.checkModifierRelease()
+            return event
+        }
+        releaseWatch = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                self?.checkModifierRelease()
+                try? await Task.sleep(for: Self.releasePollInterval)
+            }
+        }
+    }
+
+    private func disarmSwitchOnRelease() {
+        releaseWatch?.cancel()
+        releaseWatch = nil
+        if let flagsMonitor { NSEvent.removeMonitor(flagsMonitor) }
+        flagsMonitor = nil
+    }
+
+    private func checkModifierRelease() {
+        guard isVisible, releaseWatch != nil, let s = settings.effectiveShortcut else { return }
+        guard !s.isHeld(by: GlobalShortcutManager.modifiers(from: NSEvent.modifierFlags)) else { return }
+        disarmSwitchOnRelease()
+        endKeyRepeat()
+        if model.selectedEntry != nil {
+            model.activateSelection()
+        } else {
+            dismiss(restorePrevious: true)
+        }
     }
 
     /// Starts auto-cycling after a short delay while the shortcut stays held (like key repeat, but
@@ -88,7 +134,7 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
     private func shortcutModifiersDown() -> Bool {
         guard let s = settings.effectiveShortcut else { return false }
         if s.modifiers.isEmpty { return true } // bare key: rely on the key-up/release events
-        return GlobalShortcutManager.modifiers(from: NSEvent.modifierFlags).isSuperset(of: s.modifiers.subtracting(.shift))
+        return s.isHeld(by: GlobalShortcutManager.modifiers(from: NSEvent.modifierFlags))
     }
 
     func show() {
@@ -129,6 +175,7 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         guard isVisible, let panel else { return }
         isVisible = false
         endKeyRepeat()
+        disarmSwitchOnRelease()
         removeMonitors()
         panel.orderOut(nil)
         model.reset()

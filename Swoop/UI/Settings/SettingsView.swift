@@ -83,7 +83,17 @@ private struct KeyboardSettings: View {
                     Label(message, systemImage: "info.circle").foregroundStyle(.secondary).font(.callout)
                 }
             } footer: {
-                Text("The switcher stays open after you release the keys. Press the shortcut again to move to the next window (add ⇧ to go back); Escape closes it. Uses a standard hotkey registration — no Input Monitoring permission is needed.")
+                Text("Uses a standard hotkey registration — no Input Monitoring permission is needed.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
+
+            Section {
+                Picker("When you release the shortcut", selection: $settings.switcherMode) {
+                    ForEach(SwitcherMode.allCases) { Text($0.label).tag($0) }
+                }
+                .pickerStyle(.radioGroup)
+            } footer: {
+                Text(switcherModeFooter)
                     .font(.footnote).foregroundStyle(.secondary)
             }
 
@@ -104,6 +114,20 @@ private struct KeyboardSettings: View {
         .onChange(of: settings.allowBareTab) {
             if !settings.allowBareTab && settings.shortcut.isUnmodified { settings.shortcut = .default }
             controller.applyShortcut()
+        }
+    }
+
+    private var switcherModeFooter: String {
+        let s = controller.settings
+        switch s.switcherMode {
+        case .stayOpen:
+            return "The switcher stays open after you release the keys. Press the shortcut again to move to the next window (add ⇧ to go back); Escape closes it."
+        case .switchOnRelease:
+            let hold = s.shortcut.holdModifiers.displayString
+            if hold.isEmpty {
+                return "A shortcut without a modifier key can't be held, so the switcher stays open. Record a shortcut with ⌘, ⌥ or ⌃ to switch on release."
+            }
+            return "Keep \(hold) held and press the shortcut again (or keep it pressed) to move through the windows; add ⇧ to go back. Release \(hold) to switch to the selected window. Escape cancels."
         }
     }
 

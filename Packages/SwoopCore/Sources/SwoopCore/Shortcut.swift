@@ -9,6 +9,16 @@ public struct Shortcut: Codable, Sendable, Hashable {
         public static let option = Modifiers(rawValue: 1 << 1)
         public static let shift = Modifiers(rawValue: 1 << 2)
         public static let command = Modifiers(rawValue: 1 << 3)
+
+        /// Symbols in the macOS order: ⌃⌥⇧⌘.
+        public var displayString: String {
+            var s = ""
+            if contains(.control) { s += "⌃" }
+            if contains(.option) { s += "⌥" }
+            if contains(.shift) { s += "⇧" }
+            if contains(.command) { s += "⌘" }
+            return s
+        }
     }
 
     public var keyCode: UInt16
@@ -25,13 +35,21 @@ public struct Shortcut: Codable, Sendable, Hashable {
     /// True when the shortcut has no modifier (would swallow a plain key system-wide).
     public var isUnmodified: Bool { modifiers.isEmpty }
 
+    /// Modifiers that must stay held for "switch on release": releasing any of them picks the selection.
+    /// Shift is ignored when other modifiers exist (it's pressed and released to cycle backwards).
+    /// Empty for an unmodified key, which can't be held-and-released this way.
+    public var holdModifiers: Modifiers {
+        let withoutShift = modifiers.subtracting(.shift)
+        return withoutShift.isEmpty ? modifiers : withoutShift
+    }
+
+    /// True while every hold modifier is still down, given the currently pressed modifiers.
+    public func isHeld(by pressed: Modifiers) -> Bool {
+        !holdModifiers.isEmpty && pressed.isSuperset(of: holdModifiers)
+    }
+
     public var displayString: String {
-        var s = ""
-        if modifiers.contains(.control) { s += "⌃" }
-        if modifiers.contains(.option) { s += "⌥" }
-        if modifiers.contains(.shift) { s += "⇧" }
-        if modifiers.contains(.command) { s += "⌘" }
-        return s + Self.keyName(keyCode)
+        modifiers.displayString + Self.keyName(keyCode)
     }
 
     /// Known system/global shortcuts that commonly conflict. Not exhaustive.

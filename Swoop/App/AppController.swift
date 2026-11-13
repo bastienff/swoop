@@ -93,8 +93,12 @@ final class AppController {
             panel.shortcutPressed()
         } else {
             showPanel()
-            // Holding the shortcut from the opening press also starts cycling.
-            if panel.isVisible { panel.beginKeyRepeat() }
+            // Holding the shortcut from the opening press also starts cycling; in "switch on release"
+            // mode, letting go of the modifier then switches to the selection.
+            if panel.isVisible {
+                panel.beginKeyRepeat()
+                panel.armSwitchOnRelease()
+            }
         }
     }
 

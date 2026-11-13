@@ -39,6 +39,7 @@ final class DebugCommands {
             snapshot(to: a.first ?? "", clear: a.count > 1 && a[1] == "clear")
         case "demo": loadDemo()
         case "draggable": controller.settings.panelDraggable = arg == "on"
+        case "mode": controller.settings.switcherMode = SwitcherMode(rawValue: arg) ?? .stayOpen
         case "dragpanel":
             // dragpanel <dx> <dy>: real mouse drag from the panel's bottom-left padding (exercises the drag path).
             let a = arg.split(separator: " ").compactMap { Double($0) }
