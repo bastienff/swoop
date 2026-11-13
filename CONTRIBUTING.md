@@ -68,8 +68,11 @@ desktop** and describe what you checked in the pull request. Automated tests can
 - Fill in the checklist in the template. `scripts/test.sh` must pass; the PR check runs it plus a build.
 - For UI changes, add before/after screenshots. Use demo windows (Debug → Load Demo Windows), never your
   real window titles.
-- Write commit messages that say what changed and why, in the imperative: "Fix focus after switching to a
-  full-screen window".
+- Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages and PR titles, in
+  the imperative: `fix: keep focus after switching to a full-screen window`. Release notes are generated
+  from them: `feat` → New, `fix` → Fixes, `perf` → Performance, `type!:` → Breaking changes; `refactor`,
+  `test`, `ci`, `docs`, `build` and `chore` count as internal. Write the subject for users ("what changed
+  for me?") and explain the why in the body.
 
 By contributing you agree your work is released under the [MIT License](LICENSE), and that you'll follow
 the [Code of Conduct](CODE_OF_CONDUCT.md).

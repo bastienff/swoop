@@ -1,0 +1,31 @@
+# GitHub's "Generate release notes" button: groups merged pull requests by label.
+# Most changes land as direct commits, which the button can't see — the Release workflow writes the main
+# notes from Conventional Commits (scripts/release_notes.sh). The button is still handy to credit
+# contributors' PRs; Dependabot bumps are left out (they're counted as internal changes in the notes).
+changelog:
+  exclude:
+    labels:
+      - dependencies
+      - github_actions
+      - duplicate
+      - invalid
+      - wontfix
+    authors:
+      - dependabot
+      - dependabot[bot]
+  categories:
+    - title: ✨ New
+      labels:
+        - enhancement
+    - title: 🐛 Fixes
+      labels:
+        - bug
+    - title: ♿ Accessibility
+      labels:
+        - accessibility
+    - title: 📖 Documentation
+      labels:
+        - documentation
+    - title: Other changes
+      labels:
+        - "*"
