@@ -1,0 +1,37 @@
+name: PR check
+
+# Validates contributions: core tests + an unsigned Apple-silicon build. Releases have their own workflow.
+# Uses a standard GitHub-hosted macOS runner: free for public repos (billed at 10× only on private repos).
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Test & build
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # The project needs Xcode 16+ (folder-synchronized groups, Swift 6, Swift Testing).
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Core tests (SwoopCore)
+        run: swift test --package-path Packages/SwoopCore
+
+      - name: Build app (Debug, arm64, unsigned)
+        run: |
+          xcodebuild -project Swoop.xcodeproj -scheme Swoop -configuration Debug \
+            -destination 'generic/platform=macOS' -derivedDataPath build/DerivedData \
+            ARCHS=arm64 ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" \
+            build -quiet

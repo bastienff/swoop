@@ -1,0 +1,131 @@
+import AppKit
+import ServiceManagement
+
+/// Status-bar item and menu (PRD §10). Monochrome template image; no Dock icon.
+@MainActor
+final class MenuBarController: NSObject, NSMenuDelegate {
+    private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+    private let menu = NSMenu()
+    var onOpenSwoop: (() -> Void)?
+    var onOpenSettings: (() -> Void)?
+    var onOpenPermissions: (() -> Void)?
+    var shortcutDisplay: () -> String = { "" }
+    var isAccessibilityTrusted: () -> Bool = { false }
+    /// Screen frame of the menu-bar icon.
+    var statusItemFrame: NSRect? { statusItem.button?.window?.frame }
+    /// DEBUG builds: the Debug submenu, rebuilt each time the menu opens.
+    var debugMenu: (() -> NSMenu)?
+
+    override init() {
+        super.init()
+        if let button = statusItem.button {
+            button.image = Self.statusImage()
+        }
+        menu.delegate = self
+        statusItem.menu = menu
+    }
+
+    /// Template glyph matching the app icon: swap arrows (→ over ←) knocked out of a rounded square.
+    /// Drawn as vector so it stays crisp at any backing scale; tinted by the system for light/dark.
+    static func statusImage() -> NSImage {
+        let image = NSImage(size: NSSize(width: 18, height: 18), flipped: false) { rect in
+            func arrow(from p: CGPoint, to q: CGPoint, width w: CGFloat, head h: CGFloat) -> NSBezierPath {
+                let bx = q.x - (q.x >= p.x ? 1 : -1) * h
+                let path = NSBezierPath()
+                path.move(to: CGPoint(x: p.x, y: p.y + w / 2))
+                path.line(to: CGPoint(x: bx, y: q.y + w / 2))
+                path.line(to: CGPoint(x: bx, y: q.y + h * 0.8))
+                path.line(to: q)
+                path.line(to: CGPoint(x: bx, y: q.y - h * 0.8))
+                path.line(to: CGPoint(x: bx, y: q.y - w / 2))
+                path.line(to: CGPoint(x: p.x, y: p.y - w / 2))
+                path.close()
+                return path
+            }
+            let shape = NSBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), xRadius: 4, yRadius: 4)
+            shape.append(arrow(from: CGPoint(x: 4.5, y: 11), to: CGPoint(x: 13.5, y: 11), width: 1.8, head: 3.4))
+            shape.append(arrow(from: CGPoint(x: 13.5, y: 7), to: CGPoint(x: 4.5, y: 7), width: 1.8, head: 3.4))
+            shape.windingRule = .evenOdd
+            NSColor.black.setFill()
+            shape.fill()
+            return true
+        }
+        image.isTemplate = true
+        image.accessibilityDescription = "Swoop"
+        return image
+    }
+
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        menu.removeAllItems()
+        let open = NSMenuItem(title: "Open Swoop", action: #selector(openSwoop), keyEquivalent: "")
+        open.target = self
+        let shortcut = shortcutDisplay()
+        if !shortcut.isEmpty { open.title += "  (\(shortcut))" }
+        menu.addItem(open)
+        menu.addItem(.separator())
+
+        let trusted = isAccessibilityTrusted()
+        let ax = NSMenuItem(title: trusted ? "Accessibility: Granted" : "Accessibility: Not Granted — Fix…",
+                            action: trusted ? nil : #selector(openPermissions), keyEquivalent: "")
+        ax.target = self
+        ax.image = NSImage(systemSymbolName: trusted ? "checkmark.circle.fill" : "exclamationmark.triangle.fill", accessibilityDescription: nil)
+        menu.addItem(ax)
+
+        let login = NSMenuItem(title: "Launch at Login", action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
+        login.target = self
+        login.state = LaunchAtLogin.isEnabled ? .on : .off
+        menu.addItem(login)
+        menu.addItem(.separator())
+
+        let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        settings.target = self
+        menu.addItem(settings)
+        let about = NSMenuItem(title: "About Swoop", action: #selector(about), keyEquivalent: "")
+        about.target = self
+        menu.addItem(about)
+        let coffee = NSMenuItem(title: "Buy Me a Coffee ♥", action: #selector(buyMeACoffee), keyEquivalent: "")
+        coffee.target = self
+        coffee.image = NSImage(systemSymbolName: "cup.and.saucer.fill", accessibilityDescription: nil)
+        menu.addItem(coffee)
+        if let debugMenu {
+            menu.addItem(.separator())
+            let debug = NSMenuItem(title: "Debug", action: nil, keyEquivalent: "")
+            debug.image = NSImage(systemSymbolName: "ladybug", accessibilityDescription: nil)
+            debug.submenu = debugMenu()
+            menu.addItem(debug)
+        }
+        menu.addItem(.separator())
+        menu.addItem(NSMenuItem(title: "Quit Swoop", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+    }
+
+    @objc private func openSwoop() { onOpenSwoop?() }
+    @objc private func openSettings() { onOpenSettings?() }
+    @objc private func openPermissions() { onOpenPermissions?() }
+    @objc private func toggleLaunchAtLogin() { LaunchAtLogin.set(!LaunchAtLogin.isEnabled) }
+    @objc private func buyMeACoffee() { NSWorkspace.shared.open(AppLinks.buyMeACoffee) }
+    @objc private func about() {
+        NSApp.activate()
+        let credits = NSMutableAttributedString(string: "Just a window switcher. Window information never leaves this Mac.\n\n")
+        credits.append(NSAttributedString(string: "Swooped you to the right window? Buy me a coffee ☕",
+                                          attributes: [.link: AppLinks.buyMeACoffee]))
+        let centered = NSMutableParagraphStyle()
+        centered.alignment = .center
+        credits.addAttributes([.paragraphStyle: centered, .font: NSFont.systemFont(ofSize: 11)],
+                              range: NSRange(location: 0, length: credits.length))
+        NSApp.orderFrontStandardAboutPanel(options: [.credits: credits])
+    }
+}
+
+enum LaunchAtLogin {
+    static var isEnabled: Bool { SMAppService.mainApp.status == .enabled }
+
+    @discardableResult
+    static func set(_ enabled: Bool) -> Error? {
+        do {
+            if enabled { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
+            return nil
+        } catch {
+            return error
+        }
+    }
+}

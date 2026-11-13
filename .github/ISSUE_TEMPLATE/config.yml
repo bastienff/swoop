@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/bastienff/swoop/security/advisories/new
+    about: Please report security issues privately, not as a public issue.
+  - name: How Swoop works and its limitations
+    url: https://github.com/bastienff/swoop#limitations
+    about: Some windows can't be reached without visiting their desktop once. Check here first.

@@ -1,0 +1,100 @@
+name: Bug report
+description: Swoop did something wrong, didn't switch, or switched to the wrong place.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time! Please check [existing issues](https://github.com/bastienff/swoop/issues?q=is%3Aissue) first.
+        **Never paste window titles you don't want public** (client names, email subjects, etc.).
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did Swoop do? Include any message it showed.
+      placeholder: I pressed ⌥Tab, typed "api", hit Return on a VS Code window on another desktop, and…
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The smaller, the better. Mention desktops (Spaces), full-screen windows and native tabs if they're involved.
+      placeholder: |
+        1. Open two VS Code windows as native tabs on Desktop 2
+        2. Go to Desktop 1
+        3. ⌥Tab, select the hidden tab
+    validations:
+      required: true
+
+  - type: input
+    id: app
+    attributes:
+      label: App(s) involved
+      description: The app whose window Swoop couldn't reach or handled wrong.
+      placeholder: 'e.g. Visual Studio Code 1.146 with "window.nativeTabs": true'
+
+  - type: input
+    id: swoop-version
+    attributes:
+      label: Swoop version
+      description: Menu-bar icon → About Swoop.
+      placeholder: e.g. 1.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac
+      placeholder: e.g. macOS 27.0.1, MacBook Pro M3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installed with
+      options:
+        - Homebrew
+        - Download from GitHub Releases
+        - Built from source
+    validations:
+      required: true
+
+  - type: dropdown
+    id: layout
+    attributes:
+      label: Layout
+      options:
+        - Grid
+        - List · Compact
+        - List · Comfortable
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics (optional)
+      description: |
+        Settings → Advanced → **Copy Diagnostics**, then paste here. It lists your open windows' titles:
+        remove anything private before posting.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: 'Swoop has the Accessibility permission (the menu-bar icon shows "Accessibility: Granted").'
+          required: true
+        - label: I searched existing issues and this isn't a duplicate.
+          required: true

@@ -1,0 +1,42 @@
+name: Feature request
+description: An idea that makes switching windows faster or more reliable.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Swoop stays small on purpose: it's a window switcher and nothing else. Ideas that make **switching**
+        better are very welcome. Previews, tiling, desktop management, browser tabs, plugins and themes are
+        out of scope (see [What Swoop won't do](https://github.com/bastienff/swoop#what-swoop-wont-do)).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's the problem?
+      description: What are you trying to do when switching windows, and what gets in the way?
+      placeholder: When I have 20 VS Code windows, I…
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like Swoop to do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: Other ways to solve it, including how you work around it today.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: I read "What Swoop won't do", and this is about switching windows.
+          required: true
+        - label: I searched existing issues and this isn't a duplicate.
+          required: true

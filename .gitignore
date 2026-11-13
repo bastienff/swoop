@@ -1,0 +1,80 @@
+# ── Build output ────────────────────────────────────────────────
+build/
+DerivedData/
+*.xcarchive
+*.dSYM
+*.dSYM.zip
+*.ipa
+*.app
+Swoop.zip
+*.sha256
+
+# ── Xcode ───────────────────────────────────────────────────────
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.hmap
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.pbxuser
+!default.pbxuser
+timeline.xctimeline
+playground.xcworkspace
+*.xcresult
+
+# ── Swift Package Manager ───────────────────────────────────────
+.build/
+.swiftpm/
+Packages/*/.build/
+Packages/*/.swiftpm/
+
+# ── macOS ───────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Icon?
+.Spotlight-V100
+.Trashes
+.fseventsd
+.DocumentRevisions-V100
+.TemporaryItems
+
+# ── Signing & secrets (never commit) ────────────────────────────
+*.p12
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*.provisionprofile
+*.keychain
+*.keychain-db
+AuthKey_*.p8
+.env
+.env.*
+
+# ── Editors & tools ─────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*~
+.claude/settings.local.json
+
+# ── Logs & scratch ──────────────────────────────────────────────
+*.log
+*.tmp
+
+# ── Private references (screenshots of a real desktop) ──────────
+references/
+
+# ── Markdown: only README.md for now ────────────────────────────
+# Undecided which docs to publish. Allow one later with a line like:  !docs/RELEASING.md
+*.md
+!/README.md
+# Community files GitHub shows on the repo (contributing, conduct, security, issue/PR templates)
+!/CONTRIBUTING.md
+!/CODE_OF_CONDUCT.md
+!/SECURITY.md
+!/.github/**/*.md
