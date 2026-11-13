@@ -25,6 +25,19 @@ final class WindowRegistry {
     @ObservationIgnored private var recovery: RemoteWindowRecovery?
     /// App front-to-back order, computed once per refresh (not per app snapshot).
     @ObservationIgnored private var zOrder: [pid_t: Int] = [:]
+    /// Regular apps as of the last full refresh (in `runningApplications` order). Listing every app and
+    /// reading its activation policy costs a LaunchServices round-trip per app, so one-app refreshes reuse
+    /// this; launches and quits trigger a full refresh that rebuilds it.
+    @ObservationIgnored private var knownApps: [KnownApp] = []
+    private struct KnownApp {
+        let info: AppInfo
+        let bundlePath: String?
+
+        init(_ app: NSRunningApplication) {
+            info = AppInfo(pid: app.processIdentifier, bundleID: app.bundleIdentifier, name: app.localizedName ?? "App", launchDate: app.launchDate)
+            bundlePath = app.bundleURL?.standardizedFileURL.path
+        }
+    }
     @ObservationIgnored private var refreshInFlight: Task<Void, Never>?
     @ObservationIgnored private var refreshQueued = false
 
@@ -100,15 +113,24 @@ final class WindowRegistry {
             return
         }
         let start = Date()
-        let running = NSWorkspace.shared.runningApplications.filter {
-            $0.activationPolicy == .regular && $0.processIdentifier != ProcessInfo.processInfo.processIdentifier && !$0.isTerminated
+        let apps: [AppInfo]
+        if let pid, !knownApps.isEmpty {
+            // One app: look up only that one; everything else comes from the last full refresh.
+            guard let app = NSRunningApplication(processIdentifier: pid), !app.isTerminated, app.activationPolicy == .regular,
+                  pid != ProcessInfo.processInfo.processIdentifier else { return }
+            let known = KnownApp(app)
+            if let i = knownApps.firstIndex(where: { $0.info.pid == pid }) { knownApps[i] = known } else { knownApps.append(known) }
+            apps = [known.info]
+        } else {
+            knownApps = NSWorkspace.shared.runningApplications
+                .filter { $0.activationPolicy == .regular && $0.processIdentifier != ProcessInfo.processInfo.processIdentifier && !$0.isTerminated }
+                .map(KnownApp.init)
+            apps = knownApps.map(\.info).filter { pid == nil || $0.pid == pid }
         }
-        let apps = running
-            .filter { pid == nil || $0.processIdentifier == pid }
-            .map { AppInfo(pid: $0.processIdentifier, bundleID: $0.bundleIdentifier, name: $0.localizedName ?? "App", launchDate: $0.launchDate) }
+        let running = knownApps
         let badgeTask = Task.detached { WindowDiscoveryService.dockBadges() }
-        let alive = Set(running.map(\.processIdentifier))
-        let appOrder = running.map(\.processIdentifier)
+        let alive = Set(running.map(\.info.pid))
+        let appOrder = running.map(\.info.pid)
         zOrder = Self.appZOrder()
         let recovery = settings.recoverOtherSpaceWindows ? recovery : nil
         // Apply each app as soon as it reports, so the grid fills in progressively instead of
@@ -121,7 +143,7 @@ final class WindowRegistry {
         let dockBadges = await badgeTask.value
         var newBadges: [pid_t: String] = [:]
         for app in running {
-            if let path = app.bundleURL?.standardizedFileURL.path, let b = dockBadges[path] { newBadges[app.processIdentifier] = b }
+            if let path = app.bundlePath, let b = dockBadges[path] { newBadges[app.info.pid] = b }
         }
         if newBadges != badges { badges = newBadges }
 
@@ -129,7 +151,7 @@ final class WindowRegistry {
         anchors = anchors.filter { alive.contains($0.key) }
         icons = icons.filter { alive.contains($0.key) }
         if pid == nil {
-            self.recovery?.prune(keeping: Set(running.compactMap { RemoteWindowRecovery.key(pid: $0.processIdentifier, launch: $0.launchDate) }))
+            self.recovery?.prune(keeping: Set(running.compactMap { RemoteWindowRecovery.key(pid: $0.info.pid, launch: $0.info.launchDate) }))
         }
         rebuildEntries(appOrder: appOrder)
         lastRefresh = Date()

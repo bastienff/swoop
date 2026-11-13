@@ -40,6 +40,25 @@ final class DebugCommands {
         case "demo": loadDemo()
         case "draggable": controller.settings.panelDraggable = arg == "on"
         case "mode": controller.settings.switcherMode = SwitcherMode(rawValue: arg) ?? .stayOpen
+        case "timecensus":
+            var c0 = clock(), t0 = ProcessInfo.processInfo.systemUptime
+            for _ in 0..<20 { _ = WindowCensus.current() }
+            var out = String(format: "census: wall %.1f ms, cpu %.1f ms\n", (ProcessInfo.processInfo.systemUptime - t0) / 20 * 1000, Double(clock() - c0) / Double(CLOCKS_PER_SEC) / 20 * 1000)
+            c0 = clock(); t0 = ProcessInfo.processInfo.systemUptime
+            for _ in 0..<20 { _ = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) }
+            out += String(format: "zorder list: wall %.1f ms, cpu %.1f ms", (ProcessInfo.processInfo.systemUptime - t0) / 20 * 1000, Double(clock() - c0) / Double(CLOCKS_PER_SEC) / 20 * 1000)
+            try? out.write(toFile: arg, atomically: true, encoding: .utf8)
+        case "timerefresh":
+            // timerefresh <outfile> <app name>: average one-app refresh time over 20 runs (+ CPU time).
+            let parts = arg.split(separator: " ", maxSplits: 1).map(String.init)
+            guard parts.count == 2, let app = NSWorkspace.shared.runningApplications.first(where: { $0.localizedName == parts[1] }) else { break }
+            Task { @MainActor in
+                let cpu0 = ProcessInfo.processInfo.systemUptime, c0 = clock()
+                for _ in 0..<20 { await controller.registry.refresh(pid: app.processIdentifier) }
+                let wall = (ProcessInfo.processInfo.systemUptime - cpu0) / 20 * 1000
+                let cpu = Double(clock() - c0) / Double(CLOCKS_PER_SEC) / 20 * 1000
+                try? String(format: "%@: wall %.1f ms, cpu %.1f ms per refresh", parts[1], wall, cpu).write(toFile: parts[0], atomically: true, encoding: .utf8)
+            }
         case "report":
             // report <path>: writes a diagnostics report to <path>.
             Task { @MainActor in try? await DiagnosticsReport.make(controller).write(toFile: arg, atomically: true, encoding: .utf8) }
