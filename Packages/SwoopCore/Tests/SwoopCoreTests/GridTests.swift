@@ -9,8 +9,8 @@ struct GridLayoutTests {
     @Test func compactForFewResults() {
         let l = GridLayout.compute(count: 2, metrics: m, maxWidth: 2000, maxHeight: 1000, maxRows: 4, minWidth: 0)
         #expect(l.columns == 2 && l.rows == 1)
-        #expect(l.panelWidth == 2 * 100 + 10 + 40)
-        #expect(l.panelHeight == 60 + 120 + 20)
+        #expect(l.panelWidth == Double(2 * 100 + 10 + 40))
+        #expect(l.panelHeight == Double(60 + 120 + 20))
     }
 
     @Test func minWidthKeepsSearchUsable() {
@@ -89,7 +89,7 @@ struct ListLayoutTests {
         let l = GridLayout.list(count: 3, metrics: m, width: 640, maxWidth: 2000, maxHeight: 2000, maxRows: 9)
         #expect(l.columns == 1 && l.rows == 3 && l.visibleRows == 3 && !l.isScrollable)
         #expect(l.panelWidth == 640)
-        #expect(l.panelHeight == 64 + 3 * 36 + 2 * 2 + 12)
+        #expect(l.panelHeight == Double(64 + 3 * 36 + 2 * 2 + 12))
     }
 
     @Test func scrollsBeyondMaxRows() {
