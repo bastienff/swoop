@@ -47,6 +47,8 @@ final class AppController {
         menuBar.onOpenSwoop = { [weak self] in self?.showPanel() }
         menuBar.onOpenSettings = { [weak self] in self?.openSettingsHandler?() }
         menuBar.onOpenPermissions = { [weak self] in self?.openOnboardingHandler?() }
+        menuBar.onReportProblem = { [weak self] in self?.openBugReport() }
+        menuBar.onSuggestFeature = { NSWorkspace.shared.open(AppLinks.newIssue(.featureRequest)) }
         menuBar.shortcutDisplay = { [weak self] in self?.settings.effectiveShortcut?.displayString ?? "" }
         menuBar.isAccessibilityTrusted = { [weak self] in self?.permissions.isAccessibilityTrusted ?? false }
         supportPrompt.anchorFrame = { [weak self] in self?.menuBar.statusItemFrame }
@@ -88,6 +90,19 @@ final class AppController {
             shortcutError = error.description
             log.error("shortcut: \(error.description, privacy: .public)")
         }
+    }
+
+    /// GitHub's bug report form, pre-filled with version, system and layout (no window titles).
+    func openBugReport() {
+        NSWorkspace.shared.open(bugReportURL)
+    }
+
+    var bugReportURL: URL {
+        AppLinks.newIssue(.bugReport, fields: [
+            "swoop-version": AppLinks.appVersion,
+            "macos": AppLinks.systemDescription,
+            "layout": settings.panelLayout.label, // matches the form's dropdown options
+        ])
     }
 
     func togglePanel() {

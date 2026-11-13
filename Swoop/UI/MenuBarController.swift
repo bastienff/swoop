@@ -9,6 +9,9 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     var onOpenSwoop: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onOpenPermissions: (() -> Void)?
+    /// Opens GitHub's pre-filled bug report / feature request form.
+    var onReportProblem: (() -> Void)?
+    var onSuggestFeature: (() -> Void)?
     var shortcutDisplay: () -> String = { "" }
     var isAccessibilityTrusted: () -> Bool = { false }
     /// Screen frame of the menu-bar icon.
@@ -83,6 +86,14 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         let about = NSMenuItem(title: "About Swoop", action: #selector(about), keyEquivalent: "")
         about.target = self
         menu.addItem(about)
+        let report = NSMenuItem(title: "Report a Problem…", action: #selector(reportProblem), keyEquivalent: "")
+        report.target = self
+        report.image = NSImage(systemSymbolName: "exclamationmark.bubble", accessibilityDescription: nil)
+        menu.addItem(report)
+        let suggest = NSMenuItem(title: "Suggest a Feature…", action: #selector(suggestFeature), keyEquivalent: "")
+        suggest.target = self
+        suggest.image = NSImage(systemSymbolName: "lightbulb", accessibilityDescription: nil)
+        menu.addItem(suggest)
         let coffee = NSMenuItem(title: "Buy Me a Coffee ♥", action: #selector(buyMeACoffee), keyEquivalent: "")
         coffee.target = self
         coffee.image = NSImage(systemSymbolName: "cup.and.saucer.fill", accessibilityDescription: nil)
@@ -102,6 +113,8 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     @objc private func openSettings() { onOpenSettings?() }
     @objc private func openPermissions() { onOpenPermissions?() }
     @objc private func toggleLaunchAtLogin() { LaunchAtLogin.set(!LaunchAtLogin.isEnabled) }
+    @objc private func reportProblem() { onReportProblem?() }
+    @objc private func suggestFeature() { onSuggestFeature?() }
     @objc private func buyMeACoffee() { NSWorkspace.shared.open(AppLinks.buyMeACoffee) }
     @objc private func about() {
         NSApp.activate()

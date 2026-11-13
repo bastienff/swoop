@@ -40,6 +40,7 @@ final class DebugCommands {
         case "demo": loadDemo()
         case "draggable": controller.settings.panelDraggable = arg == "on"
         case "mode": controller.settings.switcherMode = SwitcherMode(rawValue: arg) ?? .stayOpen
+        case "bugurl": try? controller.bugReportURL.absoluteString.write(toFile: arg, atomically: true, encoding: .utf8)
         case "order": controller.settings.windowOrder = WindowOrder(rawValue: arg) ?? .smart
         case "results":
             // results <path>: the switcher's current order (as if opened now), top 5.
