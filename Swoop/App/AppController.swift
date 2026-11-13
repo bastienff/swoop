@@ -200,7 +200,17 @@ final class WorkspaceObserver {
     private var fullRefresh: Task<Void, Never>?
     private var appRefresh: [pid_t: Task<Void, Never>] = [:]
     private var focusTasks: [pid_t: Task<Void, Never>] = [:]
-    /// Structural changes only trigger work while the switcher is visible.
+    /// Coalesces per-app refreshes. While the switcher is hidden, changes are applied in the background so
+    /// it opens up to date; titles (terminal spinners, browsers) refresh at most every few seconds.
+    private var scheduler = RefreshScheduler<pid_t>()
+    /// Apps whose pending batch had more than title changes (needs a fresh window census).
+    private var structuralBatch: Set<pid_t> = []
+    typealias Policy = RefreshScheduler<pid_t>.Policy
+    static let visiblePolicy = Policy(quiet: 0.25, maxWait: 0.5)
+    static let structurePolicy = Policy(quiet: 0.3, maxWait: 1)
+    /// Titles change constantly in some apps (terminal spinners): at most one refresh per app every 3 s.
+    static let titlePolicy = Policy(quiet: 0.5, maxWait: 3, minInterval: 3)
+    static let activationPolicy = Policy(quiet: 0.5, maxWait: 1)
     var isPanelVisible: () -> Bool = { false }
 
     init(registry: WindowRegistry, recents: RecentWindowsStore) {
@@ -214,7 +224,8 @@ final class WorkspaceObserver {
             guard let self else { return }
             switch event {
             case .focusChanged(let pid): noteFocus(pid: pid)
-            case .structureChanged(let pid): if isPanelVisible() { scheduleRefresh(pid: pid) }
+            case .structureChanged(let pid): scheduleRefresh(pid: pid, policy: Self.structurePolicy)
+            case .titleChanged(let pid): scheduleRefresh(pid: pid, policy: Self.titlePolicy, titleOnly: true)
             case .windowCreated(let pid, let window): registry.learnCreatedWindow(window, pid: pid)
             }
         }
@@ -240,13 +251,19 @@ final class WorkspaceObserver {
     private func handle(_ name: Notification.Name, pid: pid_t?) {
         switch name {
         case NSWorkspace.didActivateApplicationNotification:
-            if let pid { noteFocus(pid: pid); if isPanelVisible() { scheduleRefresh(pid: pid) } }
+            // Also refreshes the app order (front-to-back) and that app's windows.
+            if let pid { noteFocus(pid: pid); scheduleRefresh(pid: pid, policy: Self.activationPolicy) }
         case NSWorkspace.didLaunchApplicationNotification:
             syncObservers()
             // AX often isn't ready at launch; observe again shortly after.
             Task { [weak self] in try? await Task.sleep(for: .seconds(2)); self?.syncObservers(); self?.scheduleFullRefresh() }
             scheduleFullRefresh()
         case NSWorkspace.didTerminateApplicationNotification:
+            if let pid {
+                appRefresh.removeValue(forKey: pid)?.cancel()
+                scheduler.cancel(pid)
+                structuralBatch.remove(pid)
+            }
             syncObservers()
             scheduleFullRefresh(delay: .milliseconds(50))
         default: // active Space changed: learn anchors for windows on the new Space
@@ -282,12 +299,21 @@ final class WorkspaceObserver {
         }
     }
 
-    private func scheduleRefresh(pid: pid_t) {
+    /// One app's refresh (discovery runs off the main actor), after its events go quiet or `maxWait`.
+    private func scheduleRefresh(pid: pid_t, policy: Policy, titleOnly: Bool = false) {
+        guard pid != ProcessInfo.processInfo.processIdentifier else { return }
+        if !titleOnly { structuralBatch.insert(pid) }
+        let delay = scheduler.event(pid, policy: isPanelVisible() ? Self.visiblePolicy : policy)
         appRefresh[pid]?.cancel()
-        appRefresh[pid] = Task { [registry] in
-            try? await Task.sleep(for: .milliseconds(250))
+        appRefresh[pid] = Task { [weak self, registry] in
+            try? await Task.sleep(for: .seconds(delay))
             guard !Task.isCancelled else { return }
-            await registry.refresh(pid: pid)
+            // Events during the refresh start a new batch.
+            guard let self else { return }
+            scheduler.fired(pid)
+            appRefresh[pid] = nil
+            let titleOnly = structuralBatch.remove(pid) == nil
+            await registry.refresh(pid: pid, titleOnly: titleOnly)
         }
     }
 }

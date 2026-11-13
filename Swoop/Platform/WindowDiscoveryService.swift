@@ -1,4 +1,5 @@
 import AppKit
+import os
 import ApplicationServices
 import SwoopCore
 
@@ -52,6 +53,18 @@ struct WindowCensus: Sendable {
     func sharesFrames(_ pid: pid_t) -> Bool { frames[pid]?.values.contains { $0 > 1 } ?? false }
     func count(_ pid: pid_t, _ frame: FrameKey) -> Int { allFrames[pid]?[frame] ?? 0 }
 
+    /// The last census taken, for callers that accept a slightly old one.
+    private static let cache = OSAllocatedUnfairLock<(at: Date, census: WindowCensus)?>(initialState: nil)
+
+    /// A census at most `maxAge` seconds old (0 → always fresh). Listing every window on every Space is
+    /// the most expensive part of a one-app refresh (~5 ms), so frequent title-only refreshes reuse one.
+    static func current(maxAge: TimeInterval) -> WindowCensus {
+        if maxAge > 0, let hit = cache.withLock({ $0 }), Date().timeIntervalSince(hit.at) <= maxAge { return hit.census }
+        let census = current()
+        cache.withLock { $0 = (Date(), census) }
+        return census
+    }
+
     static func current() -> WindowCensus {
         var c = WindowCensus()
         guard let list = CGWindowListCopyWindowInfo([.optionAll, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] else { return c }
@@ -75,10 +88,13 @@ enum WindowDiscoveryService {
 
     /// Discovers all `apps` concurrently, yielding each app's snapshot as soon as it is ready, so one
     /// slow or unresponsive app (e.g. still launching right after login) doesn't hold back the others.
-    static func discover(apps: [AppInfo], anchors: [pid_t: [AXElement]], recovery: RemoteWindowRecovery?) -> AsyncStream<AppSnapshot> {
+    /// `censusMaxAge` > 0 only for title-change refreshes: titles don't move windows or form tab groups,
+    /// so a recent census is still valid for the hidden-tab safety check (F7).
+    static func discover(apps: [AppInfo], anchors: [pid_t: [AXElement]], recovery: RemoteWindowRecovery?,
+                         censusMaxAge: TimeInterval = 0) -> AsyncStream<AppSnapshot> {
         AsyncStream { cont in
             DispatchQueue.global(qos: .userInitiated).async {
-                let census = WindowCensus.current()
+                let census = WindowCensus.current(maxAge: censusMaxAge)
                 DispatchQueue.concurrentPerform(iterations: apps.count) { i in
                     let app = apps[i]
                     var snap = discover(app: app, anchors: anchors[app.pid] ?? [], recovery: recovery, census: census)

@@ -48,7 +48,7 @@ That's it. No tiling, no window management, no plugins.
 - **Most recent first.** With an empty search, the window you used last comes first.
 - **Made for VS Code.** Project names are pulled out of window titles, so you can type
   `api` and see projects, not file names. Works great with `"window.nativeTabs": true`.
-- **Light.** Native Swift and AppKit. No dependencies, no background polling, 0% CPU when idle.
+- **Light.** Native Swift and AppKit. No dependencies and no polling: Swoop only wakes up when a window changes, so it sits at 0% CPU while nothing is happening.
 - **One permission.** Needs only Accessibility. No Screen Recording, no Input Monitoring, no network.
 
 ## Grid or list

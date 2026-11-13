@@ -96,3 +96,50 @@ struct ShortcutTests {
         #expect(try JSONDecoder().decode(Shortcut.self, from: JSONEncoder().encode(s)) == s)
     }
 }
+
+@Suite("Refresh scheduler")
+struct RefreshSchedulerTests {
+    let t0 = Date(timeIntervalSince1970: 1000)
+    let title = RefreshScheduler<Int>.Policy(quiet: 1, maxWait: 3)
+    let ratedTitle = RefreshScheduler<Int>.Policy(quiet: 0.5, maxWait: 3, minInterval: 3)
+    let structure = RefreshScheduler<Int>.Policy(quiet: 0.3, maxWait: 1)
+
+    @Test func singleEventWaitsForQuiet() {
+        var s = RefreshScheduler<Int>()
+        #expect(abs(s.event(1, policy: title, now: t0) - 1) < 1e-6)
+    }
+
+    @Test func continuousEventsAreCappedByMaxWait() {
+        // A spinner changing the title every 100 ms still refreshes 3 s after the first change.
+        var s = RefreshScheduler<Int>()
+        var delay = 0.0
+        for i in 0..<25 { delay = s.event(1, policy: title, now: t0.addingTimeInterval(Double(i) * 0.1)) }
+        #expect(abs(delay - 0.6) < 1e-6) // fired at t0 + 3.0 (last event at t0 + 2.4)
+    }
+
+    @Test func structuralEventTightensTheBatch() {
+        var s = RefreshScheduler<Int>()
+        _ = s.event(1, policy: title, now: t0)
+        #expect(abs(s.event(1, policy: structure, now: t0.addingTimeInterval(0.5)) - 0.3) < 1e-6)
+        // A later title event in the same batch can't push it past the structural cap (t0 + 1).
+        #expect(abs(s.event(1, policy: title, now: t0.addingTimeInterval(0.8)) - 0.2) < 1e-6)
+    }
+
+    @Test func sparseEventsAreRateLimitedByMinInterval() {
+        // One title change per second (a slow spinner): each would go quiet, but refreshes stay 3 s apart.
+        var s = RefreshScheduler<Int>()
+        #expect(abs(s.event(1, policy: ratedTitle, now: t0) - 0.5) < 1e-6) // first refresh: just the quiet period
+        s.fired(1, now: t0.addingTimeInterval(0.5))
+        #expect(abs(s.event(1, policy: ratedTitle, now: t0.addingTimeInterval(1)) - 2.5) < 1e-6) // not before t0 + 3.5
+        // A structural change in the same batch isn't held back by the title rate limit.
+        #expect(abs(s.event(1, policy: structure, now: t0.addingTimeInterval(1.5)) - 0.3) < 1e-6)
+    }
+
+    @Test func firingStartsANewBatchAndKeysAreIndependent() {
+        var s = RefreshScheduler<Int>()
+        _ = s.event(1, policy: title, now: t0)
+        s.fired(1, now: t0)
+        #expect(abs(s.event(1, policy: title, now: t0.addingTimeInterval(10)) - 1) < 1e-6)
+        #expect(abs(s.event(2, policy: structure, now: t0.addingTimeInterval(10)) - 0.3) < 1e-6)
+    }
+}

@@ -29,6 +29,8 @@ final class WindowRegistry {
     /// reading its activation policy costs a LaunchServices round-trip per app, so one-app refreshes reuse
     /// this; launches and quits trigger a full refresh that rebuilds it.
     @ObservationIgnored private var knownApps: [KnownApp] = []
+    /// One-app refreshes per app name this session (diagnostics: shows which apps cause background work).
+    @ObservationIgnored private var appRefreshCounts: [String: Int] = [:]
     private struct KnownApp {
         let info: AppInfo
         let bundlePath: String?
@@ -100,11 +102,14 @@ final class WindowRegistry {
     }
 
     /// Refreshes a single app (event-driven updates).
-    func refresh(pid: pid_t) async {
-        await performRefresh(only: pid)
+    /// `titleOnly`: triggered by title changes alone, so a census up to `titleCensusMaxAge` old is reused.
+    func refresh(pid: pid_t, titleOnly: Bool = false) async {
+        await performRefresh(only: pid, censusMaxAge: titleOnly ? Self.titleCensusMaxAge : 0)
     }
 
-    private func performRefresh(only pid: pid_t?) async {
+    static let titleCensusMaxAge: TimeInterval = 5
+
+    private func performRefresh(only pid: pid_t?, censusMaxAge: TimeInterval = 0) async {
         #if DEBUG
         if demoMode { return }
         #endif
@@ -121,6 +126,7 @@ final class WindowRegistry {
             let known = KnownApp(app)
             if let i = knownApps.firstIndex(where: { $0.info.pid == pid }) { knownApps[i] = known } else { knownApps.append(known) }
             apps = [known.info]
+            appRefreshCounts[known.info.name, default: 0] += 1
         } else {
             knownApps = NSWorkspace.shared.runningApplications
                 .filter { $0.activationPolicy == .regular && $0.processIdentifier != ProcessInfo.processInfo.processIdentifier && !$0.isTerminated }
@@ -135,7 +141,7 @@ final class WindowRegistry {
         let recovery = settings.recoverOtherSpaceWindows ? recovery : nil
         // Apply each app as soon as it reports, so the grid fills in progressively instead of
         // waiting for the slowest app. Snapshots from the previous pass stay until replaced.
-        for await snap in WindowDiscoveryService.discover(apps: apps, anchors: anchors, recovery: recovery) {
+        for await snap in WindowDiscoveryService.discover(apps: apps, anchors: anchors, recovery: recovery, censusMaxAge: censusMaxAge) {
             snapshots[snap.app.pid] = snap
             learnAnchors(from: snap)
             rebuildEntries(appOrder: appOrder)
@@ -315,6 +321,9 @@ final class WindowRegistry {
     /// `includeTitles: false` replaces titles with their length (diagnostics reports without opt-in).
     func dump(includeTitles: Bool = true) -> String {
         var s = "Registry @ \(lastRefresh.map { "\($0)" } ?? "never") — \(entries.count) entries, full refresh \(Int(lastRefreshDuration * 1000)) ms\n"
+        if !appRefreshCounts.isEmpty {
+            s += "App refreshes this session: " + appRefreshCounts.sorted { $0.value > $1.value }.map { "\($0.key) \($0.value)" }.joined(separator: ", ") + "\n"
+        }
         for e in entries {
             let t = targets[e.id]
             let route = t?.route.kind ?? "?"

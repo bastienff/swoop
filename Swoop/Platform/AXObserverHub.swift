@@ -5,11 +5,11 @@ import OSLog
 /// Per-app Accessibility observers (ARCHITECTURE §2 "Event-driven updates").
 ///
 /// Cost policy (PRD §14 low idle CPU): focus changes only update recency (one cheap AX read);
-/// structural changes (window created/destroyed/minimized/title) only mark the app dirty, and a
-/// refresh runs only while the switcher is visible. Opening the panel always refreshes anyway.
+/// structural and title changes refresh just that app, coalesced by `WorkspaceObserver` (titles at a
+/// bounded rate), so the switcher opens already up to date. Opening the panel still refreshes everything.
 @MainActor
 final class AXObserverHub {
-    enum Event { case focusChanged(pid_t), structureChanged(pid_t), windowCreated(pid_t, AXElement) }
+    enum Event { case focusChanged(pid_t), structureChanged(pid_t), titleChanged(pid_t), windowCreated(pid_t, AXElement) }
 
     private var observers: [pid_t: AXObserver] = [:]
     private let log = Logger(subsystem: "com.bastienff.swoop", category: "observers")
@@ -63,6 +63,8 @@ final class AXObserverHub {
         if let created { onEvent?(.windowCreated(pid, created)) }
         if Self.focusNotifications.contains(notification) {
             onEvent?(.focusChanged(pid))
+        } else if notification == kAXTitleChangedNotification as String {
+            onEvent?(.titleChanged(pid))
         } else {
             onEvent?(.structureChanged(pid))
         }

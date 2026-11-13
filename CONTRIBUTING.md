@@ -57,7 +57,7 @@ These come from behavior verified on real desktops. Please don't break them:
 3. **Public macOS APIs only**, with one documented, optional exception for recovering window handles after a
    restart (`Swoop/Platform/RemoteElements.swift`). Don't add more private API.
 4. **Swift 6 strict concurrency.** Accessibility calls run off the main thread with timeouts.
-5. **Stay light:** no polling, no work while the switcher is closed, no new dependencies.
+5. **Stay light:** no polling, no new dependencies. While the switcher is closed, only react to window events, coalesced and rate-limited per app (see `RefreshScheduler`), so nothing runs while nothing changes.
 
 If a change touches other desktops (Spaces), full-screen windows or native tabs, **test it on a real
 desktop** and describe what you checked in the pull request. Automated tests can't cover that part.
