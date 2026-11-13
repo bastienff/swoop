@@ -11,6 +11,15 @@ enum ActivationRoute: Sendable {
     case tab(group: AXElement, title: String)
     /// Known only from the app's Window menu.
     case menu
+
+    /// For logs: never includes the tab title.
+    var kind: String {
+        switch self {
+        case .element: "element"
+        case .tab: "tab"
+        case .menu: "menu"
+        }
+    }
 }
 
 struct ActivationTarget: Sendable {
@@ -52,7 +61,7 @@ final class WindowActivationService {
             return .failed("\(t.appName) is no longer running.")
         }
         let axApp = AXElement.application(t.pid, timeout: 0.5)
-        log.info("activate \(t.appName, privacy: .public) “\(t.title, privacy: .private)” route=\(String(describing: t.route), privacy: .public)")
+        log.info("activate \(t.appName, privacy: .public) “\(t.title, privacy: .private)” route=\(t.route.kind, privacy: .public)")
 
         switch t.route {
         case .element(let w):
