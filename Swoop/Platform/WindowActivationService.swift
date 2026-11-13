@@ -33,11 +33,16 @@ struct ActivationTarget: Sendable {
 enum ActivationResult: Sendable, Equatable {
     case activated
     case failed(String)
+    /// Superseded (e.g. the switcher was opened again): stop asserting focus, report nothing.
+    case cancelled
 }
 
 /// Activates an exact window without moving it between Spaces (ARCHITECTURE §3).
 /// Never uses `.moveToActiveSpace`, never sets window position, never presses a Window-menu item
 /// for a possibly hidden tab on another Space.
+///
+/// Cancellable: cancel the calling task (the switcher reopening does this) and it stops re-asserting
+/// focus — otherwise the post-arrival guard would see Swoop as a focus thief and close the new panel.
 @MainActor
 final class WindowActivationService {
     private let log = Logger(subsystem: "com.bastienff.swoop", category: "activation")
@@ -60,6 +65,7 @@ final class WindowActivationService {
                 // Step 1 (F9): navigate using the group's visible window.
                 focus(group, app: app, axApp: axApp)
                 let arrived = await waitUntil(timeout: 2.0) { [self] in currentWindows(axApp).contains(group) }
+                if Task.isCancelled { return .cancelled }
                 guard arrived else { return .failed("Couldn't reach the desktop containing “\(title)”.") }
             }
             // Step 2: switch tab locally (safe; F5/F9).
@@ -118,6 +124,7 @@ final class WindowActivationService {
         }
         _ = await waitUntil(timeout: 1.5) { NSWorkspace.shared.frontmostApplication?.processIdentifier == t.pid }
         try? await Task.sleep(for: .milliseconds(250)) // let the Space transition settle
+        if Task.isCancelled { return .cancelled }
         if resolveLocally(t, app: app, axApp: axApp) { return await confirmFocus(t, app: app, axApp: axApp) }
         return .failed(unreachable)
     }
@@ -171,6 +178,7 @@ final class WindowActivationService {
         var confirmed = false
         for attempt in 0..<3 {
             if await waitUntil(timeout: 0.6, focusedIsTarget) { confirmed = true; break }
+            if Task.isCancelled { return .cancelled }
             log.info("focus not confirmed (attempt \(attempt)); re-asserting")
             reassert()
         }
@@ -178,6 +186,7 @@ final class WindowActivationService {
         let guardUntil = Date().addingTimeInterval(1.0)
         while Date() < guardUntil {
             try? await Task.sleep(for: .milliseconds(60))
+            if Task.isCancelled { return .cancelled }
             if NSWorkspace.shared.frontmostApplication?.processIdentifier != t.pid {
                 log.info("focus stolen after arrival; re-asserting once")
                 reassert()
@@ -197,7 +206,8 @@ final class WindowActivationService {
 
     private func waitUntil(timeout: Double, _ condition: @MainActor () -> Bool) async -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
-        while Date() < deadline {
+        // Task.sleep returns immediately once cancelled, so stop instead of spinning to the deadline.
+        while Date() < deadline, !Task.isCancelled {
             if condition() { return true }
             try? await Task.sleep(for: .milliseconds(40))
         }

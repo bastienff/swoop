@@ -26,6 +26,13 @@ final class AppController {
 
     private let log = Logger(subsystem: "com.bastienff.swoop", category: "app")
     private(set) var shortcutError: String?
+    /// The activation in flight; cancelled when the switcher opens again so its focus guard
+    /// doesn't pull the previous target back over the new panel.
+    private var activationTask: Task<Void, Never>?
+    /// The app most recently asked to come forward. macOS applies activations asynchronously, so for a
+    /// moment after a switch it may not be frontmost yet (and can take focus from a just-reopened panel).
+    private var lastActivation: (pid: pid_t, at: Date)?
+    static let activationSettleTime: TimeInterval = 1.5
 
     func start() {
         hotkeys.onPress = { [weak self] in self?.shortcutPressed() }
@@ -108,8 +115,11 @@ final class AppController {
             openOnboardingHandler?()
             return
         }
+        activationTask?.cancel()
+        activationTask = nil
+        let pending = lastActivation.flatMap { Date().timeIntervalSince($0.at) < Self.activationSettleTime ? $0.pid : nil }
         // Cached results appear immediately; refresh in the background (PRD §14).
-        panel.show()
+        panel.show(pendingFrontmost: pending)
         Task { await registry.refresh() }
     }
 
@@ -122,7 +132,9 @@ final class AppController {
         }
         panel.dismiss(restorePrevious: false)
         registry.recordUse(of: entry)
-        Task {
+        lastActivation = (target.pid, Date())
+        activationTask?.cancel()
+        activationTask = Task {
             let result = await activation.activate(target)
             if result == .activated { supportPrompt.recordSwitch() }
             if case .failed(let message) = result {

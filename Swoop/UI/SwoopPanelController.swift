@@ -48,6 +48,10 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
     private var flagsMonitor: Any?
     static let releasePollInterval: Duration = .milliseconds(15)
     private var previousApp: NSRunningApplication?
+    /// Opened right after a switch whose activation macOS may not have applied yet: if that app takes
+    /// focus from the panel shortly after opening, take it back instead of dismissing.
+    private var pendingActivation: (pid: pid_t, until: Date)?
+    static let pendingActivationGrace: TimeInterval = 1.0
     private var targetScreen: NSScreen?
     private(set) var isVisible = false
 
@@ -137,11 +141,15 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         return s.isHeld(by: GlobalShortcutManager.modifiers(from: NSEvent.modifierFlags))
     }
 
-    func show() {
+    /// `pendingFrontmost`: an app Swoop just switched to that may not be frontmost yet. It counts as
+    /// the app you're in (Escape returns to it, smart order demotes its window).
+    func show(pendingFrontmost: pid_t? = nil) {
         guard !isVisible else { return }
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        previousApp = NSWorkspace.shared.frontmostApplication
+        let pendingApp = pendingFrontmost.flatMap { NSRunningApplication(processIdentifier: $0) }.flatMap { $0.isTerminated ? nil : $0 }
+        previousApp = pendingApp ?? NSWorkspace.shared.frontmostApplication
+        pendingActivation = pendingApp.map { ($0.processIdentifier, Date().addingTimeInterval(Self.pendingActivationGrace)) }
         model.reset()
         model.frontmostPID = previousApp?.processIdentifier
         let screen = chooseScreen()
@@ -175,6 +183,7 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
     func dismiss(restorePrevious: Bool) {
         guard isVisible, let panel else { return }
         isVisible = false
+        pendingActivation = nil
         endKeyRepeat()
         disarmSwitchOnRelease()
         removeMonitors()
@@ -421,6 +430,14 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
     }
 
     func windowDidResignKey(_ notification: Notification) {
+        // The previous switch's activation landed after the panel opened: that's not the user leaving.
+        if isVisible, let pending = pendingActivation, Date() < pending.until, let panel,
+           NSWorkspace.shared.frontmostApplication?.processIdentifier == pending.pid {
+            NSApp.activate()
+            panel.makeKeyAndOrderFront(nil)
+            model.requestFocus()
+            return
+        }
         // Another app took focus (click outside). Don't steal focus back.
         guard isVisible, settings.dismissOnOutsideClick else { return }
         dismiss(restorePrevious: false)
