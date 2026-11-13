@@ -220,7 +220,14 @@ private struct BehaviorSettings: View {
                     }
                 if let loginError { Text(loginError).font(.footnote).foregroundStyle(.red) }
                 Toggle("Dismiss when clicking outside", isOn: $settings.dismissOnOutsideClick)
-                Toggle("Sort by recent usage", isOn: $settings.sortByRecent)
+            }
+            Section {
+                Picker("Order windows by", selection: $settings.windowOrder) {
+                    ForEach(WindowOrder.allCases) { Text($0.label).tag($0) }
+                }
+            } footer: {
+                Text(settings.windowOrder.explanation)
+                    .font(.footnote).foregroundStyle(.secondary)
             }
             Section("Windows") {
                 Toggle("Show minimized windows", isOn: $settings.showMinimized)
@@ -242,7 +249,6 @@ private struct BehaviorSettings: View {
         .onChange(of: settings.nativeTabDiscovery) { refresh() }
         .onChange(of: settings.recoverOtherSpaceWindows) { refresh() }
         .onChange(of: settings.vscodeEnhancements) { refresh() }
-        .onChange(of: settings.sortByRecent) { refresh() }
         .onAppear { launchAtLogin = LaunchAtLogin.isEnabled }
     }
 

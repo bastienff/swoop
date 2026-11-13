@@ -17,6 +17,8 @@ final class SearchViewModel {
     private(set) var focusRequest = 0
 
     func requestFocus() { focusRequest += 1 }
+    /// The app that was frontmost when the switcher opened (`.smart` order demotes its current window).
+    var frontmostPID: Int32?
     /// Screen-dependent bounds set by the panel controller before showing.
     var maxPanelSize = CGSize(width: 1400, height: 900)
 
@@ -31,7 +33,8 @@ final class SearchViewModel {
     }
 
     var results: [WindowEntry] {
-        let options = WindowSearchEngine.Options(projectBoost: settings.vscodeSearchBoost ? 40 : 0)
+        let options = WindowSearchEngine.Options(projectBoost: settings.vscodeSearchBoost ? 40 : 0,
+                                                 order: settings.windowOrder, frontmostPID: frontmostPID)
         return WindowSearchEngine.rank(registry.entries, query: query, options: options)
     }
 

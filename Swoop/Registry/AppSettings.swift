@@ -48,6 +48,23 @@ enum PanelDisplay: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+extension WindowOrder {
+    var label: String {
+        switch self {
+        case .smart: "Smart"
+        case .recent: "Recent use"
+        case .name: "Name"
+        }
+    }
+    var explanation: String {
+        switch self {
+        case .smart: "Most recently used first, but the window you're in comes second, so the window you came from is selected: open Swoop and press Return to go back."
+        case .recent: "Most recently used first, starting with the window you're in."
+        case .name: "Alphabetical by app, then by window title."
+        }
+    }
+}
+
 /// What happens when the shortcut's modifier key is released.
 enum SwitcherMode: String, CaseIterable, Identifiable, Sendable {
     /// The switcher stays open until you pick a window or dismiss it (PRD §3 default).
@@ -107,7 +124,7 @@ final class AppSettings {
     /// Recover windows on other desktops through private Accessibility SPI (§2a). Off → public APIs only.
     var recoverOtherSpaceWindows: Bool { didSet { save("recoverOtherSpaceWindows", recoverOtherSpaceWindows) } }
     var vscodeSearchBoost: Bool { didSet { save("vscodeSearchBoost", vscodeSearchBoost) } }
-    var sortByRecent: Bool { didSet { save("sortByRecent", sortByRecent) } }
+    var windowOrder: WindowOrder { didSet { save("windowOrder", windowOrder.rawValue) } }
     var debugLogging: Bool { didSet { save("debugLogging", debugLogging) } }
     var onboardingCompleted: Bool { didSet { save("onboardingCompleted", onboardingCompleted) } }
 
@@ -134,7 +151,9 @@ final class AppSettings {
         nativeTabDiscovery = b("nativeTabDiscovery", true)
         recoverOtherSpaceWindows = b("recoverOtherSpaceWindows", true)
         vscodeSearchBoost = b("vscodeSearchBoost", true)
-        sortByRecent = b("sortByRecent", true)
+        // Migrates the old "Sort by recent usage" toggle: off → by name; otherwise smart.
+        windowOrder = WindowOrder(rawValue: defaults.string(forKey: "windowOrder") ?? "")
+            ?? (b("sortByRecent", true) ? .smart : .name)
         debugLogging = b("debugLogging", false)
         onboardingCompleted = b("onboardingCompleted", false)
     }

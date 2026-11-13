@@ -40,6 +40,13 @@ final class DebugCommands {
         case "demo": loadDemo()
         case "draggable": controller.settings.panelDraggable = arg == "on"
         case "mode": controller.settings.switcherMode = SwitcherMode(rawValue: arg) ?? .stayOpen
+        case "order": controller.settings.windowOrder = WindowOrder(rawValue: arg) ?? .smart
+        case "results":
+            // results <path>: the switcher's current order (as if opened now), top 5.
+            let m = controller.searchModel
+            m.frontmostPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
+            let top = m.results.prefix(5).map { "\($0.appName) | \($0.title)" }.joined(separator: "\n")
+            try? top.write(toFile: arg, atomically: true, encoding: .utf8)
         case "dragpanel":
             // dragpanel <dx> <dy>: real mouse drag from the panel's bottom-left padding (exercises the drag path).
             let a = arg.split(separator: " ").compactMap { Double($0) }

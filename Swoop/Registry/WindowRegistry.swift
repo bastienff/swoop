@@ -195,7 +195,7 @@ final class WindowRegistry {
                     entry.projectName = parsed.project
                     entry.detail = parsed.detail
                 }
-                if settings.sortByRecent { entry.lastUsed = recents.date(for: entry.recencyKey) }
+                entry.lastUsed = recents.date(for: entry.recencyKey)
                 newEntries.append(entry)
                 let own: AXElement? = if case .element(let e) = route { e } else { nil }
                 newTargets[id] = ActivationTarget(
@@ -276,7 +276,6 @@ final class WindowRegistry {
         let key = RecentUsage.key(bundleID: app?.bundleIdentifier ?? app?.localizedName ?? "", title: title)
         let now = Date()
         recents.record(key, at: now)
-        guard settings.sortByRecent else { return }
         if let i = entries.firstIndex(where: { $0.pid == pid && $0.title == title }) { entries[i].lastUsed = now }
     }
 

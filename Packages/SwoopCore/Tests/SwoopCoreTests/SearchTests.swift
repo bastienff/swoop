@@ -69,6 +69,28 @@ struct SearchRankingTests {
         #expect(WindowSearchEngine.rank(entries, query: "").map(\.appName) == ["B", "D", "A", "C"])
     }
 
+    @Test func smartOrderPutsPreviousWindowFirst() {
+        // You're in B (frontmost, most recent); the window you came from (D) leads.
+        var entries = [makeEntry("A", "a", used: 10), makeEntry("B", "b", used: 30), makeEntry("C", "c"), makeEntry("D", "d", used: 20)]
+        entries[1].pid = 42
+        let smart = WindowSearchEngine.Options(order: .smart, frontmostPID: 42)
+        #expect(WindowSearchEngine.rank(entries, query: "", options: smart).map(\.appName) == ["D", "B", "A", "C"])
+    }
+
+    @Test func smartOrderKeepsRecencyWhenFrontmostAppIsNotFirst() {
+        // Frontmost app has no window at the top (e.g. Finder with only the desktop): nothing is demoted.
+        let entries = [makeEntry("A", "a", used: 10), makeEntry("B", "b", used: 30)]
+        let smart = WindowSearchEngine.Options(order: .smart, frontmostPID: 999)
+        #expect(WindowSearchEngine.rank(entries, query: "", options: smart).map(\.appName) == ["B", "A"])
+        #expect(WindowSearchEngine.rank(Array(entries.prefix(1)), query: "", options: smart).map(\.appName) == ["A"])
+    }
+
+    @Test func nameOrderIsAlphabeticalByAppThenTitle() {
+        let entries = [makeEntry("slack", "general", used: 50), makeEntry("Code", "zeta"), makeEntry("Code", "Alpha", used: 1)]
+        let byName = WindowSearchEngine.Options(order: .name)
+        #expect(WindowSearchEngine.rank(entries, query: "", options: byName).map(\.title) == ["Alpha", "zeta", "general"])
+    }
+
     @Test func recencyBreaksTies() {
         let entries = [makeEntry("Code", "alpha", used: 5, id: "1"), makeEntry("Code", "alpha", used: 50, id: "2")]
         #expect(WindowSearchEngine.rank(entries, query: "alpha").map(\.id) == ["2", "1"])

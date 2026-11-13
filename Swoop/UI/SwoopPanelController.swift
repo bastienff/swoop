@@ -143,6 +143,7 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         self.panel = panel
         previousApp = NSWorkspace.shared.frontmostApplication
         model.reset()
+        model.frontmostPID = previousApp?.processIdentifier
         let screen = chooseScreen()
         targetScreen = screen
         let visible = screen.visibleFrame

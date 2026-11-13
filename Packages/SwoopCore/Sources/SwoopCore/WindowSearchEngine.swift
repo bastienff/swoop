@@ -1,14 +1,32 @@
 import Foundation
 
+/// How the switcher orders windows when nothing is typed (and how it breaks ties when searching).
+public enum WindowOrder: String, CaseIterable, Identifiable, Sendable {
+    /// Most recently used first, except the window you're in, which comes second:
+    /// open the switcher and press Return to go back to the previous window.
+    case smart
+    /// Most recently used first, including the window you're in.
+    case recent
+    /// Alphabetical by app, then by window title.
+    case name
+    public var id: String { rawValue }
+}
+
 /// Case- and diacritic-insensitive fuzzy ranking of window entries.
 ///
 /// Tiers (higher wins): exact (1000) > prefix (800) > word prefix (700) > substring (500)
 /// > fuzzy subsequence (100…400). A VS Code project-name match adds a small bonus that never
-/// crosses a tier. Ties break by recency, then by input order.
+/// crosses a tier. Ties break by the chosen order (recency or name), then by input order.
 public enum WindowSearchEngine {
     public struct Options: Sendable {
         public var projectBoost: Double
-        public init(projectBoost: Double = 40) { self.projectBoost = projectBoost }
+        public var order: WindowOrder
+        /// The frontmost app when the switcher opened. In `.smart` order, its most recently used
+        /// window (the one you're in) moves from first to second place.
+        public var frontmostPID: Int32?
+        public init(projectBoost: Double = 40, order: WindowOrder = .recent, frontmostPID: Int32? = nil) {
+            self.projectBoost = projectBoost; self.order = order; self.frontmostPID = frontmostPID
+        }
     }
 
     public static func normalize(_ s: String) -> String {
@@ -108,7 +126,7 @@ public enum WindowSearchEngine {
         return best
     }
 
-    /// Ranks entries for `query`. Empty query → most-recently-used first, stable otherwise.
+    /// Ranks entries for `query`. Empty query → `options.order`; otherwise by score, ties by that order.
     public static func rank(_ entries: [WindowEntry], query: String, options: Options = .init()) -> [WindowEntry] {
         let trimmed = query.trimmingCharacters(in: .whitespaces)
         let indexed = Array(entries.enumerated())
@@ -120,15 +138,29 @@ public enum WindowSearchEngine {
             default: return a.0 < b.0
             }
         }
+        func nameOrder(_ a: (Int, WindowEntry), _ b: (Int, WindowEntry)) -> Bool {
+            for (x, y) in [(a.1.appName, b.1.appName), (a.1.projectName ?? a.1.title, b.1.projectName ?? b.1.title), (a.1.title, b.1.title)] {
+                let c = x.localizedStandardCompare(y)
+                if c != .orderedSame { return c == .orderedAscending }
+            }
+            return a.0 < b.0
+        }
+        let order = options.order == .name ? nameOrder : recencyOrder
         if trimmed.isEmpty {
-            return indexed.sorted(by: recencyOrder).map(\.1)
+            var ranked = indexed.sorted(by: order).map(\.1)
+            // Smart: the window you're in is the frontmost app's most recent one. When it leads the
+            // list, the previous window takes its place so Return goes back.
+            if options.order == .smart, ranked.count > 1, let pid = options.frontmostPID, ranked[0].pid == pid {
+                ranked.swapAt(0, 1)
+            }
+            return ranked
         }
         let scored: [(Int, WindowEntry, Double)] = indexed.compactMap { i, e in
             score(entry: e, query: trimmed, options: options).map { (i, e, $0) }
         }
         return scored.sorted { a, b in
             if abs(a.2 - b.2) > 0.0001 { return a.2 > b.2 }
-            return recencyOrder((a.0, a.1), (b.0, b.1))
+            return order((a.0, a.1), (b.0, b.1))
         }.map(\.1)
     }
 }
