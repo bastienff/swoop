@@ -48,6 +48,14 @@ final class DebugCommands {
             for _ in 0..<20 { _ = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) }
             out += String(format: "zorder list: wall %.1f ms, cpu %.1f ms", (ProcessInfo.processInfo.systemUptime - t0) / 20 * 1000, Double(clock() - c0) / Double(CLOCKS_PER_SEC) / 20 * 1000)
             try? out.write(toFile: arg, atomically: true, encoding: .utf8)
+        case "releasemods":
+            // releasemods: release every modifier (clears a latched modifier state after synthetic events).
+            let src = CGEventSource(stateID: .hidSystemState)
+            for code: CGKeyCode in [55, 56, 58, 59] {
+                let e = CGEvent(keyboardEventSource: src, virtualKey: code, keyDown: false)
+                e?.flags = []
+                e?.post(tap: .cghidEventTap)
+            }
         case "timerefresh":
             // timerefresh <outfile> <app name>: average one-app refresh time over 20 runs (+ CPU time).
             let parts = arg.split(separator: " ", maxSplits: 1).map(String.init)
@@ -185,11 +193,21 @@ final class DebugCommands {
         if m.contains(.command) { flags.insert(.maskCommand) }
         if m.contains(.control) { flags.insert(.maskControl) }
         if m.contains(.shift) { flags.insert(.maskShift) }
-        for down in [true, false] {
-            let e = CGEvent(keyboardEventSource: src, virtualKey: CGKeyCode(keyCode), keyDown: down)
-            e?.flags = flags
+        // Press and release the modifier keys too, like a real keyboard: flags alone leave the system's
+        // modifier state latched (NSEvent.modifierFlags keeps reporting them as held).
+        let modifierKeys: [(Shortcut.Modifiers, CGKeyCode, CGEventFlags)] = [
+            (.control, 59, .maskControl), (.option, 58, .maskAlternate), (.shift, 56, .maskShift), (.command, 55, .maskCommand)]
+        let pressed = modifierKeys.filter { m.contains($0.0) }
+        func send(_ code: CGKeyCode, _ down: Bool, _ f: CGEventFlags) {
+            let e = CGEvent(keyboardEventSource: src, virtualKey: code, keyDown: down)
+            e?.flags = f
             e?.post(tap: .cghidEventTap)
         }
+        var held: CGEventFlags = []
+        for (_, code, flag) in pressed { held.insert(flag); send(code, true, held) }
+        send(CGKeyCode(keyCode), true, flags)
+        send(CGKeyCode(keyCode), false, flags)
+        for (_, code, flag) in pressed.reversed() { held.remove(flag); send(code, false, held) }
     }
 
     private func key(_ name: String) {
