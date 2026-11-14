@@ -11,6 +11,11 @@ name: Release
 # One-time setup for the Homebrew step:
 #   - create the public repo bastienff/homebrew-tap
 #   - add a fine-grained token with "Contents: read and write" on that repo as the secret HOMEBREW_TAP_TOKEN
+#
+# Developer ID signing + notarization (docs/RELEASING.md), from six secrets:
+#   DEVELOPER_ID_P12_BASE64, DEVELOPER_ID_P12_PASSWORD, APPLE_TEAM_ID,
+#   NOTARY_KEY_P8_BASE64, NOTARY_KEY_ID, NOTARY_ISSUER_ID
+# Without them the build falls back to ad-hoc signing (users then need "Open Anyway") and says so in a warning.
 on:
   release:
     types: [published]
@@ -23,7 +28,7 @@ jobs:
   build:
     name: Test, build & attach
     runs-on: macos-latest
-    timeout-minutes: 30
+    timeout-minutes: 60 # notarization usually takes minutes, rarely much longer
     outputs:
       version: ${{ steps.version.outputs.version }}
       sha256: ${{ steps.package.outputs.sha256 }}
@@ -51,26 +56,95 @@ jobs:
       - name: Core tests (SwoopCore)
         run: swift test --package-path Packages/SwoopCore
 
-      # Apple silicon only. Ad-hoc signed (an unsigned arm64 app won't launch); Developer ID signing +
-      # notarization can replace this once certificates are stored as secrets.
-      - name: Build Swoop.app (Release, arm64)
+      # Imports the Developer ID certificate into a throwaway keychain and writes the notarization key.
+      - name: Signing setup
+        id: signing
+        env:
+          P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          NOTARY_KEY_P8_BASE64: ${{ secrets.NOTARY_KEY_P8_BASE64 }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
         run: |
+          if [ -z "$P12_BASE64" ] || [ -z "$P12_PASSWORD" ] || [ -z "$TEAM_ID" ] || \
+             [ -z "$NOTARY_KEY_P8_BASE64" ] || [ -z "$NOTARY_KEY_ID" ] || [ -z "$NOTARY_ISSUER_ID" ]; then
+            echo "::warning::Developer ID secrets are not all set; building ad-hoc signed and not notarized."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          echo "$P12_BASE64" | base64 --decode > "$RUNNER_TEMP/developer-id.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/developer-id.p12" -k "$KEYCHAIN" -P "$P12_PASSWORD" -t cert -f pkcs12 -T /usr/bin/codesign
+          rm "$RUNNER_TEMP/developer-id.p12"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN" | grep -o '"Developer ID Application: .*"' | head -1 | tr -d '"')"
+          [ -n "$IDENTITY" ] || { echo "::error::No Developer ID Application identity in the .p12"; exit 1; }
+          echo "$NOTARY_KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/notary-key.p8"
+          {
+            echo "signed=true"
+            echo "keychain=$KEYCHAIN"
+            echo "identity=$IDENTITY"
+            echo "team=$TEAM_ID"
+          } >> "$GITHUB_OUTPUT"
+
+      # Apple silicon only. Developer ID + hardened runtime + secure timestamp when the secrets are set
+      # (needed for notarization); otherwise ad-hoc (an unsigned arm64 app won't launch).
+      # CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO keeps Xcode from adding get-task-allow, which notarization rejects.
+      - name: Build Swoop.app (Release, arm64)
+        env:
+          SIGNED: ${{ steps.signing.outputs.signed }}
+          KEYCHAIN: ${{ steps.signing.outputs.keychain }}
+          IDENTITY: ${{ steps.signing.outputs.identity }}
+          TEAM_ID: ${{ steps.signing.outputs.team }}
+        run: |
+          if [ "$SIGNED" = "true" ]; then
+            SIGN_ARGS=(CODE_SIGN_IDENTITY="$IDENTITY" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="$TEAM_ID"
+                       ENABLE_HARDENED_RUNTIME=YES CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO
+                       OTHER_CODE_SIGN_FLAGS="--timestamp --keychain $KEYCHAIN")
+          else
+            SIGN_ARGS=(CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=)
+          fi
           xcodebuild -project Swoop.xcodeproj -scheme Swoop -configuration Release \
             -destination 'generic/platform=macOS' -derivedDataPath build/DerivedData \
             ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
             MARKETING_VERSION="${{ steps.version.outputs.version }}" CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
-            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= \
+            "${SIGN_ARGS[@]}" \
             build -quiet
 
+      # Signed builds: notarize + staple the app before zipping it, then sign, notarize + staple the dmg.
       - name: Package
         id: package
+        env:
+          SIGNED: ${{ steps.signing.outputs.signed }}
+          KEYCHAIN: ${{ steps.signing.outputs.keychain }}
+          IDENTITY: ${{ steps.signing.outputs.identity }}
+          NOTARY_KEY: ${{ runner.temp }}/notary-key.p8
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
         run: |
           APP=build/DerivedData/Build/Products/Release/Swoop.app
           codesign --verify --deep --strict "$APP"
           test "$(lipo -archs "$APP/Contents/MacOS/Swoop")" = "arm64"
+          if [ "$SIGNED" = "true" ]; then
+            codesign -dvv "$APP" 2>&1 | grep -q "^Authority=Developer ID Application" \
+              || { echo "::error::Swoop.app is not signed with Developer ID"; exit 1; }
+            scripts/notarize.sh "$APP"
+            spctl --assess --type execute --verbose "$APP"
+          fi
           ditto -c -k --keepParent "$APP" Swoop.zip
           shasum -a 256 Swoop.zip | tee Swoop.zip.sha256
           scripts/make_dmg.sh "$APP" Swoop.dmg
+          if [ "$SIGNED" = "true" ]; then
+            codesign --sign "$IDENTITY" --keychain "$KEYCHAIN" --timestamp Swoop.dmg
+            scripts/notarize.sh Swoop.dmg
+            spctl --assess --type open --context context:primary-signature --verbose Swoop.dmg
+          fi
           shasum -a 256 Swoop.dmg | tee Swoop.dmg.sha256
           echo "sha256=$(cut -d' ' -f1 Swoop.zip.sha256)" >> "$GITHUB_OUTPUT"
 
@@ -90,6 +164,14 @@ jobs:
             Swoop.dmg.sha256
             Swoop.zip
             Swoop.zip.sha256
+
+      - name: Remove signing keychain
+        if: always() && steps.signing.outputs.signed == 'true'
+        env:
+          KEYCHAIN: ${{ steps.signing.outputs.keychain }}
+        run: |
+          security delete-keychain "$KEYCHAIN" || true
+          rm -f "$RUNNER_TEMP/notary-key.p8"
 
   notes:
     name: Release notes
