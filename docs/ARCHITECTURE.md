@@ -214,6 +214,9 @@ Decision tree for target `T` of app `A`:
 - Sizing: computed by `SwoopCore.GridLayout` from result count, icon size, and the target
   screen's `visibleFrame`; max width ≈ 90 % of screen, fixed max rows, scroll beyond. Shown on the
   active display (screen with key window/mouse, configurable).
+- Swoop's own windows left open behind other apps (Settings, About, …) would come forward when the panel
+  activates Swoop: they're ordered out while it's open and put back at their exact z-position afterwards
+  (above the CG window that was below them), without activating Swoop.
 - Shows cached registry immediately; a refresh runs in the background and the grid updates in place
   (selection preserved by `WindowID`).
 

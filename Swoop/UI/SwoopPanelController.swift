@@ -148,6 +148,18 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         return s.isHeld(by: GlobalShortcutManager.modifiers(from: NSEvent.modifierFlags))
     }
 
+    /// Swoop's own windows (Settings, About, …) left open behind other apps. Activating Swoop for the panel
+    /// would bring them forward with it, so they're hidden while the panel is open and put back afterwards
+    /// exactly where they were in the stacking order (just above the window that was below them).
+    private var parkedWindows: [(window: NSWindow, above: Int?)] = []
+
+    /// The on-screen normal-level window right below `window` (any app), from CG's front-to-back list.
+    private static func windowBelow(_ window: NSWindow) -> Int? {
+        let below = CGWindowListCopyWindowInfo([.optionOnScreenBelowWindow, .excludeDesktopElements],
+                                               CGWindowID(window.windowNumber)) as? [[String: Any]] ?? []
+        return below.first { ($0[kCGWindowLayer as String] as? Int) == 0 }?[kCGWindowNumber as String] as? Int
+    }
+
     /// `pendingFrontmost`: an app Swoop just switched to that may not be frontmost yet. It counts as
     /// the app you're in (Escape returns to it, smart order demotes its window).
     func show(pendingFrontmost: pid_t? = nil) {
@@ -176,6 +188,12 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         panel.alphaValue = reduceMotion ? 1 : 0
         // Activate ourselves so the search field reliably receives typing; the previous app is
         // restored on dismissal without selection (PRD §9).
+        if !NSApp.isActive {
+            parkedWindows = NSApp.windows
+                .filter { $0 !== panel && $0.isVisible && $0.level == .normal && !($0 is NSPanel) }
+                .map { ($0, Self.windowBelow($0)) }
+            parkedWindows.forEach { $0.window.orderOut(nil) }
+        }
         NSApp.activate()
         panel.makeKeyAndOrderFront(nil)
         model.requestFocus()
@@ -208,6 +226,11 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
             prev.activate()
         }
         previousApp = nil
+        // Back where they were, without activating Swoop (in reverse, so each lands above its old neighbor).
+        for (window, above) in parkedWindows.reversed() {
+            if let above { window.order(.above, relativeTo: above) } else { window.orderBack(nil) }
+        }
+        parkedWindows = []
     }
 
     // MARK: Panel
