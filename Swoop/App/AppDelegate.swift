@@ -32,13 +32,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if controller?.permissions.isAccessibilityTrusted == true { controller?.settings.onboardingCompleted = true }
             controller?.onboardingModel = nil
         }
+        // Swoop theme only; Classic keeps the standard About panel.
+        let about = HostedWindowController(title: "About Swoop", chromeless: true) { AboutView() }
+        controller.openAboutHandler = { about.show() }
         controller.openSettingsHandler = { settingsWindow.show() }
         controller.selectSettingsPane = { settingsWindow.select($0) }
         controller.openOnboardingHandler = { onboarding.show() }
         controller.closeOnboarding = { onboarding.close() }
         // Permission just granted while onboarding is open: bring it back to show "All set".
         controller.onAccessibilityGranted = { if onboarding.isVisible { onboarding.show() } }
-        windows = [settingsWindow, onboarding]
+        windows = [settingsWindow, onboarding, about]
         MainMenu.install(openSettings: #selector(openSettings), target: self)
         controller.start()
         #if DEBUG

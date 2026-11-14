@@ -276,7 +276,8 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             for pane in SettingsPane.allCases {
                 let hosting = NSHostingController(rootView: pane.content(controller)
                     .frame(width: 560)
-                    .fixedSize(horizontal: false, vertical: true))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .modifier(SettingsThemeStyle(settings: controller.settings)))
                 hosting.sizingOptions = [.preferredContentSize]
                 hosting.title = pane.title
                 let item = NSTabViewItem(viewController: hosting)
@@ -292,10 +293,25 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             w.center()
             window = w
             self.tabs = tabs
+            applyTheme()
         }
         focus.remember()
         NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
+    }
+
+    /// Swoop theme: the panes' brand background runs under a transparent toolbar. Classic: the standard
+    /// window, untouched. Follows the setting live (it's changed from this very window).
+    private func applyTheme() {
+        guard let window else { return }
+        let swoop = controller.settings.theme == .swoop
+        if swoop { window.styleMask.insert(.fullSizeContentView) } else { window.styleMask.remove(.fullSizeContentView) }
+        window.titlebarAppearsTransparent = swoop
+        withObservationTracking {
+            _ = controller.settings.theme
+        } onChange: { [weak self] in
+            Task { @MainActor in self?.applyTheme() }
+        }
     }
 
     /// Selects a pane by index (used by the debug driver).

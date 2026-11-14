@@ -89,6 +89,11 @@ final class DebugCommands {
             Task { @MainActor in try? await DiagnosticsReport.make(controller).write(toFile: arg, atomically: true, encoding: .utf8) }
         case "bugurl": try? controller.bugReportURL.absoluteString.write(toFile: arg, atomically: true, encoding: .utf8)
         case "searchfield": controller.settings.alwaysShowSearchField = arg == "always"
+        case "appappearance":
+            // appappearance light|dark|system: the whole app's appearance (Settings/About follow the system).
+            NSApp.appearance = arg == "light" ? NSAppearance(named: .aqua) : arg == "dark" ? NSAppearance(named: .darkAqua) : nil
+        case "about": controller.menuBar.onAbout?() // same path as the menu item
+        case "theme": controller.settings.theme = AppTheme(rawValue: arg) ?? .classic
         case "order": controller.settings.windowOrder = WindowOrder(rawValue: arg) ?? .smart
         case "results":
             // results <path>: the switcher's current order (as if opened now), top 5.

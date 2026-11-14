@@ -44,6 +44,13 @@ struct SwoopView: View {
             }
         }
         .frame(width: layout.panelWidth, height: layout.panelHeight, alignment: .top)
+        // Swoop theme: the brand gradient over the panel's blur (kept slightly see-through). Classic: just the
+        // blur material, as before. Icons, highlight and search field are the same in both.
+        .background {
+            if model.settings.theme == .swoop {
+                FittedBrandBackground().opacity(0.94)
+            }
+        }
         .onAppear { searchFocused = true }
         // Typing must always reach the search field: on every open, after a layout change, and when the
         // field appears (with "Always show the search field" off).

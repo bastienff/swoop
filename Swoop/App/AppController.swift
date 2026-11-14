@@ -20,6 +20,7 @@ final class AppController {
     lazy var menuBar = MenuBarController()
     lazy var observers = WorkspaceObserver(registry: registry, recents: recents)
     var openSettingsHandler: (() -> Void)?
+    var openAboutHandler: (() -> Void)?
     var selectSettingsPane: ((Int) -> Void)?
     var openOnboardingHandler: (() -> Void)?
     var closeOnboarding: (() -> Void)?
@@ -51,6 +52,11 @@ final class AppController {
         menuBar.onOpenSettings = { [weak self] in self?.openSettingsHandler?() }
         menuBar.onOpenPermissions = { [weak self] in self?.openOnboardingHandler?() }
         menuBar.onReportProblem = { [weak self] in self?.reportProblem() }
+        menuBar.onAbout = { [weak self] in
+            guard let self else { return }
+            if settings.theme == .swoop { openAboutHandler?() } else { MenuBarController.showStandardAbout() }
+        }
+        supportPrompt.settings = settings
         menuBar.onSaveDiagnostics = { [weak self] in
             guard let self else { return }
             Task { await DiagnosticsReport.saveAndReveal(self) }

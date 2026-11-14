@@ -13,6 +13,8 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     var onReportProblem: (() -> Void)?
     var onSuggestFeature: (() -> Void)?
     var onSaveDiagnostics: (() -> Void)?
+    /// "About Swoop": the theme decides between the custom window and the standard panel.
+    var onAbout: (() -> Void)?
     var shortcutDisplay: () -> String = { "" }
     var isAccessibilityTrusted: () -> Bool = { false }
     /// Screen frame of the menu-bar icon.
@@ -126,6 +128,11 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     @objc private func saveDiagnostics() { onSaveDiagnostics?() }
     @objc private func buyMeACoffee() { NSWorkspace.shared.open(AppLinks.buyMeACoffee) }
     @objc private func about() {
+        if let onAbout { onAbout() } else { Self.showStandardAbout() }
+    }
+
+    /// The standard macOS About panel (Classic theme).
+    static func showStandardAbout() {
         NSApp.activate()
         let credits = NSMutableAttributedString(string: "Just a window switcher. Window information never leaves this Mac.\n\n")
         credits.append(NSAttributedString(string: "Swooped you to the right window? Buy me a coffee ☕",

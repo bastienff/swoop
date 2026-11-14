@@ -148,6 +148,11 @@ private struct AppearanceSettings: View {
     var body: some View {
         Form {
             Section {
+                LabeledContent("Theme") {
+                    VisualPicker(options: AppTheme.allCases, selection: $settings.theme, label: \.label) {
+                        ThemeThumbnail(theme: $0)
+                    }
+                }
                 LabeledContent("Layout") {
                     VisualPicker(options: PanelLayout.allCases, selection: $settings.panelLayout, label: \.label) {
                         LayoutThumbnail(layout: $0)
@@ -350,5 +355,31 @@ private struct AdvancedSettings: View {
             }
         }
         .formStyle(.grouped)
+    }
+}
+
+/// Swoop theme for a Settings pane: brand background behind the form, form
+/// background hidden, orange switches and picture-picker selection. Classic: no change at all.
+struct SettingsThemeStyle: ViewModifier {
+    let settings: AppSettings
+
+    func body(content: Content) -> some View {
+        if settings.theme == .swoop {
+            content
+                .scrollContentBackground(.hidden)
+                .background(FittedBrandBackground().ignoresSafeArea())
+                .environment(\.themeAccent, Brand.orange)
+                // Orange switches only: a pane-wide `.tint` also greys out menu pickers' labels.
+                .toggleStyle(BrandSwitchStyle())
+        } else {
+            content
+        }
+    }
+}
+
+/// A standard switch tinted with the brand orange (the tint applies to this toggle only).
+struct BrandSwitchStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Toggle(configuration).toggleStyle(.switch).tint(Brand.orange)
     }
 }

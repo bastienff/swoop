@@ -15,6 +15,14 @@ enum AppearanceMode: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+/// Overall look. Classic is the original look and the default; Swoop applies
+/// the onboarding's brand look to the switcher, Settings, About and the support card.
+enum AppTheme: String, CaseIterable, Identifiable, Sendable {
+    case swoop, classic
+    var id: String { rawValue }
+    var label: String { self == .swoop ? "Swoop" : "Classic" }
+}
+
 enum IconSize: String, CaseIterable, Identifiable, Sendable {
     case small, medium, large
     var id: String { rawValue }
@@ -92,6 +100,7 @@ final class AppSettings {
     var allowBareTab: Bool { didSet { save("allowBareTab", allowBareTab) } }
     var switcherMode: SwitcherMode { didSet { save("switcherMode", switcherMode.rawValue) } }
 
+    var theme: AppTheme { didSet { save("theme", theme.rawValue) } }
     var appearance: AppearanceMode { didSet { save("appearance", appearance.rawValue) } }
     var iconSize: IconSize { didSet { save("iconSize", iconSize.rawValue) } }
     var maxVisibleRows: Int { didSet { save("maxVisibleRows", maxVisibleRows) } }
@@ -137,6 +146,7 @@ final class AppSettings {
         shortcut = (defaults.data(forKey: "shortcut")).flatMap { try? JSONDecoder().decode(Shortcut.self, from: $0) } ?? .default
         allowBareTab = b("allowBareTab", false)
         switcherMode = SwitcherMode(rawValue: defaults.string(forKey: "switcherMode") ?? "") ?? .stayOpen
+        theme = AppTheme(rawValue: defaults.string(forKey: "theme") ?? "") ?? .classic
         appearance = AppearanceMode(rawValue: defaults.string(forKey: "appearance") ?? "") ?? .system
         iconSize = IconSize(rawValue: defaults.string(forKey: "iconSize") ?? "") ?? .large
         maxVisibleRows = defaults.object(forKey: "maxVisibleRows") as? Int ?? 4

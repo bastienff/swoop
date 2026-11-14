@@ -8,6 +8,8 @@ struct VisualPicker<Value: Hashable, Thumbnail: View>: View {
     @Binding var selection: Value
     let label: (Value) -> String
     @ViewBuilder let thumbnail: (Value) -> Thumbnail
+    /// System accent in the Classic theme, brand orange in the Swoop theme.
+    @Environment(\.themeAccent) private var accent
 
     /// Illustrations are drawn on a 128×80 canvas and shown at 75% (96×60).
     static var drawingSize: CGSize { CGSize(width: 128, height: 80) }
@@ -30,7 +32,7 @@ struct VisualPicker<Value: Hashable, Thumbnail: View>: View {
                             .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                    .strokeBorder(selected ? Color.accentColor : Color.primary.opacity(0.14),
+                                    .strokeBorder(selected ? accent : Color.primary.opacity(0.14),
                                                   lineWidth: selected ? 2.5 : 1))
                             .shadow(color: .black.opacity(selected ? 0.18 : 0.08), radius: selected ? 6 : 3, y: 2)
                         Text(label(option))
@@ -162,6 +164,36 @@ struct LayoutThumbnail: View {
                     .padding(.horizontal, 6)
                 }
             }
+        }
+    }
+}
+
+/// Theme: the mini panel on the brand gradient (Swoop) or today's panel (Classic).
+struct ThemeThumbnail: View {
+    let theme: AppTheme
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        let dark = scheme == .dark
+        let shape = RoundedRectangle(cornerRadius: 9, style: .continuous)
+        ZStack {
+            Mini.wallpaper(dark: dark)
+            Group {
+                if theme == .swoop {
+                    BrandBackground(scale: 0.17).clipShape(shape)
+                } else {
+                    shape.fill(Mini.panelFill(dark: dark))
+                }
+            }
+            .overlay(shape.strokeBorder(Mini.ink(dark: dark, 0.12), lineWidth: 0.5))
+            .frame(width: 96, height: 60)
+            .shadow(color: .black.opacity(0.25), radius: 4, y: 2)
+            VStack(spacing: 6) {
+                Mini.searchBar(dark: dark, width: 38)
+                HStack(spacing: 7) { ForEach(0..<4, id: \.self) { Mini.icon($0, size: 13) } }
+                HStack(spacing: 7) { ForEach(4..<7, id: \.self) { Mini.icon($0, size: 13) } }
+            }
+            .frame(width: 96, height: 60)
         }
     }
 }
