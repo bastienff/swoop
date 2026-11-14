@@ -306,7 +306,14 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         // net effect, the window slides by the toolbar height. The frame size ends up unchanged, so restore it.
         let frame = window.frame
         if swoop { window.styleMask.insert(.fullSizeContentView) } else { window.styleMask.remove(.fullSizeContentView) }
-        window.titlebarAppearsTransparent = swoop
+        // macOS 26+: the system toolbar stays clear at rest (the brand background shows through) and frosts
+        // only content scrolled under it, like Classic. Earlier systems draw an opaque toolbar band, so keep
+        // it transparent there.
+        if #available(macOS 26, *) {
+            window.titlebarAppearsTransparent = false
+        } else {
+            window.titlebarAppearsTransparent = swoop
+        }
         window.layoutIfNeeded()
         window.setFrame(frame, display: true)
         chrome.fullSizeContent = swoop

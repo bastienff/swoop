@@ -214,6 +214,19 @@ final class DebugCommands {
                 }
             }
             controller.menuBar.debugOpenMenu()
+        case "scrollsettings":
+            // scrollsettings <y>: scrolls the open Settings pane to y points from the top.
+            func scrollView(in v: NSView) -> NSScrollView? {
+                if let s = v as? NSScrollView, s.documentView.map({ $0.frame.height > s.contentView.bounds.height }) == true { return s }
+                for sub in v.subviews { if let s = scrollView(in: sub) { return s } }
+                return nil
+            }
+            if let w = NSApp.windows.first(where: { $0.toolbarStyle == .preference && $0.isVisible }),
+               let root = w.contentView?.superview ?? w.contentView, let sv = scrollView(in: root), let y = Double(arg) {
+                let top = -sv.contentView.contentInsets.top
+                sv.contentView.scroll(to: NSPoint(x: 0, y: top + y))
+                sv.reflectScrolledClipView(sv.contentView)
+            }
         case "autocheck5": controller.updates.debugRunAutomaticCheckSoon()
         case "updatemock": controller.updates.debugMock = UpdateChecker.DebugMock(rawValue: arg) ?? .off // off|newVersion|upToDate|offline
         case "autoupdates": controller.settings.checkForUpdates = arg == "on"; controller.updates.applySetting()
