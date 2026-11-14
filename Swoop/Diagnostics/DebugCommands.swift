@@ -200,6 +200,10 @@ final class DebugCommands {
             }
         case "appearance": controller.settings.appearance = AppearanceMode(rawValue: arg) ?? .system
         case "refresh": Task { await controller.registry.refresh() }
+        case "checkupdates": Task { await controller.updates.check() } // same as the "Check for Updates" button
+        case "menucheckupdates": controller.checkForUpdatesFromMenu() // same as the menu item
+        case "updatemock": controller.updates.debugMock = UpdateChecker.DebugMock(rawValue: arg) ?? .off // off|newVersion|upToDate|offline
+        case "autoupdates": controller.settings.checkForUpdates = arg == "on"; controller.updates.applySetting()
         case "select":
             // select <substring>: selects the first visible result whose title/app contains it.
             if let e = controller.searchModel.results.first(where: { "\($0.appName) \($0.title)".localizedCaseInsensitiveContains(arg) }) {

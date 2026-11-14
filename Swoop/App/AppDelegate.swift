@@ -35,15 +35,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             controller?.onboardingModel = nil
         }
         // Swoop theme only; Classic keeps the standard About panel.
-        let about = HostedWindowController(title: String(localized: "About Swoop"), chromeless: true) { AboutView() }
+        let about = HostedWindowController(title: String(localized: "About Swoop"), chromeless: true) { AboutView(updates: controller.updates) }
         controller.openAboutHandler = { about.show() }
+        let closeUpdates = WindowCloser()
+        let updateWindow = HostedWindowController(title: String(localized: "Software Update"), chromeless: true) {
+            UpdateWindowView(updates: controller.updates) { closeUpdates.close?() }
+        }
+        closeUpdates.close = { [weak updateWindow] in updateWindow?.close() }
+        controller.openUpdateWindowHandler = { updateWindow.show() }
         controller.openSettingsHandler = { settingsWindow.show() }
         controller.selectSettingsPane = { settingsWindow.select($0) }
         controller.openOnboardingHandler = { onboarding.show() }
         controller.closeOnboarding = { onboarding.close() }
         // Permission just granted while onboarding is open: bring it back to show "All set".
         controller.onAccessibilityGranted = { if onboarding.isVisible { onboarding.show() } }
-        windows = [settingsWindow, onboarding, about]
+        windows = [settingsWindow, onboarding, about, updateWindow]
         MainMenu.install(openSettings: #selector(openSettings), target: self)
         controller.start()
         #if DEBUG
@@ -61,4 +67,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         controller?.showPanel()
         return false
     }
+}
+
+/// Lets a window's content close its own window (the controller is created after the content closure).
+@MainActor
+private final class WindowCloser {
+    var close: (() -> Void)?
 }

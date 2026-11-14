@@ -247,6 +247,17 @@ private struct BehaviorSettings: View {
                 Toggle("Show project names", isOn: $settings.vscodeEnhancements)
                 Toggle("Boost project-name matches in search", isOn: $settings.vscodeSearchBoost)
             }
+            Section {
+                Toggle("Check for updates automatically", isOn: $settings.checkForUpdates)
+                LabeledContent("Version \(UpdateChecker.currentVersion)") {
+                    UpdateStatusView(checker: controller.updates)
+                }
+            } header: {
+                Text("Updates")
+            } footer: {
+                Text("Swoop connects to the internet only to check for updates, and only if you allow it: when you click Check for Updates, or once a day with automatic checks on. It asks GitHub for the latest version number; nothing about you or your windows is sent.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
         .onChange(of: settings.showMinimized) { refresh() }
@@ -254,6 +265,7 @@ private struct BehaviorSettings: View {
         .onChange(of: settings.nativeTabDiscovery) { refresh() }
         .onChange(of: settings.recoverOtherSpaceWindows) { refresh() }
         .onChange(of: settings.vscodeEnhancements) { refresh() }
+        .onChange(of: settings.checkForUpdates) { controller.updates.applySetting() }
         .onAppear { launchAtLogin = LaunchAtLogin.isEnabled }
     }
 

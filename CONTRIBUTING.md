@@ -53,7 +53,9 @@ These come from behavior verified on real desktops. Please don't break them:
 
 1. **Never move a window to another desktop**, and never pull a native tab out of its group. Swoop goes to
    the window; the window doesn't come to you.
-2. **One permission:** Accessibility. No Screen Recording, no Input Monitoring, no network, no analytics.
+2. **One permission:** Accessibility. No Screen Recording, no Input Monitoring, no analytics, and no network
+   requests without the user's consent (the opt-in update check in `Swoop/Platform/UpdateChecker.swift` is the
+   only one). Don't add more.
 3. **Public macOS APIs only**, with one documented, optional exception for recovering window handles after a
    restart (`Swoop/Platform/RemoteElements.swift`). Don't add more private API.
 4. **Swift 6 strict concurrency.** Accessibility calls run off the main thread with timeouts.

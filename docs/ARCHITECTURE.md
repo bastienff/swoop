@@ -19,6 +19,10 @@ These follow from the verified facts below. Changes that break one need new evid
 - **After cross-Space activation, confirm** the frontmost app and focused window, and re-assert (F10).
 - **AX calls** set messaging timeouts, run enumeration off the main actor, and handle invalid elements.
 - **No Input Monitoring or Screen Recording** permission requests (not needed, F13).
+- **No network requests without consent.** The only one is the update check (`UpdateChecker`): an anonymous
+  GET of GitHub's latest release, when the user clicks *Check for Updates* or daily if they enabled it (off by
+  default). It only links to the release page (built from the version, not from the response); it never
+  downloads or installs.
 - **Swift 6 strict concurrency**; `AXUIElement` crosses actors only via the `AXElement` wrapper.
 - **Cross-Space and native-tab behavior** is claimed only when verified on a real desktop.
 
@@ -236,7 +240,7 @@ Packages/SwoopCore   (pure Swift, no AppKit; `swift test`)
 Swoop (app target)
   App/        main, AppDelegate, AppController (composition root) + WorkspaceObserver, WindowControllers
   Platform/   AXElement (Sendable wrapper), WindowDiscoveryService, WindowActivationService,
-              AXObserverHub, PermissionManager, GlobalShortcutManager
+              AXObserverHub, PermissionManager, GlobalShortcutManager, UpdateChecker (opt-in, §Rules)
   Registry/   WindowRegistry (@MainActor, @Observable), RecentWindowsStore, AppSettings
   UI/         SwoopPanelController, SwoopView (+ WindowGridView, WindowGridItemView),
               SearchViewModel, MenuBarController (+ LaunchAtLogin), HUDController, OnboardingView,
@@ -260,7 +264,8 @@ learned anchors); there is no separate Space service because no public Space API
 `com.bastienff.swoop.debug`): `show`, `hide`, `type <q>`, `key left|right|up|down|return|escape`,
 `hotkey` (posts the configured shortcut as a real HID event), `post <keyCode> <mods>`,
 `setshortcut <keyCode> <mods>`, `dump <file>`, `snapshot <png>`, `snapwin <png> <title>`,
-`appearance system|light|dark`, `refresh`, `settings`, `demo` (fixed generic windows for README
+`appearance system|light|dark`, `refresh`, `settings`, `checkupdates` / `menucheckupdates` (button / menu
+path), `updatemock off|newVersion|upToDate|offline`, `autoupdates on|off`, `demo` (fixed generic windows for README
 images; pauses discovery), `snapshot <png> clear` (content only, transparent, @2x). Build with
 `swiftc -O Tools/swctl.swift -o build/swctl`. Used to verify behavior end-to-end; on-screen
 Space membership is checked with CG on-screen window signatures (no Screen Recording needed).
@@ -268,7 +273,8 @@ Space membership is checked with CG on-screen window signatures (no Screen Recor
 **Settings → Debug** (DEBUG builds only; not compiled into Release): build/permission/registry/recovery
 state, plus actions — reset Accessibility via `tccutil` and relaunch/quit (first-install test), show/reset
 onboarding, system prompt, forget anchors (simulates a relaunch for recovery tests), forget remembered
-windows, refresh, open registry dump, demo windows on/off, show switcher/test HUD, clear recents, reveal
+windows, refresh, open registry dump, update check response (real / mock new version / mock up to date /
+mock offline) + forget update state, demo windows on/off, show switcher/test HUD, clear recents, reveal
 data folder, reset all settings, relaunch, quit.
 
 ### Probes

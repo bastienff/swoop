@@ -144,6 +144,8 @@ final class AppSettings {
     /// Diagnostics reports include window titles only when this is on.
     var diagnosticsIncludeTitles: Bool { didSet { save("diagnosticsIncludeTitles", diagnosticsIncludeTitles) } }
     var onboardingCompleted: Bool { didSet { save("onboardingCompleted", onboardingCompleted) } }
+    /// Daily automatic update check (one request to GitHub). Off by default: no network without consent.
+    var checkForUpdates: Bool { didSet { save("checkForUpdates", checkForUpdates) } }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -175,6 +177,7 @@ final class AppSettings {
         debugLogging = b("debugLogging", false)
         diagnosticsIncludeTitles = b("diagnosticsIncludeTitles", false)
         onboardingCompleted = b("onboardingCompleted", false)
+        checkForUpdates = b("checkForUpdates", false)
     }
 
     /// Shortcut to register, or nil if disabled or a bare Tab without opt-in.

@@ -14,6 +14,7 @@ final class AppController {
     let activation = WindowActivationService()
     let hud = HUDController()
     let supportPrompt = SupportPromptController()
+    lazy var updates = UpdateChecker(settings: settings)
     lazy var registry = WindowRegistry(settings: settings, recents: recents)
     lazy var searchModel = SearchViewModel(registry: registry, settings: settings)
     lazy var panel = SwoopPanelController(model: searchModel, settings: settings)
@@ -23,6 +24,8 @@ final class AppController {
     var openAboutHandler: (() -> Void)?
     var selectSettingsPane: ((Int) -> Void)?
     var openOnboardingHandler: (() -> Void)?
+    /// Swoop theme: the themed update window (Classic uses a standard alert).
+    var openUpdateWindowHandler: (() -> Void)?
     var closeOnboarding: (() -> Void)?
     /// The open onboarding's state (nil when closed).
     var onboardingModel: OnboardingModel?
@@ -62,6 +65,9 @@ final class AppController {
             Task { await DiagnosticsReport.saveAndReveal(self) }
         }
         menuBar.onSuggestFeature = { NSWorkspace.shared.open(AppLinks.newIssue(.featureRequest)) }
+        menuBar.onCheckForUpdates = { [weak self] in self?.checkForUpdatesFromMenu() }
+        menuBar.availableUpdate = { [weak self] in self?.updates.availableUpdate }
+        updates.applySetting()
         menuBar.shortcutDisplay = { [weak self] in self?.settings.effectiveShortcut?.displayString ?? "" }
         menuBar.isAccessibilityTrusted = { [weak self] in self?.permissions.isAccessibilityTrusted ?? false }
         supportPrompt.anchorFrame = { [weak self] in self?.menuBar.statusItemFrame }
@@ -91,6 +97,40 @@ final class AppController {
         }
         if !permissions.isAccessibilityTrusted || !settings.onboardingCompleted {
             openOnboardingHandler?()
+        }
+    }
+
+    /// Menu → Check for Updates…: checks now. Swoop theme: a themed window that follows the check live.
+    /// Classic: a standard alert with the result (like its standard About panel).
+    func checkForUpdatesFromMenu() {
+        if settings.theme == .swoop, let openUpdateWindowHandler {
+            openUpdateWindowHandler()
+            Task { await updates.check() }
+            return
+        }
+        Task {
+            await updates.check()
+            NSApp.activate()
+            let alert = NSAlert()
+            switch updates.status {
+            case .available(let version, let page):
+                alert.messageText = String(localized: "Swoop \(version) is available")
+                alert.informativeText = String(localized: "You have \(UpdateChecker.currentVersion). Download the new version from GitHub, or run “brew upgrade” if you installed Swoop with Homebrew.")
+                alert.addButton(withTitle: String(localized: "Open Release Page"))
+                alert.addButton(withTitle: String(localized: "Later"))
+                if alert.runModal() == .alertFirstButtonReturn { NSWorkspace.shared.open(page) }
+            case .upToDate:
+                alert.messageText = String(localized: "Swoop is up to date")
+                alert.informativeText = String(localized: "Version \(UpdateChecker.currentVersion) is the latest.")
+                alert.runModal()
+            case .failed(let message):
+                alert.alertStyle = .warning
+                alert.messageText = String(localized: "Couldn't check for updates")
+                alert.informativeText = message
+                alert.runModal()
+            case .idle, .checking:
+                break
+            }
         }
     }
 

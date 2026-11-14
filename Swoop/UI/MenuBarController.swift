@@ -13,6 +13,9 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     var onReportProblem: (() -> Void)?
     var onSuggestFeature: (() -> Void)?
     var onSaveDiagnostics: (() -> Void)?
+    var onCheckForUpdates: (() -> Void)?
+    /// A newer release found by an update check, shown at the top of the menu.
+    var availableUpdate: () -> (version: String, page: URL)? = { nil }
     /// "About Swoop": the theme decides between the custom window and the standard panel.
     var onAbout: (() -> Void)?
     var shortcutDisplay: () -> String = { "" }
@@ -63,6 +66,15 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
+        if let update = availableUpdate() {
+            let item = NSMenuItem(title: String(localized: "Swoop \(update.version) Is Available…", comment: "Menu bar menu; %@ is a version"),
+                                  action: #selector(openUpdatePage(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = update.page
+            item.image = NSImage(systemSymbolName: "arrow.down.circle.fill", accessibilityDescription: nil)
+            menu.addItem(item)
+            menu.addItem(.separator())
+        }
         let open = NSMenuItem(title: String(localized: "Open Swoop"), action: #selector(openSwoop), keyEquivalent: "")
         open.target = self
         let shortcut = shortcutDisplay()
@@ -89,6 +101,9 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         let about = NSMenuItem(title: String(localized: "About Swoop"), action: #selector(about), keyEquivalent: "")
         about.target = self
         menu.addItem(about)
+        let updates = NSMenuItem(title: String(localized: "Check for Updates…"), action: #selector(checkForUpdates), keyEquivalent: "")
+        updates.target = self
+        menu.addItem(updates)
         let report = NSMenuItem(title: String(localized: "Report a Problem…"), action: #selector(reportProblem), keyEquivalent: "")
         report.target = self
         report.image = NSImage(systemSymbolName: "exclamationmark.bubble", accessibilityDescription: nil)
@@ -126,6 +141,10 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     @objc private func reportProblem() { onReportProblem?() }
     @objc private func suggestFeature() { onSuggestFeature?() }
     @objc private func saveDiagnostics() { onSaveDiagnostics?() }
+    @objc private func checkForUpdates() { onCheckForUpdates?() }
+    @objc private func openUpdatePage(_ sender: NSMenuItem) {
+        if let url = sender.representedObject as? URL { NSWorkspace.shared.open(url) }
+    }
     @objc private func buyMeACoffee() { NSWorkspace.shared.open(AppLinks.buyMeACoffee) }
     @objc private func about() {
         if let onAbout { onAbout() } else { Self.showStandardAbout() }

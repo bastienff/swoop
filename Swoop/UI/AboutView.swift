@@ -4,7 +4,8 @@ import SwiftUI
 /// About window in the Swoop theme. The Classic theme keeps the standard
 /// macOS About panel (`MenuBarController.showStandardAbout`).
 struct AboutView: View {
-    static let size = CGSize(width: 340, height: 366)
+    let updates: UpdateChecker
+    static let size = CGSize(width: 340, height: 390)
 
     var body: some View {
         VStack(spacing: 0) {
@@ -18,6 +19,9 @@ struct AboutView: View {
                 .foregroundStyle(.secondary)
                 .textSelection(.enabled)
                 .padding(.top, 2)
+            UpdateStatusView(checker: updates, centered: true)
+                .environment(\.themeAccent, Brand.orange)
+                .padding(.top, 6)
             Text("Just a window switcher. Window\ninformation never leaves this Mac.")
                 .font(.system(size: 12.5))
                 .foregroundStyle(.secondary)

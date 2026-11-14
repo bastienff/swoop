@@ -49,7 +49,7 @@ That's it. No tiling, no window management, no plugins.
 - **Made for VS Code.** Project names are pulled out of window titles, so you can type
   `api` and see projects, not file names. Works great with `"window.nativeTabs": true`.
 - **Light.** Native Swift and AppKit. No dependencies and no polling: Swoop only wakes up when a window changes, so it sits at 0% CPU while nothing is happening.
-- **One permission.** Needs only Accessibility. No Screen Recording, no Input Monitoring, no network.
+- **One permission.** Needs only Accessibility. No Screen Recording, no Input Monitoring, and no network requests without your consent.
 
 ## Grid or list
 
@@ -84,6 +84,8 @@ brew install --cask bastienff/tap/swoop
 Grab the latest `Swoop.dmg` from [Releases](https://github.com/bastienff/swoop/releases), open it,
 and drag **Swoop** to **Applications**. (`Swoop.zip` has the same app, if you prefer a zip.)
 Releases are signed with a Developer ID and notarized by Apple, so macOS opens Swoop without warnings.
+To hear about new versions, click **Check for Updates** in Settings → Behavior or About, or turn on
+*Check for updates automatically* there (off by default).
 
 ### First launch
 
@@ -151,7 +153,10 @@ More detail: [`docs/ARCHITECTURE.md` §10](docs/ARCHITECTURE.md#10-known-limitat
 
 ## Privacy
 
-Swoop has no network code. Your recent-windows history is stored in
+Swoop makes no network requests without your consent. The only one it can make is an update check:
+it asks GitHub for the latest version number when you click **Check for Updates**, or once a day if you
+turn on automatic checks (off by default). Nothing about you or your windows is sent, and it never
+downloads or installs anything by itself. Your recent-windows history is stored in
 `~/Library/Application Support/Swoop/` and never leaves your Mac.
 
 ## Build from source

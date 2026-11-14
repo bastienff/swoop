@@ -92,6 +92,19 @@ enum DebugActions {
         item("Make Support Card Due (next switch)") { c.supportPrompt.debugMakeDue() }
         item("Reset Support Card (fresh install)") { c.supportPrompt.debugReset() }
         m.addItem(.separator())
+        note("Update check: \(c.updates.debugSummary)")
+        let responses = NSMenu(title: "Update Check Response")
+        for mock in UpdateChecker.DebugMock.allCases {
+            let i = ClosureMenuItem(title: mock.label) { c.updates.debugMock = mock }
+            i.state = c.updates.debugMock == mock ? .on : .off
+            responses.addItem(i)
+        }
+        let responseItem = NSMenuItem(title: "Update Check Response", action: nil, keyEquivalent: "")
+        responseItem.submenu = responses
+        m.addItem(responseItem)
+        item("Check for Updates… (menu window)") { c.checkForUpdatesFromMenu() }
+        item("Forget Update State") { c.updates.debugForget() }
+        m.addItem(.separator())
         item("Clear Recent Usage") { c.recents.reset() }
         item("Reveal Data Folder") { revealDataFolder() }
         item("Reset All Settings & Relaunch") { resetAllSettingsAndRelaunch() }

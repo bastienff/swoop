@@ -96,6 +96,21 @@ struct DebugSettings: View {
                 footnote("First card after \(SupportPromptPolicy.firstPromptSwitches) switches or 2 days (with ≥ \(SupportPromptPolicy.minimumSwitches) switches), whichever comes first. Coffee/star or \"Don't ask again\" stops it for good; ✕ / Maybe later / ignoring it postpones 2 days.")
             }
 
+            Section {
+                @Bindable var updates = controller.updates
+                Picker("Response", selection: $updates.debugMock) {
+                    ForEach(UpdateChecker.DebugMock.allCases, id: \.self) { Text($0.label).tag($0) }
+                }
+                info("State", controller.updates.debugSummary)
+                LabeledContent("Check") { UpdateStatusView(checker: controller.updates) }
+                action("Check for Updates… (menu window)") { controller.checkForUpdatesFromMenu() }
+                action("Forget Update State") { controller.updates.debugForget(); report("Update state forgotten.") }
+            } header: {
+                Text("Update Check")
+            } footer: {
+                footnote("Mocks answer instead of GitHub (after 0.8 s): a newer version (current minor + 1), this version, or no connection. Real request: GitHub's latest release (404 while the repository is private).")
+            }
+
             Section("Data") {
                 action("Clear Recent Usage") { controller.recents.reset(); report("Recent usage cleared.") }
                 action("Reveal Data Folder") { DebugActions.revealDataFolder() }

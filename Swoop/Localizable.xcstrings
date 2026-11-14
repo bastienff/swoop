@@ -43,52 +43,116 @@
       },
       "shouldTranslate" : false
     },
-    "A shortcut without a modifier key can't be held, so the switcher stays open. Record a shortcut with ⌘, ⌥ or ⌃ to switch on release." : {},
+    "A shortcut without a modifier key can't be held, so the switcher stays open. Record a shortcut with ⌘, ⌥ or ⌃ to switch on release." : {
+
+    },
     "About Swoop" : {
       "comment" : "Menu bar menu\nWindow title"
     },
-    "Accessibility" : {},
-    "Accessibility: Granted" : {},
-    "Accessibility: Not Granted — Fix…" : {},
-    "Add at least one modifier (⌘, ⌥, ⌃ or ⇧)." : {},
+    "Accessibility" : {
+
+    },
+    "Accessibility: Granted" : {
+
+    },
+    "Accessibility: Not Granted — Fix…" : {
+
+    },
+    "Add at least one modifier (⌘, ⌥, ⌃ or ⇧)." : {
+
+    },
     "Advanced" : {
       "comment" : "Settings tab"
     },
-    "Allow bare Tab as the shortcut" : {},
-    "Alphabetical by app, then by window title." : {},
-    "Already on but still not granted? Turn it off and on again." : {},
-    "Always show the search field" : {},
-    "Another app already uses this shortcut." : {},
-    "Any time, from the menu bar icon." : {},
+    "Allow bare Tab as the shortcut" : {
+
+    },
+    "Alphabetical by app, then by window title." : {
+
+    },
+    "Already on but still not granted? Turn it off and on again." : {
+
+    },
+    "Always show the search field" : {
+
+    },
+    "Another app already uses this shortcut." : {
+
+    },
+    "Any time, from the menu bar icon." : {
+
+    },
     "Appearance" : {
       "comment" : "Settings tab"
     },
-    "Attach the report to a bug report on GitHub. It has Swoop's version, settings and this session's log, and lists your windows' apps; titles are left out unless you include them. It stays on this Mac until you attach it." : {},
-    "Bare keys are disabled; the shortcut is inactive." : {},
-    "Begin setup" : {},
+    "Asking GitHub for the latest version." : {
+
+    },
+    "Attach the report to a bug report on GitHub. It has Swoop's version, settings and this session's log, and lists your windows' apps; titles are left out unless you include them. It stays on this Mac until you attach it." : {
+
+    },
+    "Bare keys are disabled; the shortcut is inactive." : {
+
+    },
+    "Begin setup" : {
+
+    },
     "Behavior" : {
       "comment" : "Settings tab"
     },
-    "Boost project-name matches in search" : {},
+    "Boost project-name matches in search" : {
+
+    },
     "Buy Me a Coffee ♥" : {
       "comment" : "Menu bar menu"
     },
-    "Buy me a coffee" : {},
-    "Cancel" : {},
+    "Buy me a coffee" : {
+
+    },
+    "Cancel" : {
+
+    },
     "Centered" : {
       "comment" : "Switcher position"
+    },
+    "Check Again" : {
+
+    },
+    "Check for Updates" : {
+
+    },
+    "Check for Updates…" : {
+
+    },
+    "Check for updates automatically" : {
+
+    },
+    "Checking for updates…" : {
+
+    },
+    "Checking…" : {
+
     },
     "Classic" : {
       "comment" : "Theme name"
     },
-    "Click, then press the new key combination. Escape cancels." : {},
+    "Click, then press the new key combination. Escape cancels." : {
+
+    },
     "Close" : {
       "comment" : "Main menu item"
     },
-    "Close without switching" : {},
-    "Continue" : {},
+    "Close without switching" : {
+
+    },
+    "Continue" : {
+
+    },
     "Copy" : {
       "comment" : "Main menu item"
+    },
+    "Couldn't check for updates" : {
+
     },
     "Couldn't reach the desktop containing “%@”." : {
       "comment" : "%@ is a window title"
@@ -99,50 +163,126 @@
     "Cut" : {
       "comment" : "Main menu item"
     },
-    "Dark" : {},
-    "Debug logging" : {},
-    "Debug logging writes the window list, with titles, to the system log (subsystem com.bastienff.swoop)." : {},
-    "Diagnostics" : {},
-    "Discover native window tabs" : {},
-    "Dismiss when clicking outside" : {},
-    "Display with the active window" : {},
-    "Display with the mouse cursor" : {},
-    "Don't ask again" : {},
-    "Done" : {},
-    "Drag the switcher by its background; it reopens where you left it on each display. The search field appears as soon as you type when it's hidden." : {},
+    "Dark" : {
+
+    },
+    "Debug logging" : {
+
+    },
+    "Debug logging writes the window list, with titles, to the system log (subsystem com.bastienff.swoop)." : {
+
+    },
+    "Diagnostics" : {
+
+    },
+    "Discover native window tabs" : {
+
+    },
+    "Dismiss when clicking outside" : {
+
+    },
+    "Display with the active window" : {
+
+    },
+    "Display with the mouse cursor" : {
+
+    },
+    "Don't ask again" : {
+
+    },
+    "Done" : {
+
+    },
+    "Download" : {
+
+    },
+    "Drag the switcher by its background; it reopens where you left it on each display. The search field appears as soon as you type when it's hidden." : {
+
+    },
     "Draggable" : {
       "comment" : "Switcher position"
     },
     "Edit" : {
       "comment" : "Main menu"
     },
-    "Enable global shortcut" : {},
-    "Enable “Allow bare Tab” first: it intercepts Tab in every app." : {},
-    "Enjoying Swoop?" : {},
-    "Every window, one keystroke. Press %@, type a few letters, hit Return — you're there. Even on other desktops." : {},
-    "Finding windows…" : {},
-    "Follow System" : {},
-    "Free and open source" : {},
+    "Enable global shortcut" : {
+
+    },
+    "Enable “Allow bare Tab” first: it intercepts Tab in every app." : {
+
+    },
+    "Enjoying Swoop?" : {
+
+    },
+    "Every window, one keystroke. Press %@, type a few letters, hit Return — you're there. Even on other desktops." : {
+
+    },
+    "Finding windows…" : {
+
+    },
+    "Follow System" : {
+
+    },
+    "Free and open source" : {
+
+    },
     "Full screen" : {
       "comment" : "Window status"
     },
-    "Go back" : {},
-    "Grant Access" : {},
-    "Granted" : {},
-    "Granted — %lld windows found." : {},
-    "Grid" : {},
-    "Helps other people discover it." : {},
+    "GitHub answered with an error (%lld)." : {
+
+    },
+    "GitHub didn't answer in time." : {
+
+    },
+    "GitHub is limiting requests right now. Try again later." : {
+
+    },
+    "Go back" : {
+
+    },
+    "Grant Access" : {
+
+    },
+    "Granted" : {
+
+    },
+    "Granted — %lld windows found." : {
+
+    },
+    "Grid" : {
+
+    },
+    "Helps other people discover it." : {
+
+    },
     "Hide Swoop" : {
       "comment" : "Main menu item"
     },
-    "Icon size" : {},
-    "In System Settings → Privacy & Security → Accessibility, turn on **Swoop**. This screen updates by itself; no restart needed." : {},
-    "Include full-screen windows" : {},
-    "Include window titles in reports" : {},
-    "Input Monitoring" : {},
-    "It's free, has no ads, and is made by one person. If it saves you time, a coffee or a GitHub star keeps it going." : {},
-    "Just a window switcher. Window\ninformation never leaves this Mac." : {},
-    "Just a window switcher. Window information never leaves this Mac." : {},
+    "Icon size" : {
+
+    },
+    "In System Settings → Privacy & Security → Accessibility, turn on **Swoop**. This screen updates by itself; no restart needed." : {
+
+    },
+    "Include full-screen windows" : {
+
+    },
+    "Include window titles in reports" : {
+
+    },
+    "Input Monitoring" : {
+
+    },
+    "It's free, has no ads, and is made by one person. If it saves you time, a coffee or a GitHub star keeps it going." : {
+
+    },
+    "Just a window switcher. Window\ninformation never leaves this Mac." : {
+
+    },
+    "Just a window switcher. Window information never leaves this Mac." : {
+
+    },
     "Keep %@ held and press the shortcut again (or keep it pressed) to move through the windows; add ⇧ to go back. Release %@ to switch to the selected window. Escape cancels." : {
       "comment" : "%@ is a modifier key such as ⌥",
       "localizations" : {
@@ -154,71 +294,150 @@
         }
       }
     },
-    "Keep the switcher open" : {},
-    "Keeps windows on desktops you visited reachable after Swoop restarts. Uses non-public macOS accessibility functions; turn off if a macOS update misbehaves." : {},
+    "Keep the switcher open" : {
+
+    },
+    "Keeps windows on desktops you visited reachable after Swoop restarts. Uses non-public macOS accessibility functions; turn off if a macOS update misbehaves." : {
+
+    },
     "Keyboard" : {
       "comment" : "Settings tab"
     },
     "Large" : {
       "comment" : "Icon size"
     },
-    "Later" : {},
-    "Launch Swoop at login" : {},
+    "Later" : {
+
+    },
+    "Launch Swoop at login" : {
+
+    },
     "Launch at Login" : {
       "comment" : "Menu bar menu"
     },
-    "Launch at login" : {},
-    "Layout" : {},
-    "Let Swoop see your windows" : {},
-    "Light" : {},
-    "Like ⌘Tab: hold the modifier, tap to move, let go." : {},
-    "List · Comfortable" : {},
-    "List · Compact" : {},
-    "Look around, search, then press Return." : {},
-    "Looking at your open apps." : {},
-    "MIT License" : {},
-    "Make it yours" : {},
-    "Maximum visible rows: %lld" : {},
+    "Launch at login" : {
+
+    },
+    "Layout" : {
+
+    },
+    "Let Swoop see your windows" : {
+
+    },
+    "Light" : {
+
+    },
+    "Like ⌘Tab: hold the modifier, tap to move, let go." : {
+
+    },
+    "List · Comfortable" : {
+
+    },
+    "List · Compact" : {
+
+    },
+    "Look around, search, then press Return." : {
+
+    },
+    "Looking at your open apps." : {
+
+    },
+    "MIT License" : {
+
+    },
+    "Make it yours" : {
+
+    },
+    "Maximum visible rows: %lld" : {
+
+    },
     "May conflict with: %@." : {
       "comment" : "%@ is a system shortcut name"
     },
-    "Maybe later" : {},
+    "Maybe later" : {
+
+    },
     "Medium" : {
       "comment" : "Icon size"
     },
     "Minimized" : {
       "comment" : "Window status"
     },
-    "Most recently used first, but the window you're in comes second, so the window you came from is selected: open Swoop and press Return to go back." : {},
-    "Most recently used first, starting with the window you're in." : {},
-    "Move the selection (or press the shortcut again)" : {},
+    "Most recently used first, but the window you're in comes second, so the window you came from is selected: open Swoop and press Return to go back." : {
+
+    },
+    "Most recently used first, starting with the window you're in." : {
+
+    },
+    "Move the selection (or press the shortcut again)" : {
+
+    },
     "Name" : {
       "comment" : "Window order: alphabetical"
     },
     "Native tab" : {
       "comment" : "Window status"
     },
-    "No Input Monitoring or Screen Recording: Swoop never reads your typing or your screen." : {},
-    "No ads, no tracking, no account. If Swoop saves you time, here's how you can help it grow." : {},
-    "No matching windows" : {},
-    "No windows" : {},
-    "Not granted" : {},
-    "Not granted yet" : {},
-    "Not needed" : {},
-    "Not requested. Swoop shows app icons, not window previews." : {},
-    "Not requested. The global shortcut uses a standard hotkey registration that doesn't read your keystrokes." : {},
+    "No Input Monitoring or Screen Recording: Swoop never reads your typing or your screen." : {
+
+    },
+    "No ads, no tracking, no account. If Swoop saves you time, here's how you can help it grow." : {
+
+    },
+    "No matching windows" : {
+
+    },
+    "No releases were found." : {
+
+    },
+    "No windows" : {
+
+    },
+    "Not granted" : {
+
+    },
+    "Not granted yet" : {
+
+    },
+    "Not needed" : {
+
+    },
+    "Not requested. Swoop shows app icons, not window previews." : {
+
+    },
+    "Not requested. The global shortcut uses a standard hotkey registration that doesn't read your keystrokes." : {
+
+    },
+    "OK" : {
+
+    },
     "On another desktop" : {
       "comment" : "Window status"
     },
-    "Open GitHub Only" : {},
+    "Open GitHub Only" : {
+
+    },
+    "Open Release Page" : {
+
+    },
     "Open Swoop" : {
       "comment" : "Menu bar menu"
     },
-    "Open System Settings" : {},
-    "Open a window in any app, then press the shortcut again." : {},
-    "Open in the center again" : {},
-    "Opens in your browser" : {},
-    "Order windows by" : {},
+    "Open System Settings" : {
+
+    },
+    "Open a window in any app, then press the shortcut again." : {
+
+    },
+    "Open in the center again" : {
+
+    },
+    "Opens in your browser" : {
+
+    },
+    "Order windows by" : {
+
+    },
     "Other desktop" : {
       "comment" : "Window status"
     },
@@ -228,65 +447,132 @@
     "Permissions" : {
       "comment" : "Settings tab"
     },
-    "Pick how your windows are shown. You can change this any time in Settings." : {},
-    "Position" : {},
-    "Press it anywhere to open Swoop. Click to record a different one; you can change it later in Settings." : {},
-    "Primary display" : {},
+    "Pick how your windows are shown. You can change this any time in Settings." : {
+
+    },
+    "Position" : {
+
+    },
+    "Press it anywhere to open Swoop. Click to record a different one; you can change it later in Settings." : {
+
+    },
+    "Primary display" : {
+
+    },
     "Quit Swoop" : {
       "comment" : "Main menu item\nMenu bar menu"
     },
-    "Recent usage cleared." : {},
-    "Recent use" : {},
+    "Recent usage cleared." : {
+
+    },
+    "Recent use" : {
+
+    },
     "Redo" : {
       "comment" : "Main menu item"
     },
-    "Refresh Window Registry" : {},
-    "Refreshed: %lld windows." : {},
-    "Release notes" : {},
-    "Remember windows on other desktops" : {},
-    "Report a Problem" : {},
+    "Refresh Window Registry" : {
+
+    },
+    "Refreshed: %lld windows." : {
+
+    },
+    "Release notes" : {
+
+    },
+    "Remember windows on other desktops" : {
+
+    },
+    "Report a Problem" : {
+
+    },
     "Report a Problem…" : {
       "comment" : "Menu bar menu"
     },
-    "Report a problem or suggest a feature" : {},
-    "Request Access" : {},
-    "Required to list windows, read their titles and native tabs, and focus the exact window you pick." : {},
-    "Reset" : {},
-    "Reset Recent Usage" : {},
-    "Restore Default" : {},
+    "Report a problem or suggest a feature" : {
+
+    },
+    "Request Access" : {
+
+    },
+    "Required to list windows, read their titles and native tabs, and focus the exact window you pick." : {
+
+    },
+    "Reset" : {
+
+    },
+    "Reset Recent Usage" : {
+
+    },
+    "Restore Default" : {
+
+    },
     "Save Diagnostics Report" : {
       "comment" : "Menu bar menu"
     },
-    "Save Diagnostics Report…" : {},
-    "Save Report & Open GitHub" : {},
+    "Save Diagnostics Report…" : {
+
+    },
+    "Save Report & Open GitHub" : {
+
+    },
     "Saved %@." : {
       "comment" : "%@ is a file name"
     },
-    "Screen Recording" : {},
-    "Search windows" : {},
-    "Search windows…" : {},
+    "Screen Recording" : {
+
+    },
+    "Search windows" : {
+
+    },
+    "Search windows…" : {
+
+    },
     "Select All" : {
       "comment" : "Main menu item"
     },
-    "Settings" : {},
+    "Settings" : {
+
+    },
     "Settings…" : {
       "comment" : "Main menu item\nMenu bar menu"
     },
-    "Shift alone would block typing that character. Add ⌘, ⌥ or ⌃." : {},
-    "Show Reports Folder" : {},
-    "Show minimized windows" : {},
-    "Show on" : {},
-    "Show project names" : {},
-    "Skip for now" : {},
-    "Skip setup" : {},
+    "Shift alone would block typing that character. Add ⌘, ⌥ or ⌃." : {
+
+    },
+    "Show Reports Folder" : {
+
+    },
+    "Show minimized windows" : {
+
+    },
+    "Show on" : {
+
+    },
+    "Show project names" : {
+
+    },
+    "Skip for now" : {
+
+    },
+    "Skip setup" : {
+
+    },
     "Small" : {
       "comment" : "Icon size"
     },
     "Smart" : {
       "comment" : "Window order"
     },
-    "Star Swoop on GitHub" : {},
-    "Star on GitHub" : {},
+    "Software Update" : {
+
+    },
+    "Star Swoop on GitHub" : {
+
+    },
+    "Star on GitHub" : {
+
+    },
     "Step %lld of %lld" : {
       "localizations" : {
         "en" : {
@@ -300,55 +586,150 @@
     "Suggest a Feature…" : {
       "comment" : "Menu bar menu"
     },
-    "Supports the time that goes into fixes and new features." : {},
-    "Switch on release" : {},
-    "Switch to the selected window" : {},
-    "Switch to the window" : {},
-    "Swoop Away" : {},
-    "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, this session's log and your windows' apps, including window titles — check it for anything private. Nothing is sent until you submit the report." : {},
-    "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, this session's log and your windows' apps, without window titles. Nothing is sent until you submit the report." : {},
-    "Swoop can see your windows" : {},
-    "Swoop has switched you %@ times" : {},
-    "Swoop lives in your menu bar. Press %@ anywhere to jump to any window." : {},
-    "Swoop needs Accessibility to list the windows of other apps and switch to the exact one you pick. Window information never leaves this Mac." : {},
-    "Swooped you to the right window? Buy me a coffee ☕" : {},
+    "Supports the time that goes into fixes and new features." : {
+
+    },
+    "Switch on release" : {
+
+    },
+    "Switch to the selected window" : {
+
+    },
+    "Switch to the window" : {
+
+    },
+    "Swoop %@ Is Available…" : {
+      "comment" : "Menu bar menu; %@ is a version"
+    },
+    "Swoop %@ is available" : {
+
+    },
+    "Swoop Away" : {
+
+    },
+    "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, this session's log and your windows' apps, including window titles — check it for anything private. Nothing is sent until you submit the report." : {
+
+    },
+    "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, this session's log and your windows' apps, without window titles. Nothing is sent until you submit the report." : {
+
+    },
+    "Swoop can see your windows" : {
+
+    },
+    "Swoop connects to the internet only to check for updates, and only if you allow it: when you click Check for Updates, or once a day with automatic checks on. It asks GitHub for the latest version number; nothing about you or your windows is sent." : {
+
+    },
+    "Swoop has switched you %@ times" : {
+
+    },
+    "Swoop is up to date" : {
+
+    },
+    "Swoop lives in your menu bar. Press %@ anywhere to jump to any window." : {
+
+    },
+    "Swoop needs Accessibility to list the windows of other apps and switch to the exact one you pick. Window information never leaves this Mac." : {
+
+    },
+    "Swooped you to the right window? Buy me a coffee ☕" : {
+
+    },
     "Tab" : {
       "comment" : "Window status"
     },
-    "Thank you!" : {},
-    "That really helps Swoop keep going. ♥" : {},
-    "The search field appears as soon as you type when it's hidden." : {},
+    "Thank you!" : {
+
+    },
+    "That really helps Swoop keep going. ♥" : {
+
+    },
+    "The latest release has an unexpected version (%@)." : {
+
+    },
+    "The search field appears as soon as you type when it's hidden." : {
+
+    },
     "The shortcut couldn't be registered (error %d)." : {
       "comment" : "%d is an error code"
     },
-    "The switcher stays open after you release the keys. Press the shortcut again to move to the next window (add ⇧ to go back); Escape closes it." : {},
+    "The switcher stays open after you release the keys. Press the shortcut again to move to the next window (add ⇧ to go back); Escape closes it." : {
+
+    },
     "The tab “%@” no longer exists." : {
       "comment" : "%@ is a tab title"
     },
-    "Theme" : {},
-    "Try an app name or part of a window title." : {},
-    "Try it now:" : {},
-    "Type shortcut…" : {},
-    "Type to filter by app, title or project" : {},
+    "Theme" : {
+
+    },
+    "Try Again" : {
+
+    },
+    "Try an app name or part of a window title." : {
+
+    },
+    "Try it now:" : {
+
+    },
+    "Type shortcut…" : {
+
+    },
+    "Type to filter by app, title or project" : {
+
+    },
     "Undo" : {
       "comment" : "Main menu item"
     },
-    "Use bare Tab" : {},
-    "Uses a standard hotkey registration — no Input Monitoring permission is needed." : {},
-    "Version %@" : {},
-    "Visual Studio Code" : {},
-    "Warning: with bare Tab, every Tab key press in every app opens Swoop instead of moving focus or indenting. Only enable this if you understand the trade-off." : {},
-    "Website" : {},
+    "Updates" : {
+
+    },
+    "Use bare Tab" : {
+
+    },
+    "Uses a standard hotkey registration — no Input Monitoring permission is needed." : {
+
+    },
+    "Version %@" : {
+
+    },
+    "Version %@ is available" : {
+
+    },
+    "Version %@ is the latest." : {
+
+    },
+    "Visual Studio Code" : {
+
+    },
+    "Warning: with bare Tab, every Tab key press in every app opens Swoop instead of moving focus or indenting. Only enable this if you understand the trade-off." : {
+
+    },
+    "Website" : {
+
+    },
     "Welcome to Swoop" : {
       "comment" : "Window title"
     },
-    "When you release the shortcut" : {},
+    "When you release the shortcut" : {
+
+    },
     "Window" : {
       "comment" : "Main menu"
     },
-    "Windows" : {},
-    "You're all set" : {},
-    "Your shortcut" : {},
+    "Windows" : {
+
+    },
+    "You have %@. Download the new version from GitHub, or run “brew upgrade” if you installed Swoop with Homebrew." : {
+
+    },
+    "You're all set" : {
+
+    },
+    "You're offline." : {
+
+    },
+    "Your shortcut" : {
+
+    },
     "↩" : {
       "shouldTranslate" : false
     }
