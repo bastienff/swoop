@@ -11,24 +11,23 @@ struct SwoopView: View {
         let layout = model.layout
         let metrics = model.metrics
         VStack(spacing: 0) {
-            if model.showsSearchField {
-                // One field for every layout (so it keeps focus when the layout changes). In lists it spans
-                // from where the app icons start to where the scroll bar ends; in the grid it's centered.
-                let isList = model.panelLayout.isList
-                let leading = isList ? ListMetrics.inset + ListMetrics.rowInset(compact: model.panelLayout == .compactList) : 0
-                SearchPill(text: $model.query, focused: $searchFocused,
-                           width: isList ? layout.panelWidth - leading - ListMetrics.inset : 242)
-                    .padding(.leading, leading)
-                    .padding(.trailing, isList ? ListMetrics.inset : 0)
-                    .padding(.top, isList ? 24 : 21)
-                    .padding(.bottom, isList ? 20 : 25)
-            } else {
-                // Keep a focused, invisible field so typing still searches.
-                TextField("", text: $model.query)
-                    .focused($searchFocused)
-                    .opacity(0).frame(height: 0)
-                    .padding(.top, 30)
-            }
+            // One field for every layout and for both "Always show the search field" states, so it keeps
+            // focus and its insertion point. When hidden it's invisible and takes no space; typing reveals it.
+            // (Swapping in a different field when the first letter arrived made AppKit select that letter as
+            // the new field took focus, so the second keystroke replaced it.)
+            let shows = model.showsSearchField
+            let isList = model.panelLayout.isList
+            let leading = isList ? ListMetrics.inset + ListMetrics.rowInset(compact: model.panelLayout == .compactList) : 0
+            // In lists it spans from where the app icons start to where the scroll bar ends; in the grid it's centered.
+            SearchPill(text: $model.query, focused: $searchFocused,
+                       width: isList ? layout.panelWidth - leading - ListMetrics.inset : 242)
+                .frame(height: shows ? nil : 0, alignment: .top)
+                .opacity(shows ? 1 : 0)
+                .allowsHitTesting(shows)
+                .padding(.leading, leading)
+                .padding(.trailing, isList ? ListMetrics.inset : 0)
+                .padding(.top, shows ? (isList ? 24 : 21) : 30)
+                .padding(.bottom, shows ? (isList ? 20 : 25) : 0)
             if results.isEmpty {
                 let registry = model.registry
                 let searching = registry.entries.isEmpty && (registry.isRefreshing || registry.lastRefresh == nil)

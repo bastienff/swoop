@@ -71,6 +71,7 @@ final class DebugCommands {
             // report <path>: writes a diagnostics report to <path>.
             Task { @MainActor in try? await DiagnosticsReport.make(controller).write(toFile: arg, atomically: true, encoding: .utf8) }
         case "bugurl": try? controller.bugReportURL.absoluteString.write(toFile: arg, atomically: true, encoding: .utf8)
+        case "searchfield": controller.settings.alwaysShowSearchField = arg == "always"
         case "order": controller.settings.windowOrder = WindowOrder(rawValue: arg) ?? .smart
         case "results":
             // results <path>: the switcher's current order (as if opened now), top 5.
