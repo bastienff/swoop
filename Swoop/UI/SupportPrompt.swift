@@ -256,6 +256,6 @@ struct SupportCardView: View {
         }
         .padding(16)
         .frame(width: 360)
-        .background { if swoop { BrandBackground(scale: 0.65).opacity(0.55) } } // frosted, like the switcher
+        .background { if swoop { BrandBackground(scale: 0.65).opacity(Brand.frostTint) } } // frosted, like the switcher
     }
 }

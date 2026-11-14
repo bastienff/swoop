@@ -9,6 +9,10 @@ enum Brand {
     static let orange = Color(red: 0.95, green: 0.42, blue: 0.16)
     static let orangeLight = Color(red: 1.00, green: 0.58, blue: 0.24)
     static let violet = Color(red: 0.45, green: 0.36, blue: 0.95)
+    /// How strongly the brand gradient tints Swoop's frosted surfaces (switcher, About, update window,
+    /// onboarding, support card). Deliberately less see-through than Classic's bare blur: the tint is
+    /// part of the theme. One value so every surface matches.
+    static let frostTint: Double = 0.55
 }
 
 /// Warm brand glow over a soft wash; deep indigo in dark mode (like the demo wallpaper).
@@ -39,7 +43,7 @@ struct FrostedBrandBackground: View {
     var body: some View {
         ZStack {
             BehindWindowBlur()
-            BrandBackground(scale: scale).opacity(0.55)
+            BrandBackground(scale: scale).opacity(Brand.frostTint)
         }
     }
 }

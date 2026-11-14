@@ -44,11 +44,11 @@ struct SwoopView: View {
             }
         }
         .frame(width: layout.panelWidth, height: layout.panelHeight, alignment: .top)
-        // Swoop theme: the brand gradient over the panel's blur, see-through enough that what's behind shows
-        // frosted like Classic. Classic: just the blur material, as before. Icons, highlight and search field are the same in both.
+        // Swoop theme: the brand gradient over the panel's blur at the shared frosted tint (less see-through
+        // than Classic by design, like every Swoop surface). Classic: just the blur material, as before. Icons, highlight and search field are the same in both.
         .background {
             if model.settings.theme == .swoop {
-                FittedBrandBackground().opacity(0.55)
+                FittedBrandBackground().opacity(Brand.frostTint)
             }
         }
         .onAppear { searchFocused = true }
