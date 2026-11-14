@@ -81,8 +81,8 @@ brew install --cask bastienff/tap/swoop
 
 ### Download
 
-Grab the latest `Swoop.zip` from [Releases](https://github.com/bastienff/swoop/releases), unzip
-it, and move **Swoop.app** to `/Applications`.
+Grab the latest `Swoop.dmg` from [Releases](https://github.com/bastienff/swoop/releases), open it,
+and drag **Swoop** to **Applications**. (`Swoop.zip` has the same app, if you prefer a zip.)
 
 > Release builds aren't notarized yet, so the first time you open Swoop macOS says it can't verify
 > the developer. Open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway**.

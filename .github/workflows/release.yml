@@ -1,7 +1,8 @@
 name: Release
 
 # When a GitHub Release is published (tag vX.Y.Z):
-#   1. build  — tests, Apple-silicon Release build, Swoop.zip + .sha256 attached to the release
+#   1. build  — tests, Apple-silicon Release build; Swoop.dmg (drag-to-Applications installer) and
+#               Swoop.zip (used by the Homebrew cask) + .sha256 files attached to the release
 #   2. homebrew — updates Casks/swoop.rb in bastienff/homebrew-tap (skipped for pre-releases)
 #   3. notes    — writes release notes from Conventional Commits since the previous tag
 #                 (scripts/release_notes.sh) below anything typed in the release description
@@ -16,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # upload the zip to the release
+  contents: write # upload the dmg and zip to the release
 
 jobs:
   build:
@@ -69,13 +70,15 @@ jobs:
           test "$(lipo -archs "$APP/Contents/MacOS/Swoop")" = "arm64"
           ditto -c -k --keepParent "$APP" Swoop.zip
           shasum -a 256 Swoop.zip | tee Swoop.zip.sha256
+          scripts/make_dmg.sh "$APP" Swoop.dmg
+          shasum -a 256 Swoop.dmg | tee Swoop.dmg.sha256
           echo "sha256=$(cut -d' ' -f1 Swoop.zip.sha256)" >> "$GITHUB_OUTPUT"
 
       - name: Attach to release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$GITHUB_REF_NAME" Swoop.zip Swoop.zip.sha256 --clobber
+        run: gh release upload "$GITHUB_REF_NAME" Swoop.dmg Swoop.dmg.sha256 Swoop.zip Swoop.zip.sha256 --clobber
 
       - name: Keep as artifact (manual runs)
         if: github.event_name != 'release'
@@ -83,6 +86,8 @@ jobs:
         with:
           name: Swoop-${{ steps.version.outputs.version }}-build${{ github.run_number }}
           path: |
+            Swoop.dmg
+            Swoop.dmg.sha256
             Swoop.zip
             Swoop.zip.sha256
 
