@@ -69,7 +69,7 @@ struct OnboardingView: View {
     var body: some View {
         let p = controller.permissions
         ZStack {
-            OnboardingBackground()
+            BrandBackground().ignoresSafeArea()
             Group {
                 switch model.step {
                 case .welcome: WelcomeStep(shortcut: shortcutDisplay)
@@ -180,35 +180,6 @@ struct OnboardingView: View {
     }
 }
 
-/// Capsule buttons in the brand colors. Unlike `.borderedProminent`, they keep their color when the
-/// window isn't key (an accessory app's window often isn't, right after launch).
-private struct BrandButtonStyle: ButtonStyle {
-    var prominent = true
-    @Environment(\.colorScheme) private var scheme
-
-    /// One shape for fill, border and hit area, so they line up exactly at the rounded ends.
-    private static let shape = RoundedRectangle(cornerRadius: 17, style: .circular)
-
-    func makeBody(configuration: Configuration) -> some View {
-        let shape = Self.shape
-        return configuration.label
-            .font(.system(size: 13.5, weight: .semibold))
-            .foregroundStyle(prominent ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
-            .padding(.horizontal, 18)
-            .frame(height: 34)
-            .background(prominent
-                        ? AnyShapeStyle(LinearGradient(colors: [Brand.orangeLight, Brand.orange], startPoint: .top, endPoint: .bottom))
-                        : AnyShapeStyle(Color.primary.opacity(scheme == .dark ? 0.12 : 0.07)),
-                        in: shape)
-            .overlay { if !prominent { shape.strokeBorder(Color.primary.opacity(0.08)) } }
-            .shadow(color: Brand.orange.opacity(prominent ? 0.35 : 0), radius: prominent ? 8 : 0, y: prominent ? 3 : 0)
-            .contentShape(shape)
-            .opacity(configuration.isPressed ? 0.82 : 1)
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
-    }
-}
-
 // MARK: - Steps
 
 private struct WelcomeStep: View {
@@ -216,7 +187,7 @@ private struct WelcomeStep: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            AppIconView(size: 76)
+            BrandIcon(size: 76)
                 .padding(.bottom, 12)
             StepHeader(title: "Welcome to Swoop",
                        subtitle: "Every window, one keystroke. Press \(shortcut), type a few letters, hit Return — you're there. Even on other desktops.")
@@ -458,7 +429,7 @@ private struct DoneStep: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            AppIconView(size: 84)
+            BrandIcon(size: 84)
                 .padding(.bottom, 14)
             StepHeader(title: "You're all set",
                        subtitle: "Swoop lives in your menu bar. Press \(shortcut) anywhere to jump to any window.")
@@ -488,32 +459,6 @@ private struct DoneStep: View {
 
 // MARK: - Building blocks
 
-private enum Brand {
-    /// The app icon's gradient.
-    static let orange = Color(red: 0.95, green: 0.42, blue: 0.16)
-    static let orangeLight = Color(red: 1.00, green: 0.58, blue: 0.24)
-}
-
-/// Warm brand glow over a soft wash; deep indigo in dark mode (like the demo wallpaper).
-private struct OnboardingBackground: View {
-    @Environment(\.colorScheme) private var scheme
-
-    var body: some View {
-        let dark = scheme == .dark
-        ZStack {
-            LinearGradient(colors: dark
-                           ? [Color(red: 0.13, green: 0.10, blue: 0.21), Color(red: 0.08, green: 0.07, blue: 0.15)]
-                           : [Color(red: 1.00, green: 0.96, blue: 0.93), Color(red: 0.95, green: 0.91, blue: 0.98)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
-            RadialGradient(colors: [Brand.orange.opacity(dark ? 0.30 : 0.28), .clear],
-                           center: .topLeading, startRadius: 0, endRadius: 520)
-            RadialGradient(colors: [Color(red: 0.45, green: 0.36, blue: 0.95).opacity(dark ? 0.40 : 0.22), .clear],
-                           center: .bottomTrailing, startRadius: 0, endRadius: 560)
-        }
-        .ignoresSafeArea()
-    }
-}
-
 private struct StepHeader: View {
     let title: String
     let subtitle: String
@@ -531,24 +476,6 @@ private struct StepHeader: View {
                 .frame(maxWidth: 540)
                 .fixedSize(horizontal: false, vertical: true)
         }
-    }
-}
-
-private struct AppIconView: View {
-    let size: CGFloat
-    var body: some View {
-        Image(nsImage: NSApp.applicationIconImage)
-            .resizable()
-            .frame(width: size, height: size)
-            // A soft glow behind the icon (a shadow on the image itself shows its square bounds).
-            .background(
-                RoundedRectangle(cornerRadius: size * 0.22, style: .continuous)
-                    .fill(Brand.orange)
-                    .frame(width: size * 0.72, height: size * 0.72)
-                    .offset(y: size * 0.08)
-                    .blur(radius: size * 0.2)
-                    .opacity(0.45))
-            .accessibilityHidden(true)
     }
 }
 
