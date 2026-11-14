@@ -260,7 +260,6 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let controller: AppController
     private var tabs: NSTabViewController?
     private let focus = FocusReturner()
-    private let chrome = SettingsChrome()
 
     init(controller: AppController) {
         self.controller = controller
@@ -274,7 +273,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
                 let hosting = NSHostingController(rootView: pane.content(controller)
                     .frame(width: 560)
                     .fixedSize(horizontal: false, vertical: true)
-                    .modifier(SettingsThemeStyle(settings: controller.settings, chrome: chrome)))
+                    .modifier(SettingsThemeStyle(settings: controller.settings)))
                 hosting.sizingOptions = [.preferredContentSize]
                 hosting.title = pane.title
                 let item = NSTabViewItem(viewController: hosting)
@@ -316,7 +315,6 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         }
         window.layoutIfNeeded()
         window.setFrame(frame, display: true)
-        chrome.fullSizeContent = swoop
         withObservationTracking {
             _ = controller.settings.theme
         } onChange: { [weak self] in

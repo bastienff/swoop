@@ -380,7 +380,6 @@ private struct AdvancedSettings: View {
 /// background hidden, orange switches and picture-picker selection. Classic: no change at all.
 struct SettingsThemeStyle: ViewModifier {
     let settings: AppSettings
-    let chrome: SettingsChrome
 
     // One view tree for both themes (no if/else): switching themes only flips modifier values. A branch swap
     // rebuilds the form's scroll view, and a fresh one flashes its scroll bar (with "Show scroll bars: Always")
@@ -389,23 +388,15 @@ struct SettingsThemeStyle: ViewModifier {
         let swoop = settings.theme == .swoop
         content
             .scrollContentBackground(swoop ? .hidden : .automatic)
-            // Under the full-size toolbar AppKit shows a full-length scroll bar (with "Show scroll bars:
-            // Always") although the pane fits; nothing scrolls. Scrolling still works if a pane doesn't fit.
-            // Also hidden while the window still has that toolbar after switching to Classic (the window
-            // catches up a moment after the pane).
-            .scrollIndicators(swoop || chrome.fullSizeContent ? .never : .automatic)
+            // No scroll bar in either theme (same look; Classic used to show one on the tall Debug pane, and
+            // under the full-size toolbar AppKit shows a full-length one even when the pane fits). Panes that
+            // don't fit still scroll with the trackpad or wheel.
+            .scrollIndicators(.never)
             .background { if swoop { FittedBrandBackground().ignoresSafeArea() } }
             .environment(\.themeAccent, swoop ? Brand.orange : Color.accentColor)
             // Orange switches only: a pane-wide `.tint` also greys out menu pickers' labels.
             .toggleStyle(ThemedSwitchStyle(brand: swoop))
     }
-}
-
-/// The Settings window's actual chrome, set by its controller once the window style has changed.
-@MainActor @Observable
-final class SettingsChrome {
-    /// Content runs under the toolbar (`.fullSizeContentView`, Swoop theme).
-    var fullSizeContent = false
 }
 
 /// A standard switch, tinted with the brand orange in the Swoop theme (the tint applies to this toggle only).
