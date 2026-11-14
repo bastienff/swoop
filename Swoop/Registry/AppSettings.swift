@@ -166,7 +166,7 @@ final class AppSettings {
         shortcut = (defaults.data(forKey: "shortcut")).flatMap { try? JSONDecoder().decode(Shortcut.self, from: $0) } ?? .default
         allowBareTab = b("allowBareTab", false)
         switcherMode = SwitcherMode(rawValue: defaults.string(forKey: "switcherMode") ?? "") ?? .stayOpen
-        theme = AppTheme(rawValue: defaults.string(forKey: "theme") ?? "") ?? .classic
+        theme = AppTheme(rawValue: defaults.string(forKey: "theme") ?? "") ?? .swoop
         appearance = AppearanceMode(rawValue: defaults.string(forKey: "appearance") ?? "") ?? .system
         iconSize = IconSize(rawValue: defaults.string(forKey: "iconSize") ?? "") ?? .large
         maxVisibleRows = defaults.object(forKey: "maxVisibleRows") as? Int ?? 4

@@ -18,7 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let settingsWindow = SettingsWindowController(controller: controller)
         // First launch: the guided setup. Afterwards (e.g. Accessibility revoked, or "Fix…" in the menu),
         // only its permissions step.
-        let onboarding = HostedWindowController(title: String(localized: "Welcome to Swoop"), staysVisible: true, chromeless: true) { [weak controller] () -> OnboardingView in
+        let onboarding = HostedWindowController(title: String(localized: "Welcome to Swoop"), staysVisible: true, chromeless: true, translucent: true) { [weak controller] () -> OnboardingView in
             let c = controller!
             let model = OnboardingModel(permissionsOnly: c.settings.onboardingCompleted)
             c.onboardingModel = model
@@ -35,10 +35,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             controller?.onboardingModel = nil
         }
         // Swoop theme only; Classic keeps the standard About panel.
-        let about = HostedWindowController(title: String(localized: "About Swoop"), chromeless: true) { AboutView(updates: controller.updates) }
+        let about = HostedWindowController(title: String(localized: "About Swoop"), chromeless: true, translucent: true) { AboutView(updates: controller.updates) }
         controller.openAboutHandler = { about.show() }
         let closeUpdates = WindowCloser()
-        let updateWindow = HostedWindowController(title: String(localized: "Software Update"), chromeless: true) {
+        let updateWindow = HostedWindowController(title: String(localized: "Software Update"), chromeless: true, translucent: true) {
             UpdateWindowView(updates: controller.updates) { closeUpdates.close?() }
         }
         closeUpdates.close = { [weak updateWindow] in updateWindow?.close() }

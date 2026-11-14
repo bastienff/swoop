@@ -191,7 +191,33 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         centered.alignment = .center
         credits.addAttributes([.paragraphStyle: centered, .font: NSFont.systemFont(ofSize: 11)],
                               range: NSRange(location: 0, length: credits.length))
+        let before = Set(NSApp.windows.map(ObjectIdentifier.init))
         NSApp.orderFrontStandardAboutPanel(options: [.credits: credits])
+        // The panel is a plain NSPanel: it's the window that appeared (first time) or the one found before.
+        if let new = NSApp.windows.first(where: { !before.contains(ObjectIdentifier($0)) && $0 is NSPanel && $0.isVisible }) {
+            aboutPanel = new
+        }
+        if let aboutPanel { frost(aboutPanel) }
+    }
+
+    private static weak var aboutPanel: NSWindow?
+
+    /// Gives the standard About panel the same frosted look as the switcher: a clear window background with a
+    /// behind-window blur under its content. Public API only; skipped if the panel isn't found.
+    private static func frost(_ panel: NSWindow) {
+        guard let frame = panel.contentView?.superview else { return }
+        BringToFront.show(panel) // like Swoop's own windows: never opens hidden behind the frontmost app
+        guard !frame.subviews.contains(where: { $0.identifier?.rawValue == "swoop.frost" }) else { return }
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        let blur = NSVisualEffectView(frame: frame.bounds)
+        blur.identifier = NSUserInterfaceItemIdentifier("swoop.frost")
+        blur.autoresizingMask = [.width, .height]
+        blur.blendingMode = .behindWindow
+        blur.state = .active
+        let dark = panel.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        blur.material = dark ? .hudWindow : .popover
+        frame.addSubview(blur, positioned: .below, relativeTo: nil)
     }
 }
 

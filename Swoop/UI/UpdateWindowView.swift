@@ -17,7 +17,7 @@ struct UpdateWindowView: View {
             Spacer(minLength: 0)
         }
         .frame(width: Self.width, height: 290)
-        .background(BrandBackground(scale: 0.5).ignoresSafeArea())
+        .background(FrostedBrandBackground(scale: 0.5).ignoresSafeArea())
         .animation(.easeOut(duration: 0.15), value: updates.status)
     }
 

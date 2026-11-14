@@ -118,7 +118,7 @@ politely declined:
 - Tiling, snapping, resizing or arranging windows
 - Creating, renaming or managing desktops
 - Browser tabs, or tabs that apps draw themselves
-- Plugins, scripting, themes
+- Plugins, scripting, custom themes (there are two built in: Swoop and Classic)
 
 Bug reports and anything that makes **switching** faster or more reliable are very welcome.
 

@@ -32,6 +32,32 @@ struct BrandBackground: View {
     }
 }
 
+/// The frosted surface shared by Swoop's floating UI: a behind-window blur (what's behind shows through,
+/// frosted) with the brand gradient see-through over it. Needs a non-opaque window with a clear background.
+struct FrostedBrandBackground: View {
+    var scale: CGFloat = 1
+    var body: some View {
+        ZStack {
+            BehindWindowBlur()
+            BrandBackground(scale: scale).opacity(0.55)
+        }
+    }
+}
+
+/// A behind-window blur in the material Swoop uses elsewhere (dark HUD / light popover).
+struct BehindWindowBlur: NSViewRepresentable {
+    @Environment(\.colorScheme) private var scheme
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let v = NSVisualEffectView()
+        v.blendingMode = .behindWindow
+        v.state = .active
+        return v
+    }
+    func updateNSView(_ v: NSVisualEffectView, context: Context) {
+        v.material = scheme == .dark ? .hudWindow : .popover
+    }
+}
+
 /// `BrandBackground` with glows sized to whatever it fills (panels change size with their content).
 struct FittedBrandBackground: View {
     var body: some View {

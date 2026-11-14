@@ -69,7 +69,7 @@ struct OnboardingView: View {
     var body: some View {
         let p = controller.permissions
         ZStack {
-            BrandBackground().ignoresSafeArea()
+            FrostedBrandBackground().ignoresSafeArea()
             Group {
                 switch model.step {
                 case .welcome: WelcomeStep(shortcut: shortcutDisplay)

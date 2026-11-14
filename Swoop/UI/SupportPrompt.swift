@@ -56,34 +56,20 @@ final class SupportPromptController {
         let size = hosting.fittingSize
 
         let p = panel ?? makePanel()
-        if swoop {
-            // The card draws its own brand surface; this view only rounds and outlines it.
-            let background = NSView()
-            background.appearance = settings?.appearance.nsAppearance
-            let dark = (background.appearance ?? NSApp.effectiveAppearance).bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-            background.wantsLayer = true
-            background.layer?.cornerRadius = 18
-            background.layer?.cornerCurve = .continuous
-            background.layer?.masksToBounds = true
-            background.layer?.borderWidth = 0.5
-            background.layer?.borderColor = NSColor.white.withAlphaComponent(dark ? 0.14 : 0.6).cgColor
-            hosting.frame = NSRect(origin: .zero, size: size)
-            background.addSubview(hosting)
-            p.contentView = background
-            present(p, size: size)
-            return
-        }
+        // Both themes: the frosted blur behind. Classic: dark HUD material. Swoop: the material for the chosen
+        // appearance, with the card's brand surface drawn see-through over it (like the switcher).
         let background = NSVisualEffectView()
-        background.material = .hudWindow
         background.blendingMode = .behindWindow
         background.state = .active
-        background.appearance = NSAppearance(named: .darkAqua)
+        background.appearance = swoop ? settings?.appearance.nsAppearance : NSAppearance(named: .darkAqua)
+        let dark = (background.appearance ?? NSApp.effectiveAppearance).bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        background.material = dark ? .hudWindow : .popover
         background.wantsLayer = true
         background.layer?.cornerRadius = 18
         background.layer?.cornerCurve = .continuous
         background.layer?.masksToBounds = true
         background.layer?.borderWidth = 0.5
-        background.layer?.borderColor = NSColor.white.withAlphaComponent(0.14).cgColor
+        background.layer?.borderColor = NSColor.white.withAlphaComponent(dark ? 0.14 : 0.6).cgColor
         hosting.frame = NSRect(origin: .zero, size: size)
         background.addSubview(hosting)
         p.contentView = background
@@ -270,6 +256,6 @@ struct SupportCardView: View {
         }
         .padding(16)
         .frame(width: 360)
-        .background { if swoop { BrandBackground(scale: 0.65).opacity(0.97) } }
+        .background { if swoop { BrandBackground(scale: 0.65).opacity(0.55) } } // frosted, like the switcher
     }
 }

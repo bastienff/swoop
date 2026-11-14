@@ -44,7 +44,7 @@ struct AboutView: View {
             Spacer(minLength: 0)
         }
         .frame(width: Self.size.width, height: Self.size.height)
-        .background(BrandBackground(scale: 0.5).ignoresSafeArea())
+        .background(FrostedBrandBackground(scale: 0.5).ignoresSafeArea())
     }
 
     private func link(_ title: LocalizedStringKey, _ url: URL) -> some View {

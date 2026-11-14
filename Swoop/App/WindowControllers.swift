@@ -87,14 +87,18 @@ final class HostedWindowController<Content: View>: NSObject, NSWindowDelegate {
     private let staysVisible: Bool
     /// Content runs under a transparent title bar (onboarding); the window moves by its background.
     private let chromeless: Bool
+    /// Clear window background, so the content can draw a behind-window blur (About's frosted look).
+    private let translucent: Bool
     private var activationObserver: NSObjectProtocol?
     private let focus = FocusReturner()
     var onClose: (() -> Void)?
 
-    init(title: String, staysVisible: Bool = false, chromeless: Bool = false, content: @escaping () -> Content) {
+    init(title: String, staysVisible: Bool = false, chromeless: Bool = false, translucent: Bool = false,
+         content: @escaping () -> Content) {
         self.title = title
         self.staysVisible = staysVisible
         self.chromeless = chromeless
+        self.translucent = translucent
         self.makeContent = content
     }
 
@@ -112,6 +116,10 @@ final class HostedWindowController<Content: View>: NSObject, NSWindowDelegate {
                 w.titlebarAppearsTransparent = true
                 w.titleVisibility = .hidden
                 w.isMovableByWindowBackground = true
+            }
+            if translucent {
+                w.isOpaque = false
+                w.backgroundColor = .clear
             }
             w.isReleasedWhenClosed = false
             w.delegate = self
