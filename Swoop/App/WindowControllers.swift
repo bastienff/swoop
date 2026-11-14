@@ -264,6 +264,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let controller: AppController
     private var tabs: NSTabViewController?
     private let focus = FocusReturner()
+    private let chrome = SettingsChrome()
 
     init(controller: AppController) {
         self.controller = controller
@@ -277,7 +278,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
                 let hosting = NSHostingController(rootView: pane.content(controller)
                     .frame(width: 560)
                     .fixedSize(horizontal: false, vertical: true)
-                    .modifier(SettingsThemeStyle(settings: controller.settings)))
+                    .modifier(SettingsThemeStyle(settings: controller.settings, chrome: chrome)))
                 hosting.sizingOptions = [.preferredContentSize]
                 hosting.title = pane.title
                 let item = NSTabViewItem(viewController: hosting)
@@ -305,8 +306,15 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     private func applyTheme() {
         guard let window else { return }
         let swoop = controller.settings.theme == .swoop
+        // Toggling .fullSizeContentView keeps the content rect (moving the top edge by the toolbar height),
+        // then the pane's preferred size (which now includes/excludes that inset) resizes from the top:
+        // net effect, the window slides by the toolbar height. The frame size ends up unchanged, so restore it.
+        let frame = window.frame
         if swoop { window.styleMask.insert(.fullSizeContentView) } else { window.styleMask.remove(.fullSizeContentView) }
         window.titlebarAppearsTransparent = swoop
+        window.layoutIfNeeded()
+        window.setFrame(frame, display: true)
+        chrome.fullSizeContent = swoop
         withObservationTracking {
             _ = controller.settings.theme
         } onChange: { [weak self] in

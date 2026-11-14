@@ -362,24 +362,39 @@ private struct AdvancedSettings: View {
 /// background hidden, orange switches and picture-picker selection. Classic: no change at all.
 struct SettingsThemeStyle: ViewModifier {
     let settings: AppSettings
+    let chrome: SettingsChrome
 
+    // One view tree for both themes (no if/else): switching themes only flips modifier values. A branch swap
+    // rebuilds the form's scroll view, and a fresh one flashes its scroll bar (with "Show scroll bars: Always")
+    // before `.never` applies.
     func body(content: Content) -> some View {
-        if settings.theme == .swoop {
-            content
-                .scrollContentBackground(.hidden)
-                .background(FittedBrandBackground().ignoresSafeArea())
-                .environment(\.themeAccent, Brand.orange)
-                // Orange switches only: a pane-wide `.tint` also greys out menu pickers' labels.
-                .toggleStyle(BrandSwitchStyle())
-        } else {
-            content
-        }
+        let swoop = settings.theme == .swoop
+        content
+            .scrollContentBackground(swoop ? .hidden : .automatic)
+            // Under the full-size toolbar AppKit shows a full-length scroll bar (with "Show scroll bars:
+            // Always") although the pane fits; nothing scrolls. Scrolling still works if a pane doesn't fit.
+            // Also hidden while the window still has that toolbar after switching to Classic (the window
+            // catches up a moment after the pane).
+            .scrollIndicators(swoop || chrome.fullSizeContent ? .never : .automatic)
+            .background { if swoop { FittedBrandBackground().ignoresSafeArea() } }
+            .environment(\.themeAccent, swoop ? Brand.orange : Color.accentColor)
+            // Orange switches only: a pane-wide `.tint` also greys out menu pickers' labels.
+            .toggleStyle(ThemedSwitchStyle(brand: swoop))
     }
 }
 
-/// A standard switch tinted with the brand orange (the tint applies to this toggle only).
-struct BrandSwitchStyle: ToggleStyle {
+/// The Settings window's actual chrome, set by its controller once the window style has changed.
+@MainActor @Observable
+final class SettingsChrome {
+    /// Content runs under the toolbar (`.fullSizeContentView`, Swoop theme).
+    var fullSizeContent = false
+}
+
+/// A standard switch, tinted with the brand orange in the Swoop theme (the tint applies to this toggle only).
+struct ThemedSwitchStyle: ToggleStyle {
+    let brand: Bool
+
     func makeBody(configuration: Configuration) -> some View {
-        Toggle(configuration).toggleStyle(.switch).tint(Brand.orange)
+        Toggle(configuration).toggleStyle(.switch).tint(brand ? Brand.orange : nil)
     }
 }
