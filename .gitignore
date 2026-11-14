@@ -75,6 +75,7 @@ references/
 *.md
 !/README.md
 !/docs/ARCHITECTURE.md
+!/docs/DESIGN.md
 # Community files GitHub shows on the repo (contributing, conduct, security, issue/PR templates)
 !/CONTRIBUTING.md
 !/CODE_OF_CONDUCT.md

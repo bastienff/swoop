@@ -15,8 +15,8 @@ enum AppearanceMode: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// Overall look. Classic is the original look and the default; Swoop applies
-/// the onboarding's brand look to the switcher, Settings, About and the support card.
+/// Overall look. Swoop (the default) applies the onboarding's brand look to the switcher, Settings, About,
+/// the update window and the support card; Classic is the original look. See docs/DESIGN.md §2.
 enum AppTheme: String, CaseIterable, Identifiable, Sendable {
     case swoop, classic
     var id: String { rawValue }

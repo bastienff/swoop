@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swoop User Journeys</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .map { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .map a { display: block; padding: 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); color: var(--text); text-decoration: none; position: relative; }
+  .map a:hover { border-color: var(--orange); }
+  .map .n { font: 700 11px var(--font); color: var(--orange); letter-spacing: .08em; }
+  .map b { display: block; margin-top: 4px; font-size: 14.5px; }
+  .map span { font-size: 12.5px; color: var(--muted); }
+
+  /* Onboarding filmstrip */
+  .film { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; }
+  .step { display: flex; flex-direction: column; gap: 12px; }
+  .mini { aspect-ratio: 800 / 590; border-radius: 14px; padding: 7% 7% 0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .mini .t { font-size: 16px; font-weight: 700; margin-top: 8px; }
+  .mini .s { font-size: 10.5px; color: var(--muted); margin-top: 4px; max-width: 86%; line-height: 1.4; }
+  .mini .foot { margin-top: auto; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 2%; }
+  .mini .btn { height: 22px; font-size: 10.5px; padding: 0 11px; }
+  .mini .dots i { width: 4px; height: 4px; } .mini .dots i.on { width: 12px; }
+  .mini .dots { gap: 4px; }
+  .bicon { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(180deg, var(--orange-light), var(--orange)); display: grid; place-items: center; box-shadow: 0 4px 16px rgba(242,107,41,.45); }
+  .bicon svg { width: 26px; height: 26px; }
+  .sb { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font-size: 17px; }
+  .minicard { width: 82%; margin-top: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(var(--ink), .06); box-shadow: inset 0 0 0 1px rgba(var(--ink), .08); font-size: 10px; text-align: left; display: flex; align-items: center; gap: 8px; }
+  body[data-appearance="light"] .minicard { background: rgba(255,255,255,.6); }
+  .step h3 { display: flex; gap: 8px; align-items: baseline; }
+  .step h3 .num { color: var(--orange); font-size: 13px; }
+  .step ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); display: grid; gap: 4px; }
+  .branch { margin-top: 18px; padding: 14px 16px; border-radius: 12px; border: 1px dashed color-mix(in srgb, var(--orange) 55%, transparent); font-size: 13.5px; }
+
+  /* Flow diagram */
+  .flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; }
+  .node { flex: 1 1 150px; min-width: 150px; padding: 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); position: relative; }
+  .node .k { font: 700 11px var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  .node b { display: block; margin: 4px 0 4px; font-size: 14.5px; }
+  .node p { font-size: 12.5px; color: var(--muted); }
+  .arrow { flex: 0 0 34px; display: grid; place-items: center; color: var(--orange); font-size: 18px; }
+  .node.good { border-color: color-mix(in srgb, var(--green) 55%, transparent); }
+  .node.exit { border-color: color-mix(in srgb, var(--faint) 60%, transparent); }
+  .node.hot { border-color: var(--orange); box-shadow: 0 0 0 3px color-mix(in srgb, var(--orange) 15%, transparent); }
+  .lane-label { font-size: 12px; font-weight: 600; color: var(--faint); margin: 18px 0 8px; letter-spacing: .04em; text-transform: uppercase; }
+
+  /* Interactive switcher demo */
+  .demo-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; align-items: start; }
+  @media (max-width: 860px) { .demo-wrap { grid-template-columns: 1fr; } }
+  .demo-stage { min-height: 360px; align-items: center; }
+  .demo-panel { width: 560px; max-width: 100%; padding: 24px 20px; border-radius: 36px; transition: opacity .24s cubic-bezier(.2,.8,.3,1); }
+  .demo-panel.hidden { opacity: 0; pointer-events: none; }
+  .demo-panel .lrow { cursor: pointer; }
+  .demo-panel input { all: unset; flex: 1; font-size: 13.8px; font-weight: 500; }
+  .demo-panel input::placeholder { color: var(--faint); font-weight: 400; }
+  .demo-log { font-size: 13px; }
+  .demo-log .now { font-weight: 600; }
+  .demo-hint { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,.5); pointer-events: none; }
+  .empty { padding: 18px 0 10px; text-align: center; }
+
+  /* Timeline */
+  .timeline { position: relative; display: grid; gap: 14px; padding-left: 26px; }
+  .timeline::before { content: ""; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
+  .tl { position: relative; }
+  .tl::before { content: ""; position: absolute; left: -23px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--card); border: 2px solid var(--orange); }
+  .tl b { font-size: 14px; } .tl p { font-size: 13px; color: var(--muted); }
+
+  .supportcard { width: 360px; max-width: 100%; border-radius: 18px; padding: 16px; display: grid; gap: 12px; }
+  .supportcard .cta { flex: 1; height: 30px; border-radius: 999px; display: grid; place-items: center; font-size: 12.5px; font-weight: 600; }
+  .alert { width: 260px; border-radius: 12px; padding: 16px; text-align: center; background: var(--card); border: 1px solid var(--line); box-shadow: 0 18px 50px rgba(0,0,0,.35); }
+</style>
+</head>
+<body data-appearance="dark" data-theme="swoop">
+
+<header class="topbar">
+  <div class="logo" aria-hidden="true"><svg viewBox="0 0 18 18" fill="#fff"><path d="M4.5 6.2h6.6V4.6L14 7l-2.9 2.4V7.8H4.5z"/><path d="M13.5 10.2H6.9V8.6L4 11l2.9 2.4v-1.6h6.6z"/></svg></div>
+  <span class="title">Swoop · Journeys</span>
+  <nav>
+    <a href="#first-run">First run</a><a href="#switching">Switching</a><a href="#try">Try it</a>
+    <a href="#customize">Customize</a><a href="#updates">Updates</a><a href="#support">Support</a><a href="#recovery">Recovery</a>
+    <a href="design-system.html">← Design system</a>
+  </nav>
+  <span class="spacer"></span>
+  <div class="seg" role="group" aria-label="Theme">
+    <button data-set="theme" data-value="swoop" aria-pressed="true">Swoop</button>
+    <button data-set="theme" data-value="classic" aria-pressed="false">Classic</button>
+  </div>
+  <div class="seg" role="group" aria-label="Appearance">
+    <button data-set="appearance" data-value="dark" aria-pressed="true">Dark</button>
+    <button data-set="appearance" data-value="light" aria-pressed="false">Light</button>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <span class="eyebrow">User journeys</span>
+    <h1>From install to <span>muscle memory.</span></h1>
+    <p>How people meet Swoop, set it up, and use it every day, with what each step shows and where it can branch.
+      Themed screens follow the toggles above.</p>
+  </div>
+
+  <div class="map">
+    <a href="#first-run"><span class="n">01</span><b>First run</b><span>Six-step onboarding</span></a>
+    <a href="#switching"><span class="n">02</span><b>Everyday switching</b><span>Shortcut → type → Return</span></a>
+    <a href="#customize"><span class="n">03</span><b>Customize</b><span>Settings, live</span></a>
+    <a href="#updates"><span class="n">04</span><b>Updates</b><span>Opt-in only</span></a>
+    <a href="#support"><span class="n">05</span><b>Support</b><span>A rare, polite card</span></a>
+    <a href="#recovery"><span class="n">06</span><b>Recovery</b><span>Lost Accessibility</span></a>
+  </div>
+
+  <!-- 01 First run -->
+  <section id="first-run">
+    <div class="section-head">
+      <span class="eyebrow">01 · First run</span>
+      <h2>Onboarding</h2>
+      <p class="muted">An 800 × 590 frosted brand window (always brand, in both themes). The content area is fixed so the
+        footer never moves; steps slide 44 pt with a spring (fade only with Reduce Motion).</p>
+    </div>
+
+    <div class="film">
+      <div class="step">
+        <div class="surface swoop mini">
+          <div class="bicon"><svg viewBox="0 0 18 18" fill="#fff"><path d="M4.5 6.2h6.6V4.6L14 7l-2.9 2.4V7.8H4.5z"/><path d="M13.5 10.2H6.9V8.6L4 11l2.9 2.4v-1.6h6.6z"/></svg></div>
+          <div class="t">Welcome to Swoop</div>
+          <div class="s">Every window, one keystroke. Press ⌥Tab, type a few letters, hit Return — you're there. Even on other desktops.</div>
+          <div style="margin-top:10px;width:70%;height:38px;border-radius:8px;background:rgba(var(--ink),.08)"></div>
+          <div class="foot"><span class="small faint" style="font-size:10.5px">Skip setup</span><div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div><span class="btn primary">Begin setup</span></div>
+        </div>
+        <h3><span class="num">1</span>Welcome</h3>
+        <ul><li>Brand icon with glow, the promise in one line.</li><li>Stacked demo screenshots (grid behind, search in front).</li><li><b>Skip setup</b> finishes, or jumps to Permissions if Accessibility is missing.</li></ul>
+      </div>
+
+      <div class="step">
+        <div class="surface swoop mini">
+          <div class="sb" style="background:color-mix(in srgb,var(--orange) 14%,transparent);color:var(--orange)">🔒</div>
+          <div class="t">Let Swoop see your windows</div>
+          <div class="s">Accessibility lists other apps' windows and switches to the exact one. Window information never leaves this Mac.</div>
+          <div class="minicard"><span style="color:var(--orange)">✋</span><div style="flex:1"><b>Accessibility</b><div class="faint">Not granted yet</div></div><span class="btn primary" style="height:18px;font-size:9px;padding:0 8px">Grant Access</span></div>
+          <div class="foot"><span class="btn secondary">Go back</span><div class="dots"><i></i><i class="on"></i><i></i><i></i><i></i><i></i></div><span class="btn secondary">Skip for now</span></div>
+        </div>
+        <h3><span class="num">2</span>Permissions</h3>
+        <ul><li>Status updates live; no restart.</li><li>Granted → green shield, "N windows found", <b>Continue</b>.</li><li>"No Input Monitoring or Screen Recording" stated up front.</li></ul>
+      </div>
+
+      <div class="step">
+        <div class="surface swoop mini">
+          <div class="sb" style="background:color-mix(in srgb,var(--orange) 14%,transparent);color:var(--orange)">⌨</div>
+          <div class="t">Your shortcut</div>
+          <div class="s">Press it anywhere to open Swoop. Click to record a different one.</div>
+          <div style="margin-top:10px;padding:6px 30px;border-radius:8px;background:rgba(var(--ink),.1);font:600 15px var(--rounded)">⌥ Tab</div>
+          <div class="row" style="gap:6px;margin-top:10px">
+            <div class="minicard" style="width:120px;margin:0;box-shadow:inset 0 0 0 1.5px var(--orange)">Keep open</div>
+            <div class="minicard" style="width:120px;margin:0">Switch on release</div>
+          </div>
+          <div class="foot"><span class="btn secondary">Go back</span><div class="dots"><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div><span class="btn primary">Continue</span></div>
+        </div>
+        <h3><span class="num">3</span>Shortcut</h3>
+        <ul><li>Big recorder, "Try it now" keycap, conflict warning.</li><li>Release behavior as two choice cards.</li><li>Launch at login · weekly update check (<b>off</b> by default).</li></ul>
+      </div>
+
+      <div class="step">
+        <div class="surface swoop mini">
+          <div class="t" style="margin-top:2px">Make it yours</div>
+          <div class="s">Pick how your windows are shown.</div>
+          <div style="margin-top:10px;width:66%;height:52px;border-radius:8px;background:rgba(var(--ink),.08)"></div>
+          <div class="row" style="gap:6px;margin-top:10px">
+            <div style="width:44px;height:28px;border-radius:5px;box-shadow:inset 0 0 0 1.5px var(--orange);background:rgba(var(--ink),.08)"></div>
+            <div style="width:44px;height:28px;border-radius:5px;box-shadow:inset 0 0 0 1px rgba(var(--ink),.14)"></div>
+            <div style="width:44px;height:28px;border-radius:5px;box-shadow:inset 0 0 0 1px rgba(var(--ink),.14)"></div>
+          </div>
+          <div class="foot"><span class="btn secondary">Go back</span><div class="dots"><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div><span class="btn primary">Continue</span></div>
+        </div>
+        <h3><span class="num">4</span>Look</h3>
+        <ul><li>Layout picker (Grid · Compact · Comfortable) with a live screenshot.</li><li>Appearance: Follow System / Light / Dark — the window previews it.</li></ul>
+      </div>
+
+      <div class="step">
+        <div class="surface swoop mini">
+          <div class="sb" style="background:color-mix(in srgb,#ff375f 14%,transparent);color:#ff375f">♡</div>
+          <div class="t">Free and open source</div>
+          <div class="s">No ads, no tracking, no account. If Swoop saves you time, here's how you can help.</div>
+          <div class="minicard"><span style="color:var(--orange)">☕</span><b style="flex:1">Buy me a coffee</b>↗</div>
+          <div class="minicard" style="margin-top:5px"><span style="color:#ffd60a">★</span><b style="flex:1">Star Swoop on GitHub</b>↗</div>
+          <div class="foot"><span class="btn secondary">Go back</span><div class="dots"><i></i><i></i><i></i><i></i><i class="on"></i><i></i></div><span class="btn primary">Continue</span></div>
+        </div>
+        <h3><span class="num">5</span>Support</h3>
+        <ul><li>Coffee, GitHub star, report or suggest.</li><li>Using a link turns it into "Thank you!" and silences the support card for good.</li></ul>
+      </div>
+
+      <div class="step">
+        <div class="surface swoop mini">
+          <div class="bicon" style="width:46px;height:46px"><svg viewBox="0 0 18 18" fill="#fff"><path d="M4.5 6.2h6.6V4.6L14 7l-2.9 2.4V7.8H4.5z"/><path d="M13.5 10.2H6.9V8.6L4 11l2.9 2.4v-1.6h6.6z"/></svg></div>
+          <div class="t">You're all set</div>
+          <div class="s">Swoop lives in your menu bar. Press ⌥Tab anywhere.</div>
+          <div class="minicard" style="width:60%;display:grid;grid-template-columns:auto 1fr;gap:4px 8px">
+            <span class="keycap" style="font-size:9px;padding:1px 4px">⌥Tab</span><span class="faint">Open Swoop</span>
+            <span class="keycap" style="font-size:9px;padding:1px 4px">↩</span><span class="faint">Switch</span>
+            <span class="keycap" style="font-size:9px;padding:1px 4px">esc</span><span class="faint">Close</span>
+          </div>
+          <div class="foot"><span class="btn secondary">Go back</span><div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i></div><span class="btn primary">Swoop Away →</span></div>
+        </div>
+        <h3><span class="num">6</span>Done</h3>
+        <ul><li>Cheat sheet of keys.</li><li><b>Swoop Away →</b> opens the switcher right away (if Accessibility is granted).</li></ul>
+      </div>
+    </div>
+
+    <div class="branch">
+      <b>Branches.</b> <span class="muted">Welcome → <i>Skip setup</i> without Accessibility → Permissions only (Later / Done).
+      Permissions → <i>Skip for now</i> continues; access can be granted later from the menu bar.
+      If Accessibility is revoked later, only the Permissions step reopens (see 06).</span>
+    </div>
+  </section>
+
+  <!-- 02 Switching -->
+  <section id="switching">
+    <div class="section-head">
+      <span class="eyebrow">02 · Everyday switching</span>
+      <h2>Shortcut, type, Return</h2>
+      <p class="muted">The core loop, many times a day. It must feel instant and never lose a keystroke.</p>
+    </div>
+
+    <div class="lane-label">Keep the switcher open (default)</div>
+    <div class="flow">
+      <div class="node"><span class="k">Trigger</span><b>Press ⌥Tab</b><p>Anywhere, any app, any desktop.</p></div>
+      <div class="arrow">→</div>
+      <div class="node hot"><span class="k">Open</span><b>Panel fades in</b><p>0.24 s on the active display. Smart order selects the window you came from.</p></div>
+      <div class="arrow">→</div>
+      <div class="node"><span class="k">Narrow</span><b>Type</b><p>Fuzzy, by app, title or VS Code project. Matches turn bold; the panel resizes.</p></div>
+      <div class="arrow">→</div>
+      <div class="node"><span class="k">Move</span><b>Arrows · ⌥Tab again</b><p>⇧ goes back. Selection scrolls into view.</p></div>
+      <div class="arrow">→</div>
+      <div class="node good"><span class="k">Arrive</span><b>Return or click</b><p>Panel closes, the exact window is in front — even on another desktop.</p></div>
+    </div>
+    <div class="flow" style="margin-top:10px">
+      <div class="node exit" style="flex:0 1 420px"><span class="k">Leave</span><b>Esc or click outside</b><p>Closes and gives focus back to where you were.</p></div>
+    </div>
+
+    <div class="lane-label">Switch on release (like ⌘Tab)</div>
+    <div class="flow">
+      <div class="node"><span class="k">Hold</span><b>Hold ⌥, tap Tab</b><p>Panel opens on the next window.</p></div>
+      <div class="arrow">→</div>
+      <div class="node"><span class="k">Move</span><b>Tap Tab / ⇧Tab</b><p>Or keep it pressed to repeat.</p></div>
+      <div class="arrow">→</div>
+      <div class="node good"><span class="k">Arrive</span><b>Release ⌥</b><p>Switches to the selection. Esc cancels.</p></div>
+    </div>
+
+    <div class="card" style="margin-top:22px">
+      <h3>Empty and edge states</h3>
+      <div class="grid g3" style="margin-top:10px">
+        <div><b class="small">Finding windows…</b><p class="small muted">Spinner while the first scan runs.</p></div>
+        <div><b class="small">No windows</b><p class="small muted">Open a window in any app, then press the shortcut again.</p></div>
+        <div><b class="small">No matching windows</b><p class="small muted">Try an app name or part of a window title.</p></div>
+        <div><b class="small">Activation failed</b><p class="small muted">A short HUD bubble explains, for 3 s; nothing moves between desktops.</p></div>
+        <div><b class="small">Hidden search field</b><p class="small muted">Appears as soon as you type (if "Always show" is off).</p></div>
+        <div><b class="small">Draggable panel</b><p class="small muted">Reopens where you left it, per display.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Try it -->
+  <section id="try">
+    <div class="section-head">
+      <span class="eyebrow">Try it</span>
+      <h2>A playable switcher</h2>
+      <p class="muted">Click the stage, press <span class="keycap">⌥ Tab</span> (or the button), type, use <span class="keycap">↑ ↓</span>,
+        <span class="keycap">↩</span> or <span class="keycap">esc</span>. Follows the theme toggle.</p>
+    </div>
+    <div class="demo-wrap">
+      <div class="stage demo-stage" id="demoStage" tabindex="0" aria-label="Switcher demo">
+        <div class="fake-window" style="left:8%;top:14%;width:44%;height:60%"></div>
+        <div class="fake-window" style="right:6%;top:26%;width:36%;height:62%"></div>
+        <div class="demo-hint" id="demoHint">Press ⌥Tab</div>
+        <div class="surface themed demo-panel hidden" id="demoPanel">
+          <div class="pill" style="margin:0 20px 20px 14px"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="demoInput" placeholder="Search windows…" aria-label="Search windows"></div>
+          <div class="stack" style="gap:4px" id="demoRows"></div>
+        </div>
+      </div>
+      <div class="card stack demo-log">
+        <button class="btn primary sm" id="demoOpen">Open (⌥Tab)</button>
+        <span class="label">What happened</span>
+        <div id="demoLog" class="stack" style="gap:6px"><span class="muted">Waiting for the shortcut.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 Customize -->
+  <section id="customize">
+    <div class="section-head">
+      <span class="eyebrow">03 · Customize</span>
+      <h2>Settings, applied live</h2>
+      <p class="muted">Menu bar → Settings (⌘,). Toolbar tabs; changes apply immediately, including the theme on the open window.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card"><h3>⌨ Keyboard</h3><p class="muted small">Record the shortcut, release behavior, bare Tab (with a clear warning).</p></div>
+      <div class="card"><h3>🖌 Appearance</h3><p class="muted small">Theme, layout, icon size, appearance as picture pickers; visible rows; display; centered or draggable; search field.</p></div>
+      <div class="card"><h3>⚙ Behavior</h3><p class="muted small">Launch at login, outside click, window order (Smart / Recent / Name), windows to include, VS Code, updates.</p></div>
+      <div class="card"><h3>🛡 Permissions</h3><p class="muted small">Accessibility status and fixes; Input Monitoring and Screen Recording shown as "not needed".</p></div>
+      <div class="card"><h3>🔧 Advanced</h3><p class="muted small">Debug logging, refresh, reset recents, diagnostics report, Quit.</p></div>
+    </div>
+  </section>
+
+  <!-- 04 Updates -->
+  <section id="updates">
+    <div class="section-head">
+      <span class="eyebrow">04 · Updates</span>
+      <h2>Opt-in, never surprising</h2>
+      <p class="muted">The only network request Swoop makes, and only with consent: a manual check, or daily / weekly / monthly when enabled.</p>
+    </div>
+    <div class="flow">
+      <div class="node"><span class="k">Ask</span><b>Check for Updates</b><p>Menu bar, About, or on schedule.</p></div>
+      <div class="arrow">→</div>
+      <div class="node"><span class="k">Checking</span><b>Checking for updates…</b><p>"Asking GitHub for the latest version."</p></div>
+      <div class="arrow">→</div>
+      <div class="node good"><span class="k">Result</span><b>Up to date · Available · Couldn't check</b><p>Available tints the menu bar icon orange and adds a menu item.</p></div>
+    </div>
+    <div class="stage" style="margin-top:18px">
+      <div>
+        <div class="surface swoop" style="width:300px;border-radius:14px;padding:30px 24px 22px;text-align:center">
+          <div class="bicon" style="margin:0 auto"><svg viewBox="0 0 18 18" fill="#fff"><path d="M4.5 6.2h6.6V4.6L14 7l-2.9 2.4V7.8H4.5z"/><path d="M13.5 10.2H6.9V8.6L4 11l2.9 2.4v-1.6h6.6z"/></svg></div>
+          <div style="font-size:17px;font-weight:700;margin-top:14px"><span style="color:var(--orange)">⬇</span> Swoop 1.2.0 is available</div>
+          <p class="small muted" style="margin-top:6px">You have 1.1.0. Download the new version from GitHub, or run "brew upgrade".</p>
+          <div class="row" style="justify-content:center;margin-top:18px"><span class="btn secondary sm">Later</span><span class="btn primary sm">Open Release Page</span></div>
+        </div>
+        <div class="stage-caption">Swoop: update window</div>
+      </div>
+      <div>
+        <div class="alert">
+          <div style="font-size:30px">⇄</div>
+          <b style="display:block;margin-top:6px;font-size:13px">Swoop 1.2.0 is available</b>
+          <p class="small muted" style="margin-top:4px;font-size:11px">You have 1.1.0.</p>
+          <div style="margin-top:12px;display:grid;gap:6px"><span style="background:#0A84FF;color:#fff;border-radius:6px;padding:4px;font-size:12px">Open Release Page</span><span style="background:var(--chip);border-radius:6px;padding:4px;font-size:12px">Later</span></div>
+        </div>
+        <div class="stage-caption">Classic: standard alert</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 Support -->
+  <section id="support">
+    <div class="section-head">
+      <span class="eyebrow">05 · Support</span>
+      <h2>A rare, polite ask</h2>
+      <p class="muted">Appears under the menu bar icon after real use, never steals focus, and dismisses itself.</p>
+    </div>
+    <div class="grid g2">
+      <div class="timeline">
+        <div class="tl"><b>Install</b><p>Nothing is asked.</p></div>
+        <div class="tl"><b>100 switches — or 2 days with 10+ switches</b><p>First card.</p></div>
+        <div class="tl"><b>Maybe later (or ignored)</b><p>Auto-hides; asks again 2 days later.</p></div>
+        <div class="tl"><b>Coffee, star, or "Don't ask again"</b><p>Never shown again.</p></div>
+      </div>
+      <div class="stage" style="padding:22px">
+        <div class="surface themed supportcard">
+          <div class="row" style="align-items:flex-start;flex-wrap:nowrap">
+            <div class="bicon" style="width:44px;height:44px;flex:none"><svg viewBox="0 0 18 18" fill="#fff"><path d="M4.5 6.2h6.6V4.6L14 7l-2.9 2.4V7.8H4.5z"/><path d="M13.5 10.2H6.9V8.6L4 11l2.9 2.4v-1.6h6.6z"/></svg></div>
+            <div><b style="font-size:14px">Swoop has switched you 120 times</b><p class="small muted" style="font-size:12px">It's free, has no ads, and is made by one person. If it saves you time, a coffee or a GitHub star keeps it going.</p></div>
+          </div>
+          <div class="row" style="flex-wrap:nowrap">
+            <span class="cta" id="coffeeCta" style="color:#fff">☕ Buy me a coffee</span>
+            <span class="cta" style="background:rgba(var(--ink),.12)">★ Star on GitHub</span>
+          </div>
+          <div class="row" style="justify-content:space-between;font-size:11px" ><span class="faint">Maybe later</span><span class="faint">Don't ask again</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 Recovery -->
+  <section id="recovery">
+    <div class="section-head">
+      <span class="eyebrow">06 · Recovery</span>
+      <h2>When Accessibility goes missing</h2>
+      <p class="muted">macOS updates or a reinstall can drop the grant. Swoop says so plainly and gets you back in two clicks.</p>
+    </div>
+    <div class="flow">
+      <div class="node exit"><span class="k">Signal</span><b>Grant revoked</b><p>Detected at launch or while running.</p></div>
+      <div class="arrow">→</div>
+      <div class="node"><span class="k">Tell</span><b>Menu: "Accessibility: Not Granted — Fix"</b><p>Warning symbol in the menu bar menu.</p></div>
+      <div class="arrow">→</div>
+      <div class="node hot"><span class="k">Fix</span><b>Permissions step only</b><p>Same onboarding window, one step. Live status.</p></div>
+      <div class="arrow">→</div>
+      <div class="node good"><span class="k">Back</span><b>Done</b><p>Switching works again; no restart.</p></div>
+    </div>
+  </section>
+
+  <div class="footer">Swoop journeys · see also <a href="design-system.html">the design system</a> and <a href="../DESIGN.md">DESIGN.md</a>. Screens are illustrations of the shipping UI.</div>
+</main>
+
+<script>
+  const body = document.body;
+  try {
+    const saved = JSON.parse(localStorage.getItem('swoop-design') || '{}');
+    if (saved.theme) body.dataset.theme = saved.theme;
+    if (saved.appearance) body.dataset.appearance = saved.appearance;
+  } catch (e) {}
+  function sync() {
+    document.querySelectorAll('[data-set]').forEach(b => b.setAttribute('aria-pressed', body.dataset[b.dataset.set] === b.dataset.value));
+    const c = document.getElementById('coffeeCta');
+    c.style.background = body.dataset.theme === 'swoop' ? 'linear-gradient(180deg,var(--orange-light),var(--orange))' : '#FFDD00';
+    c.style.color = body.dataset.theme === 'swoop' ? '#fff' : '#000';
+  }
+  document.querySelectorAll('[data-set]').forEach(b => b.addEventListener('click', () => {
+    body.dataset[b.dataset.set] = b.dataset.value; sync();
+    try { localStorage.setItem('swoop-design', JSON.stringify({ theme: body.dataset.theme, appearance: body.dataset.appearance })); } catch (e) {}
+  }));
+  sync();
+
+  // Playable switcher
+  const windows = [
+    { app: 'Ghostty', icon: 'i-term', g: '>_', title: '~/code/heron-web', chips: ['Tab'] },
+    { app: 'Finder', icon: 'i-finder', g: '☺', title: 'Downloads', chips: [] },
+    { app: 'Code', icon: 'i-code', g: '⟨⟩', title: 'wren-ui · Untitled-1', chips: ['Other desktop'] },
+    { app: 'Code', icon: 'i-code', g: '⟨⟩', title: 'heron-api-proxy · heron.config.js', chips: ['Tab', 'Other desktop'] },
+    { app: 'Postman', icon: 'i-post', g: '✈', title: 'finch-billing · Workspace', chips: [] },
+    { app: 'Notes', icon: 'i-notes', g: '✎', title: 'Release checklist', chips: ['Minimized'] },
+    { app: 'Slack', icon: 'i-slack', g: '#', title: 'monitoring', chips: [] },
+  ];
+  // Smart order: the window you came from (index 1) is selected first.
+  const panel = document.getElementById('demoPanel'), rowsEl = document.getElementById('demoRows'),
+        input = document.getElementById('demoInput'), hint = document.getElementById('demoHint'),
+        log = document.getElementById('demoLog'), stage = document.getElementById('demoStage');
+  let open = false, sel = 0, results = windows;
+  const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  function mark(text, q) {
+    const i = q ? text.toLowerCase().indexOf(q.toLowerCase()) : -1;
+    return i < 0 ? esc(text) : esc(text.slice(0, i)) + '<b>' + esc(text.slice(i, i + q.length)) + '</b>' + esc(text.slice(i + q.length));
+  }
+  function say(msg) {
+    log.querySelectorAll('.now').forEach(n => n.classList.remove('now'));
+    const s = document.createElement('span'); s.className = 'now'; s.textContent = msg; log.prepend(s);
+    while (log.children.length > 6) log.lastChild.remove();
+  }
+  function render() {
+    const q = input.value.trim();
+    results = q ? windows.filter(w => (w.app + ' ' + w.title).toLowerCase().includes(q.toLowerCase())) : windows;
+    sel = Math.min(sel, Math.max(results.length - 1, 0));
+    rowsEl.innerHTML = results.length ? results.map((w, i) =>
+      `<div class="lrow${i === sel ? ' sel' : ''}" data-i="${i}"><div class="icon ${w.icon}" style="width:26px;height:26px;font-size:11px;${w.chips.includes('Minimized') ? 'opacity:.75' : ''}">${esc(w.g)}</div><span class="app">${mark(w.app, q)}</span><span class="subt">${mark(w.title, q)}</span>${w.chips.map(c => `<span class="chip">${c}</span>`).join('')}${i === sel ? '<span class="ret">↩</span>' : ''}</div>`
+    ).join('') : `<div class="empty"><b style="font-size:13.5px;color:var(--muted)">No matching windows</b><div class="small faint">Try an app name or part of a window title.</div></div>`;
+  }
+  function show() {
+    if (open) { move(1); say('Shortcut again → next window'); return; }
+    open = true; input.value = ''; sel = 1; render();
+    panel.classList.remove('hidden'); hint.style.display = 'none';
+    setTimeout(() => input.focus(), 10);
+    say('Opened · the window you came from is selected (Smart order)');
+  }
+  function hide(msg) { open = false; panel.classList.add('hidden'); hint.style.display = ''; stage.focus(); say(msg); }
+  function move(d) { if (!results.length) return; sel = (sel + d + results.length) % results.length; render(); }
+  function activate() { const w = results[sel]; if (!w) return; hide(`Switched to ${w.app} — ${w.title}${w.chips.includes('Other desktop') ? ' (on another desktop)' : ''}`); }
+  document.getElementById('demoOpen').addEventListener('click', show);
+  input.addEventListener('input', () => { sel = 0; render(); });
+  rowsEl.addEventListener('click', e => { const r = e.target.closest('.lrow'); if (r) { sel = +r.dataset.i; activate(); } });
+  document.addEventListener('keydown', e => {
+    const inDemo = stage.contains(document.activeElement);
+    if (e.altKey && e.key === 'Tab' && inDemo) { e.preventDefault(); if (open && e.shiftKey) { move(-1); say('⇧ → previous window'); } else show(); return; }
+    if (!open || !inDemo) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+    else if (e.key === 'Enter') { e.preventDefault(); activate(); }
+    else if (e.key === 'Escape') { e.preventDefault(); hide('Closed · focus back where you were'); }
+  });
+  stage.addEventListener('mousedown', e => { if (open && !panel.contains(e.target)) hide('Clicked outside · closed'); });
+</script>
+</body>
+</html>

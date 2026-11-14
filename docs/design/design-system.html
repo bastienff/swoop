@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swoop Design System</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .swatch { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--card); }
+  .swatch .chipc { height: 88px; }
+  .swatch .meta { padding: 12px 14px; display: grid; gap: 2px; }
+  .swatch .meta b { font-size: 13.5px; }
+  .swatch .meta span { font: 12px var(--mono); color: var(--muted); }
+  .layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .layer { height: 120px; border-radius: 14px; border: 1px solid var(--line); position: relative; overflow: hidden; }
+  .layer span { position: absolute; left: 10px; bottom: 8px; font-size: 12px; font-weight: 600; color: var(--text); }
+  .plus { display: grid; place-items: center; font-size: 22px; color: var(--faint); }
+  .type-row { display: grid; grid-template-columns: 210px 1fr; gap: 16px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .type-row .spec { font: 12px var(--mono); color: var(--muted); }
+  .radius-box { height: 84px; border: 1.5px solid var(--orange); background: color-mix(in srgb, var(--orange) 10%, transparent); }
+  .anatomy { position: relative; display: inline-block; }
+  .measure { position: absolute; font: 600 10.5px var(--mono); color: var(--orange); white-space: nowrap; }
+  .mline { position: absolute; background: var(--orange); }
+  .tint-ctl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  .tint-ctl input { width: 240px; accent-color: var(--orange); }
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .shots figure { margin: 0; }
+  .shots img { width: 100%; border-radius: 14px; border: 1px solid var(--line); display: block; background: #111; }
+  .shots figcaption { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+  .dd { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .dd ul { margin: 10px 0 0; padding-left: 18px; display: grid; gap: 7px; font-size: 14px; }
+  .do { border-top: 3px solid var(--green); }
+  .dont { border-top: 3px solid var(--red); }
+  .anim-panel { opacity: 0; }
+  .anim-panel.play { animation: openfade .24s cubic-bezier(.2,.8,.3,1) forwards; }
+  @keyframes openfade { from { opacity: 0; } to { opacity: 1; } }
+  .choice { width: 250px; padding: 14px; border-radius: 12px; background: rgba(var(--ink), .05); box-shadow: inset 0 0 0 1px rgba(var(--ink), .08); }
+  .choice.on { background: rgba(var(--ink), .09); box-shadow: inset 0 0 0 2px var(--orange); }
+  body[data-appearance="light"] .choice { background: rgba(255,255,255,.55); }
+  body[data-appearance="light"] .choice.on { background: rgba(255,255,255,.85); }
+  .linkrow { display: flex; align-items: center; gap: 14px; padding: 11px 14px; border-radius: 12px; background: rgba(var(--ink), .06); box-shadow: inset 0 0 0 1px rgba(var(--ink), .08); }
+  body[data-appearance="light"] .linkrow { background: rgba(255,255,255,.6); }
+  .linkrow .ic { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; }
+  .tile { width: 96px; height: 60px; border-radius: 9px; position: relative; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,.12), inset 0 0 0 1px rgba(var(--ink), .14); }
+  .tile.on { box-shadow: 0 2px 6px rgba(0,0,0,.18), inset 0 0 0 2.5px var(--accent); }
+  .tile .mp { position: absolute; inset: 9px 12px; border-radius: 6px; }
+  .switch { width: 38px; height: 22px; border-radius: 11px; position: relative; background: var(--accent); }
+  .switch::after { content: ""; position: absolute; right: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  body[data-theme="swoop"] { --accent: var(--orange); }
+  body[data-theme="classic"] { --accent: #0A84FF; }
+  .pick { display: flex; flex-direction: column; align-items: center; gap: 7px; width: 118px; font-size: 13px; }
+</style>
+</head>
+<body data-appearance="dark" data-theme="swoop">
+
+<header class="topbar">
+  <div class="logo" aria-hidden="true"><svg viewBox="0 0 18 18" fill="#fff"><path d="M4.5 6.2h6.6V4.6L14 7l-2.9 2.4V7.8H4.5z"/><path d="M13.5 10.2H6.9V8.6L4 11l2.9 2.4v-1.6h6.6z"/></svg></div>
+  <span class="title">Swoop · Design system</span>
+  <nav>
+    <a href="#themes">Themes</a><a href="#color">Color</a><a href="#type">Type</a><a href="#shape">Shape</a>
+    <a href="#spacing">Spacing</a><a href="#motion">Motion</a><a href="#components">Components</a><a href="#rules">Rules</a>
+    <a href="journeys.html">Journeys →</a>
+  </nav>
+  <span class="spacer"></span>
+  <div class="seg" role="group" aria-label="Theme">
+    <button data-set="theme" data-value="swoop" aria-pressed="true">Swoop</button>
+    <button data-set="theme" data-value="classic" aria-pressed="false">Classic</button>
+  </div>
+  <div class="seg" role="group" aria-label="Appearance">
+    <button data-set="appearance" data-value="dark" aria-pressed="true">Dark</button>
+    <button data-set="appearance" data-value="light" aria-pressed="false">Light</button>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <span class="eyebrow">Design system</span>
+    <h1>Every window, <span>one keystroke.</span></h1>
+    <p>The look of Swoop in both themes: tokens, components and rules. Use the toggles above to switch every
+      themed example between <b>Swoop</b> and <b>Classic</b>, in <b>Dark</b> and <b>Light</b>. Text reference:
+      <a href="../DESIGN.md">DESIGN.md</a>.</p>
+  </div>
+
+  <!-- Principles -->
+  <section id="principles" style="padding-top:24px">
+    <div class="grid g4">
+      <div class="card"><h3>⚡ Speed over decoration</h3><p class="muted small">Instant, typeable on the first keystroke. Motion is short and never blocks input.</p></div>
+      <div class="card"><h3>🍎 Native first</h3><p class="muted small">Real app icons, AppKit materials, SF Pro and SF Symbols, standard Settings controls.</p></div>
+      <div class="card"><h3>🔅 Restraint</h3><p class="muted small">Dim by default, bright when selected. One accent at a time.</p></div>
+      <div class="card"><h3>🧊 Frosted floating UI</h3><p class="muted small">Everything that floats over other apps is see-through: blur, optionally tinted.</p></div>
+      <div class="card"><h3>📏 One design line</h3><p class="muted small">A theme applies to every surface with the same tokens. Never tune one surface alone.</p></div>
+      <div class="card"><h3>⌨️ Keyboard primary</h3><p class="muted small">Selection never depends on hover. The mouse still works everywhere.</p></div>
+      <div class="card"><h3>🔒 Honest copy</h3><p class="muted small">Say what Swoop does and doesn't do. No tracking, no network without consent.</p></div>
+    </div>
+  </section>
+
+  <!-- Themes -->
+  <section id="themes">
+    <div class="section-head">
+      <span class="eyebrow">Themes</span>
+      <h2>Swoop and Classic</h2>
+      <p class="muted">Same content, different surface. Classic is the bare system blur, clearly see-through.
+        Swoop lays the brand gradient over the same blur at <code>Brand.frostTint</code> = 55 %, less
+        see-through on purpose: the tint is the theme. Swoop is the default.</p>
+    </div>
+
+    <div class="stage">
+      <div class="fake-window" style="left:6%;top:12%;width:38%;height:62%"></div>
+      <div class="fake-window" style="right:5%;top:30%;width:34%;height:58%"></div>
+      <div>
+        <div class="surface panel" style="width:450px;max-width:calc(100vw - 80px)">
+          <div class="pill" style="width:242px;margin:0 auto 22px"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ph">Search windows…</span></div>
+          <div class="row" style="justify-content:center;gap:4px">
+            <div class="gitem sel"><div class="hl"><div class="icon i-finder" style="width:76px;height:76px;font-size:30px">☺</div></div><div class="name">Finder</div><div class="sub">Downloads</div></div>
+            <div class="gitem"><div class="hl"><div class="icon i-code" style="width:76px;height:76px;font-size:30px">⟨⟩</div></div><div class="name">Code</div><div class="sub">wren-ui · Untitled-1</div></div>
+            <div class="gitem"><div class="hl"><div class="icon i-term" style="width:76px;height:76px;font-size:26px">&gt;_</div></div><div class="name">Ghostty</div><div class="sub">~/projects</div></div>
+          </div>
+        </div>
+        <div class="stage-caption">Classic</div>
+      </div>
+      <div>
+        <div class="surface swoop panel" style="width:450px;max-width:calc(100vw - 80px)">
+          <div class="pill" style="width:242px;margin:0 auto 22px"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ph">Search windows…</span></div>
+          <div class="row" style="justify-content:center;gap:4px">
+            <div class="gitem sel"><div class="hl"><div class="icon i-finder" style="width:76px;height:76px;font-size:30px">☺</div></div><div class="name">Finder</div><div class="sub">Downloads</div></div>
+            <div class="gitem"><div class="hl"><div class="icon i-code" style="width:76px;height:76px;font-size:30px">⟨⟩</div></div><div class="name">Code</div><div class="sub">wren-ui · Untitled-1</div></div>
+            <div class="gitem"><div class="hl"><div class="icon i-term" style="width:76px;height:76px;font-size:26px">&gt;_</div></div><div class="name">Ghostty</div><div class="sub">~/projects</div></div>
+          </div>
+        </div>
+        <div class="stage-caption">Swoop · tint <span id="tintLabel">55 %</span></div>
+      </div>
+    </div>
+    <div class="tint-ctl">
+      <label for="tint" class="small muted">Explore the tint (shipping value 55 %):</label>
+      <input id="tint" type="range" min="0" max="100" value="55">
+      <button class="btn secondary sm" id="tintReset">Reset to 55 %</button>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <div class="table-wrap"><table>
+        <tr><th>Surface</th><th>Swoop (default)</th><th>Classic</th></tr>
+        <tr><td>Switcher</td><td>Blur + brand gradient @ 55 %</td><td>Blur only</td></tr>
+        <tr><td>Settings</td><td>Brand background under a clear toolbar; orange switches and picker selection</td><td>Standard macOS window</td></tr>
+        <tr><td>About</td><td>Custom frosted brand window</td><td>Standard About panel, frosted</td></tr>
+        <tr><td>Check for Updates</td><td>Custom frosted window that follows the check live</td><td>Standard alert</td></tr>
+        <tr><td>Support card</td><td>Brand surface, follows Light/Dark, orange coffee button</td><td>Always dark HUD, yellow coffee button</td></tr>
+        <tr><td>Onboarding</td><td colspan="2">Always brand: the first impression</td></tr>
+        <tr><td>Switcher content</td><td colspan="2">Identical: icons, highlight, search field, text tones</td></tr>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- Color -->
+  <section id="color">
+    <div class="section-head">
+      <span class="eyebrow">Color</span>
+      <h2>Brand tokens</h2>
+      <p class="muted">Defined once in <code>Swoop/UI/Theme/SwoopTheme.swift</code> (<code>enum Brand</code>). Never use literals in views.</p>
+    </div>
+    <div class="grid g4">
+      <div class="swatch"><div class="chipc" style="background:#F26B29"></div><div class="meta"><b>Brand.orange</b><span>#F26B29 · rgb .95 .42 .16</span><span>Accent: buttons, selection, links</span></div></div>
+      <div class="swatch"><div class="chipc" style="background:#FF943D"></div><div class="meta"><b>Brand.orangeLight</b><span>#FF943D · rgb 1 .58 .24</span><span>Top of button gradient</span></div></div>
+      <div class="swatch"><div class="chipc" style="background:#735CF2"></div><div class="meta"><b>Brand.violet</b><span>#735CF2 · rgb .45 .36 .95</span><span>Bottom-right glow</span></div></div>
+      <div class="swatch"><div class="chipc" style="background:linear-gradient(180deg,#FF943D,#F26B29)"></div><div class="meta"><b>Prominent gradient</b><span>orangeLight → orange</span><span>Primary buttons</span></div></div>
+    </div>
+
+    <h3 style="margin:32px 0 12px">Brand background, layer by layer <span class="faint small">(follows the appearance toggle)</span></h3>
+    <div class="layers">
+      <div class="layer" style="background:var(--brand-wash)"><span>1 · Base wash</span></div>
+      <div class="layer" style="background:radial-gradient(circle at 0 0,var(--glow-o) 0,transparent 60%),var(--page2)"><span>2 · Orange glow, top-leading</span></div>
+      <div class="layer" style="background:radial-gradient(circle at 100% 100%,var(--glow-v) 0,transparent 66%),var(--page2)"><span>3 · Violet glow, bottom-trailing</span></div>
+      <div class="layer brand-solid"><span>= BrandBackground</span></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="table-wrap"><table>
+        <tr><th>Layer</th><th>Dark</th><th>Light</th></tr>
+        <tr><td>Base wash</td><td><code>#211A36 → #141226</code></td><td><code>#FFF5ED → #F2E8FA</code></td></tr>
+        <tr><td>Orange glow (r 520 × scale)</td><td>orange @ 30 %</td><td>orange @ 28 %</td></tr>
+        <tr><td>Violet glow (r 560 × scale)</td><td>violet @ 40 %</td><td>violet @ 22 %</td></tr>
+        <tr><td>Scale</td><td colspan="2"><code>FittedBrandBackground</code>: max(w, h) / 800. Fixed: About/update 0.5, support card 0.65, picker 0.17.</td></tr>
+      </table></div>
+    </div>
+
+    <h3 style="margin:32px 0 12px">Text tones in the switcher <span class="faint small">(explicit, not vibrancy)</span></h3>
+    <div class="stage" style="padding:24px">
+      <div class="surface themed" style="border-radius:20px;padding:20px 26px;min-width:min(520px,100%)">
+        <div class="stack" style="gap:8px;font-size:14px">
+          <div style="color:rgba(var(--ink),.95);font-weight:700">Selected name · white / black 88 %</div>
+          <div style="color:rgba(var(--ink),.62);font-weight:500">Unselected name · 62 %</div>
+          <div style="color:rgba(var(--ink),.6)">List secondary · 60 % / 55 %</div>
+          <div style="color:rgba(var(--ink),.45)">Grid subtitle · 45 % (62 % selected)</div>
+          <div style="color:var(--faint)">Placeholder · 40 % / 35 %</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin:32px 0 12px">Semantic</h3>
+    <div class="row">
+      <span class="chip" style="background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green);font-size:12.5px;padding:5px 12px">● Granted · up to date</span>
+      <span class="chip" style="background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn);font-size:12.5px;padding:5px 12px">▲ Warning · conflict</span>
+      <span class="chip" style="background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red);font-size:12.5px;padding:5px 12px">✕ Not granted · destructive</span>
+      <span class="chip" style="background:var(--badge);color:#fff;font-size:12.5px;padding:5px 12px">3 · app badge #F53B36 only</span>
+    </div>
+  </section>
+
+  <!-- Type -->
+  <section id="type">
+    <div class="section-head">
+      <span class="eyebrow">Typography</span>
+      <h2>SF Pro, one family</h2>
+      <p class="muted">System font everywhere; SF Pro Rounded only for keycaps and the shortcut recorder. Settings uses system text styles.</p>
+    </div>
+    <div class="card">
+      <div class="type-row"><span class="spec">30 bold · step title</span><span style="font-size:30px;font-weight:700">Welcome to Swoop</span></div>
+      <div class="type-row"><span class="spec">24 bold · About name</span><span style="font-size:24px;font-weight:700">Swoop</span></div>
+      <div class="type-row"><span class="spec">22 semibold rounded · recorder</span><span style="font:600 22px var(--rounded)">⌥ Tab</span></div>
+      <div class="type-row"><span class="spec">17 bold · update title</span><span style="font-size:17px;font-weight:700">Swoop is up to date</span></div>
+      <div class="type-row"><span class="spec">14.5 regular · subtitle</span><span style="font-size:14.5px;color:var(--muted)">Press it anywhere to open Swoop.</span></div>
+      <div class="type-row"><span class="spec">14 semibold · list headline</span><span style="font-size:14px;font-weight:600">wren-ui — Untitled-1</span></div>
+      <div class="type-row"><span class="spec">13.8 medium · search</span><span style="font-size:13.8px;font-weight:500">heron</span></div>
+      <div class="type-row"><span class="spec">13.5 medium / bold · grid name</span><span style="font-size:13.5px"><span style="font-weight:500;color:var(--muted)">Code</span> · <b>Finder</b> (selected)</span></div>
+      <div class="type-row"><span class="spec">13.5 semibold · button</span><span style="font-size:13.5px;font-weight:600">Begin setup</span></div>
+      <div class="type-row"><span class="spec">12.5 semibold rounded · keycap</span><span><span class="keycap">esc</span> <span class="keycap">↩</span> <span class="keycap">⌘ ,</span></span></div>
+      <div class="type-row"><span class="spec">12 regular · subtitle / caption</span><span style="font-size:12px;color:var(--muted)">Code · heron.config.js</span></div>
+      <div class="type-row"><span class="spec">10.5 medium · chip</span><span><span class="chip">Other desktop</span> <span class="chip">Tab</span></span></div>
+      <div class="type-row" style="border:0"><span class="spec">match highlight</span><span style="font-size:14px">bold in place: <span class="muted">route-</span><b>api</b><span class="muted"> · Untitled-1</span></span></div>
+    </div>
+  </section>
+
+  <!-- Shape -->
+  <section id="shape">
+    <div class="section-head">
+      <span class="eyebrow">Shape</span>
+      <h2>Continuous corners</h2>
+      <p class="muted">Squircles (<code>style: .continuous</code>) and capsules. Radii by element:</p>
+    </div>
+    <div class="grid g4">
+      <div class="stack"><div class="radius-box" style="border-radius:36px"></div><span class="small"><b>36</b> · switcher panel</span></div>
+      <div class="stack"><div class="radius-box" style="border-radius:18px"></div><span class="small"><b>18</b> · support card</span></div>
+      <div class="stack"><div class="radius-box" style="border-radius:16px"></div><span class="small"><b>14–16</b> · onboarding card, badge</span></div>
+      <div class="stack"><div class="radius-box" style="border-radius:12px"></div><span class="small"><b>12</b> · choice card, link row</span></div>
+      <div class="stack"><div class="radius-box" style="border-radius:11px"></div><span class="small"><b>11 / 9</b> · list row comfy / compact</span></div>
+      <div class="stack"><div class="radius-box" style="border-radius:28px;width:84px"></div><span class="small"><b>24 %</b> · grid selection</span></div>
+      <div class="stack"><div class="radius-box" style="border-radius:6px"></div><span class="small"><b>6</b> · keycap</span></div>
+      <div class="stack"><div class="radius-box" style="border-radius:999px;height:40px"></div><span class="small"><b>capsule</b> · buttons, pill, chips</span></div>
+    </div>
+  </section>
+
+  <!-- Spacing -->
+  <section id="spacing">
+    <div class="section-head">
+      <span class="eyebrow">Spacing & layouts</span>
+      <h2>Grid and lists</h2>
+      <p class="muted">Metrics from <code>SearchViewModel.metrics</code> and <code>ListMetrics</code>. Panels stay under 90 % of the screen; columns are whole cells, nothing is clipped.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Grid cell (Large icon, 96 pt)</h3>
+        <p class="muted small" style="margin-bottom:22px">Icon sizes: Small 64 · Medium 80 · Large 96</p>
+        <div style="display:flex;justify-content:center;padding:10px 0 20px">
+          <div class="anatomy">
+            <div class="gitem sel" style="outline:1px dashed color-mix(in srgb,var(--orange) 60%,transparent);outline-offset:0">
+              <div class="hl"><div class="icon i-code" style="width:96px;height:96px;font-size:36px">⟨⟩</div></div>
+              <div class="name">Code</div><div class="sub">wren-ui · Untitled-1</div>
+            </div>
+            <span class="measure" style="left:100%;top:50px;margin-left:10px">highlight = icon + 20</span>
+            <span class="measure" style="left:100%;top:122px;margin-left:10px">8 gap · 17 name · 16 subtitle</span>
+            <span class="measure" style="top:-18px;left:0">cell = highlight + 10</span>
+          </div>
+        </div>
+        <div class="table-wrap"><table>
+          <tr><td>Column / row spacing</td><td>max(4, icon×0.1) / max(10, icon×0.2)</td></tr>
+          <tr><td>Horizontal padding</td><td>28</td></tr>
+          <tr><td>Top (with search) / bottom</td><td>75 (30 hidden) / 26</td></tr>
+          <tr><td>Search pill</td><td>242 × 29, centered</td></tr>
+          <tr><td>Min panel width · rows</td><td>400 · 1–8 visible</td></tr>
+        </table></div>
+      </div>
+      <div class="card">
+        <h3>Lists</h3>
+        <p class="muted small" style="margin-bottom:16px">Same selection and scrolling model as the grid (one column).</p>
+        <div class="table-wrap"><table>
+          <tr><th></th><th>Compact</th><th>Comfortable</th></tr>
+          <tr><td>Panel width</td><td>640</td><td>680</td></tr>
+          <tr><td>Row height</td><td>40</td><td>60</td></tr>
+          <tr><td>Icon</td><td>26</td><td>38</td></tr>
+          <tr><td>Row inset</td><td>14</td><td>16</td></tr>
+          <tr><td>Row gap · list inset</td><td colspan="2">4 · 20</td></tr>
+          <tr><td>Top (with search) / bottom</td><td colspan="2">73 (30 hidden) / 24</td></tr>
+          <tr><td>Scroll bar</td><td colspan="2">custom 4 pt, 12 pt gap</td></tr>
+          <tr><td>Visible rows</td><td colspan="2">3–20</td></tr>
+        </table></div>
+        <p class="muted small" style="margin-top:12px">In lists, the search pill spans from where the app icons start to where the scroll bar ends.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Motion -->
+  <section id="motion">
+    <div class="section-head">
+      <span class="eyebrow">Motion & elevation</span>
+      <h2>Quick, then calm</h2>
+      <p class="muted">Short ease-outs. Reduce Motion is always honored (no open fade, fade-only step changes).</p>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Switcher open</h3>
+        <p class="muted small">Fade 0 → 1 in 0.24 s, cubic-bezier(0.2, 0.8, 0.3, 1). Close is immediate.</p>
+        <div class="stage" style="margin-top:14px;padding:22px;min-height:150px;align-items:center">
+          <div class="surface themed panel anim-panel play" id="animPanel" style="padding:16px 22px">
+            <div class="pill" style="width:200px"><span class="ph">Search windows…</span></div>
+          </div>
+        </div>
+        <button class="btn primary sm" id="replay" style="margin-top:14px">Replay open</button>
+      </div>
+      <div class="card">
+        <h3>Timings</h3>
+        <div class="table-wrap"><table>
+          <tr><td>Support card in</td><td>fade 0.25 s</td></tr>
+          <tr><td>Onboarding step</td><td>spring 0.42 / 0.88, slide 44 + fade</td></tr>
+          <tr><td>Step dots</td><td>spring 0.35 / 0.8, dot 6 → 18</td></tr>
+          <tr><td>Pickers, cards, status</td><td>ease-out 0.15–0.25 s</td></tr>
+          <tr><td>Button press</td><td>opacity 0.82, scale 0.98, 0.12 s</td></tr>
+          <tr><td>Symbol swaps</td><td>symbolEffect .replace</td></tr>
+        </table></div>
+        <h3 style="margin-top:18px">Elevation</h3>
+        <p class="muted small">System window shadow on floating panels. Orange glow under prominent buttons and behind the brand icon (never a shadow on the icon itself).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Components -->
+  <section id="components">
+    <div class="section-head">
+      <span class="eyebrow">Components</span>
+      <h2>Building blocks</h2>
+      <p class="muted">Themed examples follow the toggles. Source files in <code>Swoop/UI/</code>.</p>
+    </div>
+
+    <h3 style="margin-bottom:12px">Switcher layouts</h3>
+    <div class="stage">
+      <div class="surface themed panel" style="padding:24px 20px 24px;width:640px;max-width:100%">
+        <div class="pill" style="margin:0 20px 20px 14px"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>api</span></div>
+        <div class="stack" style="gap:4px">
+          <div class="lrow sel"><div class="icon i-code" style="width:26px;height:26px;font-size:11px">⟨⟩</div><span class="app">Code</span><span class="subt">route-<b>api</b> · Untitled-1</span><span class="chip">Tab</span><span class="chip">Other desktop</span><span class="ret">↩</span></div>
+          <div class="lrow"><div class="icon i-code" style="width:26px;height:26px;font-size:11px">⟨⟩</div><span class="app">Code</span><span class="subt">order-<b>api</b></span><span class="chip">Other desktop</span></div>
+          <div class="lrow"><div class="icon i-post" style="width:26px;height:26px;font-size:12px">✈</div><span class="app">Postman</span><span class="subt">https://brand-<b>api</b>-prod…Workspace</span></div>
+          <div class="lrow"><div class="icon i-db" style="width:26px;height:26px;font-size:12px">◆</div><span class="app">DBeaver</span><span class="subt"><b>api</b>_db_prod · Script-16</span><span class="chip">Minimized</span></div>
+        </div>
+      </div>
+      <div class="surface themed panel" style="padding:24px 20px;width:680px;max-width:100%">
+        <div class="stack" style="gap:4px">
+          <div class="lrow comfy sel"><div class="icon i-term" style="width:38px;height:38px;font-size:14px">&gt;_</div><div style="flex:1;min-width:0"><div class="head">~/code/heron-web</div><div class="cap">Ghostty</div></div><span class="chip">Tab</span><span class="ret">↩</span></div>
+          <div class="lrow comfy"><div class="icon i-code" style="width:38px;height:38px;font-size:14px">⟨⟩</div><div style="flex:1;min-width:0"><div class="head">swoop</div><div class="cap">Code · Untitled-1</div></div><span class="chip">Other desktop</span></div>
+          <div class="lrow comfy"><div class="icon i-notes" style="width:38px;height:38px;font-size:14px">✎</div><div style="flex:1;min-width:0"><div class="head">Release checklist</div><div class="cap">Notes</div></div></div>
+        </div>
+      </div>
+      <div style="width:100%"><div class="stage-caption">List · Compact (640) with a search · List · Comfortable (680): headline = project or title</div></div>
+    </div>
+
+    <div class="grid g3" style="margin-top:24px">
+      <div class="card stack">
+        <span class="label">Grid item states</span>
+        <div class="row" style="gap:0">
+          <div class="gitem sel"><div class="hl"><div class="icon i-slack" style="width:76px;height:76px;font-size:28px">#</div><span class="badge">1</span></div><div class="name">Slack</div><div class="sub">monitoring</div></div>
+          <div class="gitem"><div class="hl"><div class="icon i-notes" style="width:76px;height:76px;font-size:28px;opacity:.75">✎</div></div><div class="name">Notes</div><div class="sub">⊟ Minimized</div></div>
+        </div>
+        <p class="muted small">Selected: fill + 1 pt stroke + bold name. Badge top-trailing. Minimized icons at 75 % with a state symbol.</p>
+      </div>
+      <div class="card stack">
+        <span class="label">Buttons (BrandButtonStyle)</span>
+        <div class="row"><button class="btn primary">Begin setup</button><button class="btn secondary">Go back</button></div>
+        <div class="row"><button class="btn primary sm">Swoop Away →</button><button class="btn secondary sm">Star on GitHub</button></div>
+        <p class="muted small">Capsule, 34 pt (30 in small windows). Keeps its color when the window isn't key. Pair with <code>.focusEffectDisabled()</code>.</p>
+      </div>
+      <div class="card stack">
+        <span class="label">Search pill</span>
+        <div class="pill" style="width:242px"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ph">Search windows…</span></div>
+        <div class="pill" style="width:242px"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>heron</span></div>
+        <p class="muted small">One field for every layout. Hidden (zero height) until you type, unless "Always show the search field".</p>
+      </div>
+      <div class="card stack">
+        <span class="label">Keycaps · step dots</span>
+        <div class="row"><span class="keycap">⌥ Tab</span><span class="keycap">abc</span><span class="keycap">← →</span><span class="keycap">↩</span><span class="keycap">esc</span></div>
+        <div class="dots"><i></i><i class="on"></i><i></i><i></i><i></i><i></i></div>
+        <p class="muted small">Real key glyphs. Current step dot widens to 18 pt in orange.</p>
+      </div>
+      <div class="card stack">
+        <span class="label">Symbol badges</span>
+        <div class="row">
+          <div class="symbadge" style="background:color-mix(in srgb,var(--orange) 14%,transparent);color:var(--orange)">⌨</div>
+          <div class="symbadge" style="background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green)">✓</div>
+          <div class="symbadge" style="background:color-mix(in srgb,#ff375f 14%,transparent);color:#ff375f">♥</div>
+        </div>
+        <p class="muted small">64 pt, radius 16, color @ 14 %. Decorative: hidden from VoiceOver.</p>
+      </div>
+      <div class="card stack">
+        <span class="label">Picker tiles · switch (themed)</span>
+        <div class="row" style="gap:4px">
+          <div class="pick"><div class="tile on"><div class="mp brand-solid"></div></div>Swoop</div>
+          <div class="pick muted"><div class="tile"><div class="mp" style="background:rgba(var(--ink),.18)"></div></div>Classic</div>
+        </div>
+        <div class="row"><div class="switch"></div><span class="small muted">Orange in Swoop, system accent in Classic</span></div>
+      </div>
+    </div>
+
+    <h3 style="margin:28px 0 12px">Onboarding blocks</h3>
+    <div class="stage">
+      <div class="surface swoop" style="border-radius:14px;padding:22px;width:560px;max-width:100%">
+        <div class="row" style="gap:12px">
+          <div class="choice on"><div class="row" style="justify-content:space-between"><span style="color:var(--orange)">▦</span><span style="color:var(--orange)">●</span></div><b style="display:block;margin-top:6px">Keep the switcher open</b><span class="small muted">Look around, search, then press Return.</span></div>
+          <div class="choice"><div class="row" style="justify-content:space-between"><span class="muted">☝</span><span class="faint">○</span></div><b style="display:block;margin-top:6px">Switch on release</b><span class="small muted">Like ⌘Tab: hold, tap, let go.</span></div>
+        </div>
+        <div class="linkrow" style="margin-top:14px"><div class="ic" style="background:color-mix(in srgb,var(--orange) 15%,transparent);color:var(--orange)">☕</div><div style="flex:1"><b style="font-size:14px">Buy me a coffee</b><div class="small muted">Supports the time that goes into fixes and new features.</div></div><span class="muted">↗</span></div>
+      </div>
+      <div style="width:100%"><div class="stage-caption">Choice cards (orange 2 pt border when selected) · Link row</div></div>
+    </div>
+  </section>
+
+  <!-- Screenshots -->
+  <section id="screens">
+    <div class="section-head">
+      <span class="eyebrow">Reference</span>
+      <h2>The real thing</h2>
+      <p class="muted">Screenshots from <code>docs/images/</code>.</p>
+    </div>
+    <div class="shots">
+      <figure><img src="../images/swoop-grid.png" alt="Swoop grid layout" loading="lazy"><figcaption>Grid</figcaption></figure>
+      <figure><img src="../images/swoop-search.png" alt="Swoop search results" loading="lazy"><figcaption>Search</figcaption></figure>
+      <figure><img src="../images/swoop-list-compact.png" alt="Swoop compact list" loading="lazy"><figcaption>List · Compact</figcaption></figure>
+      <figure><img src="../images/swoop-list-comfortable.png" alt="Swoop comfortable list" loading="lazy"><figcaption>List · Comfortable</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- Rules -->
+  <section id="rules">
+    <div class="section-head">
+      <span class="eyebrow">Rules</span>
+      <h2>Do and don't</h2>
+    </div>
+    <div class="dd">
+      <div class="card do"><h3>Do</h3><ul>
+        <li>Use <code>Brand.*</code> tokens and the shared backgrounds (<code>FrostedBrandBackground</code>, <code>FittedBrandBackground</code>).</li>
+        <li>Use <code>Brand.frostTint</code> for every frosted Swoop surface; change it in one place.</li>
+        <li>Give every floating surface a Swoop and a Classic treatment, in light and dark.</li>
+        <li>Continuous corners, capsules, SF Symbols, real app icons.</li>
+        <li>Check translucency over a varied backdrop with a region capture (<code>screencapture -R</code>).</li>
+      </ul></div>
+      <div class="card dont"><h3>Don't</h3><ul>
+        <li>Hard-code a tint or brand color in a view.</li>
+        <li>Make a floating surface opaque, or tint one surface differently.</li>
+        <li>Change switcher content (icons, rows, tones) per theme.</li>
+        <li>Use the system accent in Swoop-themed controls, or orange in Classic.</li>
+        <li>Bundle app icons, add custom fonts, or rely on hover for selection.</li>
+      </ul></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>New surface checklist</h3>
+      <ol class="muted" style="margin:10px 0 0;padding-left:20px;display:grid;gap:6px;font-size:14px">
+        <li>Floating → frosted in both themes; Swoop adds <code>FrostedBrandBackground</code>.</li>
+        <li>Window non-opaque with a clear background, opened with <code>BringToFront.show</code>.</li>
+        <li>Light and dark checked in both themes.</li>
+        <li>Tokens only; new shared values go in <code>SwoopTheme.swift</code> and DESIGN.md.</li>
+        <li>Localizable strings, VoiceOver labels, Reduce Motion.</li>
+        <li>Classic vs Swoop screenshot comparison before merging.</li>
+      </ol>
+    </div>
+  </section>
+
+  <div class="footer">Swoop design system · mirrors <code>Swoop/UI/Theme/SwoopTheme.swift</code> and <a href="../DESIGN.md">DESIGN.md</a>. App icons here are illustrations; the app uses real icons. Browser blur approximates the macOS materials.</div>
+</main>
+
+<script>
+  const body = document.body;
+  try {
+    const saved = JSON.parse(localStorage.getItem('swoop-design') || '{}');
+    if (saved.theme) body.dataset.theme = saved.theme;
+    if (saved.appearance) body.dataset.appearance = saved.appearance;
+  } catch (e) {}
+  function sync() {
+    document.querySelectorAll('[data-set]').forEach(b => b.setAttribute('aria-pressed', body.dataset[b.dataset.set] === b.dataset.value));
+  }
+  document.querySelectorAll('[data-set]').forEach(b => b.addEventListener('click', () => {
+    body.dataset[b.dataset.set] = b.dataset.value; sync();
+    try { localStorage.setItem('swoop-design', JSON.stringify({ theme: body.dataset.theme, appearance: body.dataset.appearance })); } catch (e) {}
+  }));
+  sync();
+
+  const tint = document.getElementById('tint'), label = document.getElementById('tintLabel');
+  const swoopPanel = document.querySelector('#themes .surface.swoop');
+  function setTint(v) { swoopPanel.style.setProperty('--frost-tint', v / 100); label.textContent = v + ' %'; tint.value = v; }
+  tint.addEventListener('input', e => setTint(e.target.value));
+  document.getElementById('tintReset').addEventListener('click', () => setTint(55));
+
+  document.getElementById('replay').addEventListener('click', () => {
+    const p = document.getElementById('animPanel'); p.classList.remove('play'); void p.offsetWidth; p.classList.add('play');
+  });
+</script>
+</body>
+</html>
