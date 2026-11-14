@@ -56,6 +56,23 @@ final class DebugCommands {
                 e?.flags = []
                 e?.post(tap: .cghidEventTap)
             }
+        case "cmdtab":
+            // cmdtab: a real ⌘Tab (macOS app switcher) through the HID event stream.
+            let src = CGEventSource(stateID: .hidSystemState)
+            func send(_ code: CGKeyCode, _ down: Bool, _ flags: CGEventFlags) {
+                let e = CGEvent(keyboardEventSource: src, virtualKey: code, keyDown: down)
+                e?.flags = flags
+                e?.post(tap: .cghidEventTap)
+            }
+            send(55, true, .maskCommand); send(48, true, .maskCommand); send(48, false, .maskCommand)
+            Task { try? await Task.sleep(for: .milliseconds(150)); send(55, false, []) }
+        case "clickat":
+            // clickat <x> <y>: a real left click at global top-left coordinates.
+            let a = arg.split(separator: " ").compactMap { Double($0) }
+            guard a.count == 2 else { break }
+            let p = CGPoint(x: a[0], y: a[1])
+            CGEvent(mouseEventSource: nil, mouseType: .leftMouseDown, mouseCursorPosition: p, mouseButton: .left)?.post(tap: .cghidEventTap)
+            CGEvent(mouseEventSource: nil, mouseType: .leftMouseUp, mouseCursorPosition: p, mouseButton: .left)?.post(tap: .cghidEventTap)
         case "timerefresh":
             // timerefresh <outfile> <app name>: average one-app refresh time over 20 runs (+ CPU time).
             let parts = arg.split(separator: " ", maxSplits: 1).map(String.init)

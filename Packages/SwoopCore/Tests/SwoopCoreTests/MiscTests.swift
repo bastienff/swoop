@@ -143,3 +143,49 @@ struct RefreshSchedulerTests {
         #expect(abs(s.event(2, policy: structure, now: t0.addingTimeInterval(10)) - 0.3) < 1e-6)
     }
 }
+
+@Suite("Focus steal policy")
+struct FocusStealPolicyTests {
+    func decide(_ bundle: String? = "com.example.app", own: Bool = false, held: Shortcut.Modifiers = [],
+                ownHold: Shortcut.Modifiers = [], click: TimeInterval? = nil, modifier: TimeInterval? = nil,
+                reclaims: Int = 0) -> FocusStealPolicy.Decision {
+        FocusStealPolicy.decide(newFrontmostBundleID: bundle, isOwnApp: own, heldModifiers: held, ownHoldModifiers: ownHold,
+                                secondsSinceOutsideClick: click, secondsSinceModifier: modifier, reclaimsSoFar: reclaims)
+    }
+
+    @Test func appTakingFocusOnItsOwnIsReclaimed() {
+        #expect(decide() == .reclaim)
+        #expect(decide(click: 5) == .reclaim)        // an old click doesn't count
+        #expect(decide(held: [.shift]) == .reclaim)  // Shift alone isn't a shortcut
+    }
+
+    @Test func userActionsAreRespected() {
+        #expect(decide(held: [.command]) == .respect)          // ⌘Tab, ⌘Space
+        #expect(decide(held: [.option]) == .respect)           // e.g. a launcher on ⌥Space
+        #expect(decide(click: 0.1) == .respect)                // clicked outside
+        #expect(decide(own: true) == .respect)                 // Swoop's own Settings window
+        #expect(decide(nil) == .respect)                       // unknown: don't guess
+        #expect(decide(modifier: 0.3) == .respect)             // ⌘Tab: ⌘ released just before the switch
+    }
+
+    @Test func appWithoutBundleIDAndOldModifiersAreReclaimed() {
+        #expect(decide("") == .reclaim)
+        #expect(decide(modifier: 3) == .reclaim)
+    }
+
+    @Test func modifierHeldForSwitchOnReleaseIsNotAShortcut() {
+        #expect(decide(held: [.option], ownHold: [.option]) == .reclaim)
+        #expect(decide(held: [.option, .command], ownHold: [.option]) == .respect)
+    }
+
+    @Test func systemUIIsNeverFought() {
+        for id in ["com.apple.SecurityAgent", "com.apple.Spotlight", "com.apple.loginwindow", "com.apple.dock"] {
+            #expect(decide(id) == .respect)
+        }
+    }
+
+    @Test func givesUpAfterTheLimit() {
+        #expect(decide(reclaims: FocusStealPolicy.maxReclaims - 1) == .reclaim)
+        #expect(decide(reclaims: FocusStealPolicy.maxReclaims) == .respect)
+    }
+}

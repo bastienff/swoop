@@ -51,6 +51,13 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
     /// Opened right after a switch whose activation macOS may not have applied yet: if that app takes
     /// focus from the panel shortly after opening, take it back instead of dismissing.
     private var pendingActivation: (pid: pid_t, until: Date)?
+    /// Focus-steal protection (`FocusStealPolicy`): reclaims this opening, and the last outside click.
+    private var focusReclaims = 0
+    private var lastOutsideClick: Date?
+    /// Last time a modifier other than the shortcut's own was held while open (⌘Tab detection).
+    private var lastOtherModifier: Date?
+    private var modifierWatch: Task<Void, Never>?
+    static let modifierPollInterval: Duration = .milliseconds(30)
     static let pendingActivationGrace: TimeInterval = 1.0
     private var targetScreen: NSScreen?
     private(set) var isVisible = false
@@ -159,6 +166,10 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         panel.appearance = settings.appearance.nsAppearance
         updateFrame(animated: false)
         isVisible = true
+        focusReclaims = 0
+        lastOutsideClick = nil
+        lastOtherModifier = nil
+        watchModifiers()
         observeLayout()
 
         let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
@@ -184,6 +195,8 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         guard isVisible, let panel else { return }
         isVisible = false
         pendingActivation = nil
+        modifierWatch?.cancel()
+        modifierWatch = nil
         endKeyRepeat()
         disarmSwitchOnRelease()
         removeMonitors()
@@ -323,7 +336,9 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         // Outside clicks while another app keeps focus (e.g. clicks on the desktop / menu bar).
         mouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             MainActor.assumeIsolated {
-                guard let self, self.settings.dismissOnOutsideClick else { return }
+                guard let self else { return }
+                self.lastOutsideClick = Date() // focus moving next is the user's doing, never "stolen"
+                guard self.settings.dismissOnOutsideClick else { return }
                 self.dismiss(restorePrevious: false)
             }
         }
@@ -431,15 +446,70 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
 
     func windowDidResignKey(_ notification: Notification) {
         // The previous switch's activation landed after the panel opened: that's not the user leaving.
-        if isVisible, let pending = pendingActivation, Date() < pending.until, let panel,
+        if isVisible, let pending = pendingActivation, Date() < pending.until,
            NSWorkspace.shared.frontmostApplication?.processIdentifier == pending.pid {
-            NSApp.activate()
-            panel.makeKeyAndOrderFront(nil)
-            model.requestFocus()
+            reclaimFocus()
             return
         }
-        // Another app took focus (click outside). Don't steal focus back.
+        // Another app grabbed focus on its own (it launched, answered a script, or opened a window):
+        // take it back. A click outside, a shortcut the user pressed, or system UI is respected.
+        if isVisible, focusWasStolen() {
+            focusReclaims += 1
+            reclaimFocus()
+            return
+        }
         guard isVisible, settings.dismissOnOutsideClick else { return }
         dismiss(restorePrevious: false)
+    }
+
+    private func focusWasStolen() -> Bool {
+        let front = NSWorkspace.shared.frontmostApplication
+        let held = GlobalShortcutManager.modifiers(from: NSEvent.modifierFlags)
+        noteModifiers(held)
+        // While switch-on-release is armed the user holds the shortcut's modifier for us.
+        let ownHold: Shortcut.Modifiers = releaseWatch != nil ? (settings.effectiveShortcut?.holdModifiers ?? []) : []
+        return FocusStealPolicy.decide(
+            newFrontmostBundleID: front.map { $0.bundleIdentifier ?? "" },
+            isOwnApp: front?.processIdentifier == ProcessInfo.processInfo.processIdentifier,
+            heldModifiers: held, ownHoldModifiers: ownHold,
+            secondsSinceOutsideClick: lastOutsideClick.map { Date().timeIntervalSince($0) },
+            secondsSinceModifier: lastOtherModifier.map { Date().timeIntervalSince($0) },
+            reclaimsSoFar: focusReclaims) == .reclaim
+    }
+
+    /// Modifier state while open, so a shortcut that switches on release (⌘Tab) still counts as the user's.
+    /// Reads only which modifiers are down (like switch-on-release); no keystrokes, no Input Monitoring.
+    private func watchModifiers() {
+        modifierWatch?.cancel()
+        modifierWatch = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                self?.noteModifiers(GlobalShortcutManager.modifiers(from: NSEvent.modifierFlags))
+                try? await Task.sleep(for: Self.modifierPollInterval)
+            }
+        }
+    }
+
+    private func noteModifiers(_ held: Shortcut.Modifiers) {
+        let own = settings.effectiveShortcut?.modifiers ?? []
+        if !held.subtracting(.shift).subtracting(own).isEmpty { lastOtherModifier = Date() }
+    }
+
+    /// Takes focus back for the panel. macOS 14+ refuses `NSApp.activate()` without fresh user input, so
+    /// fall back to Accessibility's frontmost attribute on our own app (set off the main thread: Swoop
+    /// answers its own AX requests there).
+    private func reclaimFocus() {
+        guard let panel else { return }
+        NSApp.activate()
+        panel.makeKeyAndOrderFront(nil)
+        model.requestFocus()
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(60))
+            guard let self, self.isVisible, !NSApp.isActive else { return }
+            let pid = ProcessInfo.processInfo.processIdentifier
+            await Task.detached { AXElement.application(pid, timeout: 0.3).set(kAXFrontmostAttribute, kCFBooleanTrue) }.value
+            guard self.isVisible else { return }
+            panel.makeKeyAndOrderFront(nil)
+            self.model.requestFocus()
+        }
     }
 }
