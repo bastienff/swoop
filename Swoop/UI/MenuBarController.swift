@@ -164,7 +164,9 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     @objc private func openSwoop() { onOpenSwoop?() }
-    @objc private func openSettings() { onOpenSettings?() }
+    // After the menu has closed: activating from inside menu tracking (⌘, while the menu is open) is refused,
+    // and Settings would open behind the frontmost app.
+    @objc private func openSettings() { DispatchQueue.main.async { [weak self] in self?.onOpenSettings?() } }
     @objc private func openPermissions() { onOpenPermissions?() }
     @objc private func toggleLaunchAtLogin() { LaunchAtLogin.set(!LaunchAtLogin.isEnabled) }
     @objc private func reportProblem() { onReportProblem?() }

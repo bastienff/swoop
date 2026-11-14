@@ -124,11 +124,7 @@ final class HostedWindowController<Content: View>: NSObject, NSWindowDelegate {
         }
         guard let window else { return }
         focus.remember()
-        NSApp.activate()
-        window.makeKeyAndOrderFront(nil)
-        // An accessory app launched in the background may not be allowed to activate (macOS 14+
-        // cooperative activation): order the window front regardless, so it is never hidden.
-        window.orderFrontRegardless()
+        BringToFront.show(window)
         if staysVisible { startLayering() }
     }
 
@@ -297,8 +293,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             applyTheme()
         }
         focus.remember()
-        NSApp.activate()
-        window?.makeKeyAndOrderFront(nil)
+        if let window { BringToFront.show(window) }
     }
 
     /// Swoop theme: the panes' brand background runs under a transparent toolbar. Classic: the standard
@@ -333,5 +328,27 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         // Drop the hierarchy so observation/polling stops while closed.
         window = nil
         tabs = nil
+    }
+}
+
+/// Opens one of Swoop's windows in front and focused. macOS 14+ activation is cooperative: an accessory app
+/// is often refused `NSApp.activate()` (launched in the background, or opened from the menu bar menu with ⌘,).
+/// So: order the window front regardless (never hidden behind other apps), and if Swoop still isn't active
+/// shortly after, take focus through Accessibility's frontmost attribute on Swoop's own app (as the switcher
+/// does; set off the main thread, where Swoop answers its own AX requests).
+@MainActor
+enum BringToFront {
+    static func show(_ window: NSWindow) {
+        NSApp.activate()
+        window.makeKeyAndOrderFront(nil)
+        window.orderFrontRegardless()
+        Task { @MainActor [weak window] in
+            try? await Task.sleep(for: .milliseconds(60))
+            guard let window, window.isVisible, !NSApp.isActive else { return }
+            let pid = ProcessInfo.processInfo.processIdentifier
+            await Task.detached { AXElement.application(pid, timeout: 0.3).set(kAXFrontmostAttribute, kCFBooleanTrue) }.value
+            guard window.isVisible else { return }
+            window.makeKeyAndOrderFront(nil)
+        }
     }
 }

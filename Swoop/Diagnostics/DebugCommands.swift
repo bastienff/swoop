@@ -202,7 +202,18 @@ final class DebugCommands {
         case "refresh": Task { await controller.registry.refresh() }
         case "checkupdates": Task { await controller.updates.check() } // same as the "Check for Updates" button
         case "menucheckupdates": controller.checkForUpdatesFromMenu() // same as the menu item
-        case "openmenu": controller.menuBar.debugOpenMenu() // opens the menu bar menu (blocks until closed)
+        case "openmenu":
+            // openmenu [cmdcomma]: opens the menu bar menu (blocks until closed); "cmdcomma" presses ⌘, in it after 1 s.
+            if arg == "cmdcomma" {
+                DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
+                    for down in [true, false] {
+                        let e = CGEvent(keyboardEventSource: nil, virtualKey: 43, keyDown: down)
+                        e?.flags = .maskCommand
+                        e?.post(tap: .cghidEventTap)
+                    }
+                }
+            }
+            controller.menuBar.debugOpenMenu()
         case "autocheck5": controller.updates.debugRunAutomaticCheckSoon()
         case "updatemock": controller.updates.debugMock = UpdateChecker.DebugMock(rawValue: arg) ?? .off // off|newVersion|upToDate|offline
         case "autoupdates": controller.settings.checkForUpdates = arg == "on"; controller.updates.applySetting()

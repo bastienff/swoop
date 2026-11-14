@@ -266,7 +266,7 @@ learned anchors); there is no separate Space service because no public Space API
 `hotkey` (posts the configured shortcut as a real HID event), `post <keyCode> <mods>`,
 `setshortcut <keyCode> <mods>`, `dump <file>`, `snapshot <png>`, `snapwin <png> <title>`,
 `appearance system|light|dark`, `refresh`, `settings`, `checkupdates` / `menucheckupdates` (button / menu
-path), `updatemock off|newVersion|upToDate|offline`, `autoupdates on|off`, `autocheck5` (automatic check in 5 s), `demo` (fixed generic windows for README
+path), `updatemock off|newVersion|upToDate|offline`, `autoupdates on|off`, `autocheck5` (automatic check in 5 s), `openmenu [cmdcomma]` (menu bar menu; optionally presses ⌘, in it), `demo` (fixed generic windows for README
 images; pauses discovery), `snapshot <png> clear` (content only, transparent, @2x). Build with
 `swiftc -O Tools/swctl.swift -o build/swctl`. Used to verify behavior end-to-end; on-screen
 Space membership is checked with CG on-screen window signatures (no Screen Recording needed).
