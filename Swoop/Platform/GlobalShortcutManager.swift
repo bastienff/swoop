@@ -12,8 +12,8 @@ final class GlobalShortcutManager {
         case failed(OSStatus)
         var description: String {
             switch self {
-            case .alreadyTaken: "Another app already uses this shortcut."
-            case .failed(let s): "The shortcut couldn't be registered (error \(s))."
+            case .alreadyTaken: String(localized: "Another app already uses this shortcut.")
+            case .failed(let s): String(localized: "The shortcut couldn't be registered (error \(s)).", comment: "%d is an error code")
             }
         }
     }

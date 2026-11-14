@@ -1,7 +1,5 @@
 import AppKit
 
-LegacyMigration.run()
-
 MainActor.assumeIsolated {
     let app = NSApplication.shared
     let delegate = AppDelegate()

@@ -166,7 +166,7 @@ struct OnboardingView: View {
         }
     }
 
-    private func primary(_ title: String, systemImage: String? = nil, prominent: Bool = true,
+    private func primary(_ title: LocalizedStringKey, systemImage: String? = nil, prominent: Bool = true,
                          action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 6) {
@@ -237,7 +237,7 @@ private struct PermissionsStep: View {
                             .contentTransition(.symbolEffect(.replace))
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Accessibility").font(.headline)
-                            Text(granted ? "Granted — \(controller.registry.entries.count) windows found." : "Not granted yet")
+                            (granted ? Text("Granted — \(controller.registry.entries.count) windows found.") : Text("Not granted yet"))
                                 .foregroundStyle(.secondary)
                         }
                         Spacer()
@@ -292,7 +292,7 @@ private struct ShortcutStep: View {
             }, onRejected: { message = $0 }, large: true)
                 .padding(.top, 24)
             Group {
-                if let warning = controller.shortcutError ?? settings.shortcut.knownConflict.map({ "May conflict with: \($0)." }) {
+                if let warning = controller.shortcutError ?? settings.shortcut.knownConflict.map({ String(localized: "May conflict with: \($0).", comment: "%@ is a system shortcut name") }) {
                     Label(warning, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                 } else if let message {
                     Label(message, systemImage: "info.circle").foregroundStyle(.secondary)
@@ -449,7 +449,7 @@ private struct DoneStep: View {
         }
     }
 
-    private func tip(_ keys: String, _ text: String) -> some View {
+    private func tip(_ keys: String, _ text: LocalizedStringKey) -> some View {
         GridRow {
             Keycap(keys).gridColumnAlignment(.trailing)
             Text(text).foregroundStyle(.secondary)
@@ -460,8 +460,8 @@ private struct DoneStep: View {
 // MARK: - Building blocks
 
 private struct StepHeader: View {
-    let title: String
-    let subtitle: String
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
 
     var body: some View {
         VStack(spacing: 10) {
@@ -507,8 +507,8 @@ private struct Card<Content: View>: View {
 }
 
 private struct ChoiceCard: View {
-    let title: String
-    let detail: String
+    let title: LocalizedStringKey
+    let detail: LocalizedStringKey
     let systemImage: String
     let selected: Bool
     let action: () -> Void
@@ -544,8 +544,8 @@ private struct ChoiceCard: View {
 private struct LinkRow: View {
     let systemImage: String
     let color: Color
-    let title: String
-    let detail: String
+    let title: LocalizedStringKey
+    let detail: LocalizedStringKey
     let action: () -> Void
     @State private var hovering = false
     @Environment(\.colorScheme) private var scheme

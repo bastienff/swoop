@@ -63,7 +63,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        let open = NSMenuItem(title: "Open Swoop", action: #selector(openSwoop), keyEquivalent: "")
+        let open = NSMenuItem(title: String(localized: "Open Swoop"), action: #selector(openSwoop), keyEquivalent: "")
         open.target = self
         let shortcut = shortcutDisplay()
         if !shortcut.isEmpty { open.title += "  (\(shortcut))" }
@@ -71,40 +71,40 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         menu.addItem(.separator())
 
         let trusted = isAccessibilityTrusted()
-        let ax = NSMenuItem(title: trusted ? "Accessibility: Granted" : "Accessibility: Not Granted — Fix…",
+        let ax = NSMenuItem(title: trusted ? String(localized: "Accessibility: Granted") : String(localized: "Accessibility: Not Granted — Fix…"),
                             action: trusted ? nil : #selector(openPermissions), keyEquivalent: "")
         ax.target = self
         ax.image = NSImage(systemSymbolName: trusted ? "checkmark.circle.fill" : "exclamationmark.triangle.fill", accessibilityDescription: nil)
         menu.addItem(ax)
 
-        let login = NSMenuItem(title: "Launch at Login", action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
+        let login = NSMenuItem(title: String(localized: "Launch at Login"), action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
         login.target = self
         login.state = LaunchAtLogin.isEnabled ? .on : .off
         menu.addItem(login)
         menu.addItem(.separator())
 
-        let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        let settings = NSMenuItem(title: String(localized: "Settings…"), action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
-        let about = NSMenuItem(title: "About Swoop", action: #selector(about), keyEquivalent: "")
+        let about = NSMenuItem(title: String(localized: "About Swoop"), action: #selector(about), keyEquivalent: "")
         about.target = self
         menu.addItem(about)
-        let report = NSMenuItem(title: "Report a Problem…", action: #selector(reportProblem), keyEquivalent: "")
+        let report = NSMenuItem(title: String(localized: "Report a Problem…"), action: #selector(reportProblem), keyEquivalent: "")
         report.target = self
         report.image = NSImage(systemSymbolName: "exclamationmark.bubble", accessibilityDescription: nil)
         menu.addItem(report)
         // ⌥ reveals it in place of "Report a Problem…" (standard alternate menu item).
-        let diagnostics = NSMenuItem(title: "Save Diagnostics Report", action: #selector(saveDiagnostics), keyEquivalent: "")
+        let diagnostics = NSMenuItem(title: String(localized: "Save Diagnostics Report"), action: #selector(saveDiagnostics), keyEquivalent: "")
         diagnostics.target = self
         diagnostics.image = NSImage(systemSymbolName: "doc.text.magnifyingglass", accessibilityDescription: nil)
         diagnostics.isAlternate = true
         diagnostics.keyEquivalentModifierMask = .option
         menu.addItem(diagnostics)
-        let suggest = NSMenuItem(title: "Suggest a Feature…", action: #selector(suggestFeature), keyEquivalent: "")
+        let suggest = NSMenuItem(title: String(localized: "Suggest a Feature…"), action: #selector(suggestFeature), keyEquivalent: "")
         suggest.target = self
         suggest.image = NSImage(systemSymbolName: "lightbulb", accessibilityDescription: nil)
         menu.addItem(suggest)
-        let coffee = NSMenuItem(title: "Buy Me a Coffee ♥", action: #selector(buyMeACoffee), keyEquivalent: "")
+        let coffee = NSMenuItem(title: String(localized: "Buy Me a Coffee ♥"), action: #selector(buyMeACoffee), keyEquivalent: "")
         coffee.target = self
         coffee.image = NSImage(systemSymbolName: "cup.and.saucer.fill", accessibilityDescription: nil)
         menu.addItem(coffee)
@@ -116,7 +116,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             menu.addItem(debug)
         }
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "Quit Swoop", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: String(localized: "Quit Swoop"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
     }
 
     @objc private func openSwoop() { onOpenSwoop?() }
@@ -134,8 +134,8 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     /// The standard macOS About panel (Classic theme).
     static func showStandardAbout() {
         NSApp.activate()
-        let credits = NSMutableAttributedString(string: "Just a window switcher. Window information never leaves this Mac.\n\n")
-        credits.append(NSAttributedString(string: "Swooped you to the right window? Buy me a coffee ☕",
+        let credits = NSMutableAttributedString(string: String(localized: "Just a window switcher. Window information never leaves this Mac.") + "\n\n")
+        credits.append(NSAttributedString(string: String(localized: "Swooped you to the right window? Buy me a coffee ☕"),
                                           attributes: [.link: AppLinks.buyMeACoffee]))
         let centered = NSMutableParagraphStyle()
         centered.alignment = .center

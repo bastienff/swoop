@@ -5,7 +5,7 @@ import SwoopCore
 enum AppearanceMode: String, CaseIterable, Identifiable, Sendable {
     case system, light, dark
     var id: String { rawValue }
-    var label: String { switch self { case .system: "Follow System"; case .light: "Light"; case .dark: "Dark" } }
+    var label: String { switch self { case .system: String(localized: "Follow System"); case .light: String(localized: "Light"); case .dark: String(localized: "Dark") } }
     var nsAppearance: NSAppearance? {
         switch self {
         case .system: nil
@@ -20,13 +20,19 @@ enum AppearanceMode: String, CaseIterable, Identifiable, Sendable {
 enum AppTheme: String, CaseIterable, Identifiable, Sendable {
     case swoop, classic
     var id: String { rawValue }
-    var label: String { self == .swoop ? "Swoop" : "Classic" }
+    var label: String { self == .swoop ? "Swoop" : String(localized: "Classic", comment: "Theme name") }
 }
 
 enum IconSize: String, CaseIterable, Identifiable, Sendable {
     case small, medium, large
     var id: String { rawValue }
-    var label: String { rawValue.capitalized }
+    var label: String {
+        switch self {
+        case .small: String(localized: "Small", comment: "Icon size")
+        case .medium: String(localized: "Medium", comment: "Icon size")
+        case .large: String(localized: "Large", comment: "Icon size")
+        }
+    }
     var points: Double { switch self { case .small: 64; case .medium: 80; case .large: 96 } }
 }
 
@@ -36,9 +42,9 @@ enum PanelLayout: String, CaseIterable, Identifiable, Sendable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .grid: "Grid"
-        case .compactList: "List · Compact"
-        case .comfortableList: "List · Comfortable"
+        case .grid: String(localized: "Grid")
+        case .compactList: String(localized: "List · Compact")
+        case .comfortableList: String(localized: "List · Comfortable")
         }
     }
     var isList: Bool { self != .grid }
@@ -49,9 +55,9 @@ enum PanelDisplay: String, CaseIterable, Identifiable, Sendable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .activeWindow: "Display with the active window"
-        case .mouseCursor: "Display with the mouse cursor"
-        case .primary: "Primary display"
+        case .activeWindow: String(localized: "Display with the active window")
+        case .mouseCursor: String(localized: "Display with the mouse cursor")
+        case .primary: String(localized: "Primary display")
         }
     }
 }
@@ -59,16 +65,16 @@ enum PanelDisplay: String, CaseIterable, Identifiable, Sendable {
 extension WindowOrder {
     var label: String {
         switch self {
-        case .smart: "Smart"
-        case .recent: "Recent use"
-        case .name: "Name"
+        case .smart: String(localized: "Smart", comment: "Window order")
+        case .recent: String(localized: "Recent use")
+        case .name: String(localized: "Name", comment: "Window order: alphabetical")
         }
     }
     var explanation: String {
         switch self {
-        case .smart: "Most recently used first, but the window you're in comes second, so the window you came from is selected: open Swoop and press Return to go back."
-        case .recent: "Most recently used first, starting with the window you're in."
-        case .name: "Alphabetical by app, then by window title."
+        case .smart: String(localized: "Most recently used first, but the window you're in comes second, so the window you came from is selected: open Swoop and press Return to go back.")
+        case .recent: String(localized: "Most recently used first, starting with the window you're in.")
+        case .name: String(localized: "Alphabetical by app, then by window title.")
         }
     }
 }
@@ -82,8 +88,8 @@ enum SwitcherMode: String, CaseIterable, Identifiable, Sendable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .stayOpen: "Keep the switcher open"
-        case .switchOnRelease: "Switch to the selected window"
+        case .stayOpen: String(localized: "Keep the switcher open")
+        case .switchOnRelease: String(localized: "Switch to the selected window")
         }
     }
 }

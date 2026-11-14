@@ -9,14 +9,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     #endif
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        #if DEBUG
         if Probe.run(arguments: CommandLine.arguments) { return }
+        #endif
         LastExternalApp.shared.start()
         let controller = AppController()
         self.controller = controller
         let settingsWindow = SettingsWindowController(controller: controller)
         // First launch: the guided setup. Afterwards (e.g. Accessibility revoked, or "Fix…" in the menu),
         // only its permissions step.
-        let onboarding = HostedWindowController(title: "Welcome to Swoop", staysVisible: true, chromeless: true) { [weak controller] () -> OnboardingView in
+        let onboarding = HostedWindowController(title: String(localized: "Welcome to Swoop"), staysVisible: true, chromeless: true) { [weak controller] () -> OnboardingView in
             let c = controller!
             let model = OnboardingModel(permissionsOnly: c.settings.onboardingCompleted)
             c.onboardingModel = model
@@ -33,7 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             controller?.onboardingModel = nil
         }
         // Swoop theme only; Classic keeps the standard About panel.
-        let about = HostedWindowController(title: "About Swoop", chromeless: true) { AboutView() }
+        let about = HostedWindowController(title: String(localized: "About Swoop"), chromeless: true) { AboutView() }
         controller.openAboutHandler = { about.show() }
         controller.openSettingsHandler = { settingsWindow.show() }
         controller.selectSettingsPane = { settingsWindow.select($0) }

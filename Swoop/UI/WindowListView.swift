@@ -176,10 +176,10 @@ struct WindowListRow: View {
     /// Status the grid has no room for. At most two, most important first.
     private var chips: [String] {
         var c: [String] = []
-        if entry.isMinimized { c.append("Minimized") }
-        if entry.isFullScreen { c.append("Full screen") }
-        if entry.isNativeTab { c.append("Tab") }
-        if !entry.isOnCurrentSpace && !entry.isMinimized && !entry.isFullScreen { c.append("Other desktop") }
+        if entry.isMinimized { c.append(String(localized: "Minimized", comment: "Window status")) }
+        if entry.isFullScreen { c.append(String(localized: "Full screen", comment: "Window status")) }
+        if entry.isNativeTab { c.append(String(localized: "Tab", comment: "Window status")) }
+        if !entry.isOnCurrentSpace && !entry.isMinimized && !entry.isFullScreen { c.append(String(localized: "Other desktop", comment: "Window status")) }
         return Array(c.prefix(2))
     }
 

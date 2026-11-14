@@ -10,34 +10,34 @@ enum MainMenu {
 
         let appItem = NSMenuItem()
         let app = NSMenu(title: "Swoop")
-        let settings = NSMenuItem(title: "Settings…", action: openSettings, keyEquivalent: ",")
+        let settings = NSMenuItem(title: String(localized: "Settings…"), action: openSettings, keyEquivalent: ",")
         settings.target = target
         app.addItem(settings)
         app.addItem(.separator())
-        app.addItem(NSMenuItem(title: "Hide Swoop", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h"))
-        app.addItem(NSMenuItem(title: "Quit Swoop", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        app.addItem(NSMenuItem(title: String(localized: "Hide Swoop"), action: #selector(NSApplication.hide(_:)), keyEquivalent: "h"))
+        app.addItem(NSMenuItem(title: String(localized: "Quit Swoop"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         appItem.submenu = app
         main.addItem(appItem)
 
         // Edit: nil-targeted actions go to the first responder (the focused text field).
         let editItem = NSMenuItem()
-        let edit = NSMenu(title: "Edit")
-        edit.addItem(NSMenuItem(title: "Undo", action: Selector(("undo:")), keyEquivalent: "z"))
-        let redo = NSMenuItem(title: "Redo", action: Selector(("redo:")), keyEquivalent: "z")
+        let edit = NSMenu(title: String(localized: "Edit", comment: "Main menu"))
+        edit.addItem(NSMenuItem(title: String(localized: "Undo"), action: Selector(("undo:")), keyEquivalent: "z"))
+        let redo = NSMenuItem(title: String(localized: "Redo"), action: Selector(("redo:")), keyEquivalent: "z")
         redo.keyEquivalentModifierMask = [.command, .shift]
         edit.addItem(redo)
         edit.addItem(.separator())
-        edit.addItem(NSMenuItem(title: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x"))
-        edit.addItem(NSMenuItem(title: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c"))
-        edit.addItem(NSMenuItem(title: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v"))
-        edit.addItem(NSMenuItem(title: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"))
+        edit.addItem(NSMenuItem(title: String(localized: "Cut"), action: #selector(NSText.cut(_:)), keyEquivalent: "x"))
+        edit.addItem(NSMenuItem(title: String(localized: "Copy"), action: #selector(NSText.copy(_:)), keyEquivalent: "c"))
+        edit.addItem(NSMenuItem(title: String(localized: "Paste"), action: #selector(NSText.paste(_:)), keyEquivalent: "v"))
+        edit.addItem(NSMenuItem(title: String(localized: "Select All"), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"))
         editItem.submenu = edit
         main.addItem(editItem)
 
         // ⌘W closes Settings / onboarding windows.
         let windowItem = NSMenuItem()
-        let window = NSMenu(title: "Window")
-        window.addItem(NSMenuItem(title: "Close", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w"))
+        let window = NSMenu(title: String(localized: "Window", comment: "Main menu"))
+        window.addItem(NSMenuItem(title: String(localized: "Close"), action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w"))
         windowItem.submenu = window
         main.addItem(windowItem)
 

@@ -3,9 +3,11 @@ import ApplicationServices
 import Carbon
 import Foundation
 
+#if DEBUG
+
 /// Diagnostic experiments used to validate platform assumptions on a real desktop.
 /// Invoked via `open Swoop.app --args --probe <command> <out-file> [args...]`.
-/// Output is plain text written to <out-file>. Not part of the user-facing flow.
+/// Output is plain text written to <out-file>. Not part of the user-facing flow. DEBUG builds only.
 @MainActor
 enum Probe {
     private static var out = ""
@@ -508,3 +510,4 @@ enum Probe {
         }
     }
 }
+#endif

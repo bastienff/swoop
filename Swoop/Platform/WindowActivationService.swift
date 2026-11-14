@@ -58,7 +58,7 @@ final class WindowActivationService {
 
     func activate(_ t: ActivationTarget) async -> ActivationResult {
         guard let app = NSRunningApplication(processIdentifier: t.pid), !app.isTerminated else {
-            return .failed("\(t.appName) is no longer running.")
+            return .failed(String(localized: "\(t.appName) is no longer running.", comment: "%@ is an app name"))
         }
         let axApp = AXElement.application(t.pid, timeout: 0.5)
         log.info("activate \(t.appName, privacy: .public) “\(t.title, privacy: .private)” route=\(t.route.kind, privacy: .public)")
@@ -75,11 +75,11 @@ final class WindowActivationService {
                 focus(group, app: app, axApp: axApp)
                 let arrived = await waitUntil(timeout: 2.0) { [self] in currentWindows(axApp).contains(group) }
                 if Task.isCancelled { return .cancelled }
-                guard arrived else { return .failed("Couldn't reach the desktop containing “\(title)”.") }
+                guard arrived else { return .failed(String(localized: "Couldn't reach the desktop containing “\(title)”.", comment: "%@ is a window title")) }
             }
             // Step 2: switch tab locally (safe; F5/F9).
             guard selectTabLocally(title: title, app: app, axApp: axApp) else {
-                return .failed("The tab “\(title)” no longer exists.")
+                return .failed(String(localized: "The tab “\(title)” no longer exists.", comment: "%@ is a tab title"))
             }
 
         case .menu:
@@ -120,7 +120,7 @@ final class WindowActivationService {
     /// then find the target among windows/tabs on that Space. Fails safely otherwise.
     private func navigateViaAppThenResolve(_ t: ActivationTarget, app: NSRunningApplication, axApp: AXElement) async -> ActivationResult {
         if resolveLocally(t, app: app, axApp: axApp) { return await confirmFocus(t, app: app, axApp: axApp) }
-        let unreachable = "Couldn't reach “\(t.title)” without moving it. Visit its desktop once so Swoop can learn where it is."
+        let unreachable = String(localized: "Couldn't reach “\(t.title)” without moving it. Visit its desktop once so Swoop can learn where it is.", comment: "%@ is a window title")
         let main = axApp.element(kAXMainWindowAttribute)
         if let main, currentWindows(axApp).contains(main) {
             // Navigating via the main window would not change Space: nothing more we can do safely.
@@ -204,7 +204,7 @@ final class WindowActivationService {
             }
         }
         if confirmed || NSWorkspace.shared.frontmostApplication?.processIdentifier == t.pid { return .activated }
-        return .failed("\(t.appName) didn't accept focus.")
+        return .failed(String(localized: "\(t.appName) didn't accept focus.", comment: "%@ is an app name"))
     }
 
     // MARK: - Helpers

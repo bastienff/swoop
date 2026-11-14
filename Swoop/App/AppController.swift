@@ -115,13 +115,13 @@ final class AppController {
     func reportProblem() {
         NSApp.activate()
         let alert = NSAlert()
-        alert.messageText = "Report a Problem"
-        alert.informativeText = """
-            Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on             GitHub. It has Swoop's version and settings, this session's log and your windows' apps,             \(settings.diagnosticsIncludeTitles ? "including window titles — check it for anything private" : "without window titles").             Nothing is sent until you submit the report.
-            """
-        alert.addButton(withTitle: "Save Report & Open GitHub")
-        alert.addButton(withTitle: "Open GitHub Only")
-        alert.addButton(withTitle: "Cancel")
+        alert.messageText = String(localized: "Report a Problem")
+        alert.informativeText = settings.diagnosticsIncludeTitles
+            ? String(localized: "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, this session's log and your windows' apps, including window titles — check it for anything private. Nothing is sent until you submit the report.")
+            : String(localized: "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, this session's log and your windows' apps, without window titles. Nothing is sent until you submit the report.")
+        alert.addButton(withTitle: String(localized: "Save Report & Open GitHub"))
+        alert.addButton(withTitle: String(localized: "Open GitHub Only"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         switch alert.runModal() {
         case .alertFirstButtonReturn:
             Task {

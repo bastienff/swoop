@@ -12,11 +12,11 @@ enum SettingsPane: CaseIterable {
 
     var title: String {
         switch self {
-        case .keyboard: "Keyboard"
-        case .appearance: "Appearance"
-        case .behavior: "Behavior"
-        case .permissions: "Permissions"
-        case .advanced: "Advanced"
+        case .keyboard: String(localized: "Keyboard", comment: "Settings tab")
+        case .appearance: String(localized: "Appearance", comment: "Settings tab")
+        case .behavior: String(localized: "Behavior", comment: "Settings tab")
+        case .permissions: String(localized: "Permissions", comment: "Settings tab")
+        case .advanced: String(localized: "Advanced", comment: "Settings tab")
         #if DEBUG
         case .debug: "Debug"
         #endif
@@ -121,21 +121,21 @@ private struct KeyboardSettings: View {
         let s = controller.settings
         switch s.switcherMode {
         case .stayOpen:
-            return "The switcher stays open after you release the keys. Press the shortcut again to move to the next window (add ⇧ to go back); Escape closes it."
+            return String(localized: "The switcher stays open after you release the keys. Press the shortcut again to move to the next window (add ⇧ to go back); Escape closes it.")
         case .switchOnRelease:
             let hold = s.shortcut.holdModifiers.displayString
             if hold.isEmpty {
-                return "A shortcut without a modifier key can't be held, so the switcher stays open. Record a shortcut with ⌘, ⌥ or ⌃ to switch on release."
+                return String(localized: "A shortcut without a modifier key can't be held, so the switcher stays open. Record a shortcut with ⌘, ⌥ or ⌃ to switch on release.")
             }
-            return "Keep \(hold) held and press the shortcut again (or keep it pressed) to move through the windows; add ⇧ to go back. Release \(hold) to switch to the selected window. Escape cancels."
+            return String(localized: "Keep \(hold) held and press the shortcut again (or keep it pressed) to move through the windows; add ⇧ to go back. Release \(hold) to switch to the selected window. Escape cancels.", comment: "%@ is a modifier key such as ⌥")
         }
     }
 
     private var conflictWarning: String? {
         let s = controller.settings
         if let error = controller.shortcutError { return error }
-        if s.shortcut.isUnmodified && !s.allowBareTab { return "Bare keys are disabled; the shortcut is inactive." }
-        if let known = s.shortcut.knownConflict { return "May conflict with: \(known)." }
+        if s.shortcut.isUnmodified && !s.allowBareTab { return String(localized: "Bare keys are disabled; the shortcut is inactive.") }
+        if let known = s.shortcut.knownConflict { return String(localized: "May conflict with: \(known).", comment: "%@ is a system shortcut name") }
         return nil
     }
 }
@@ -198,8 +198,8 @@ private struct AppearanceSettings: View {
                 Toggle("Always show the search field", isOn: $settings.alwaysShowSearchField)
             } footer: {
                 Text(settings.panelDraggable
-                     ? "Drag the switcher by its background; it reopens where you left it on each display. The search field appears as soon as you type when it's hidden."
-                     : "The search field appears as soon as you type when it's hidden.")
+                     ? String(localized: "Drag the switcher by its background; it reopens where you left it on each display. The search field appears as soon as you type when it's hidden.")
+                     : String(localized: "The search field appears as soon as you type when it's hidden."))
                     .font(.footnote).foregroundStyle(.secondary)
             }
         }
@@ -292,10 +292,10 @@ struct PermissionsSettings: View {
 }
 
 struct PermissionRow: View {
-    let title: String
+    let title: LocalizedStringKey
     let granted: Bool?
     let required: Bool
-    let detail: String
+    let detail: LocalizedStringKey
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
@@ -305,7 +305,7 @@ struct PermissionRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
                     Text(title).font(.headline)
-                    if let granted { Text(granted ? "Granted" : "Not granted").foregroundStyle(.secondary) }
+                    if let granted { Text(granted ? "Granted" : "Not granted" as LocalizedStringKey).foregroundStyle(.secondary) }
                 }
                 Text(detail).font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
@@ -326,9 +326,9 @@ private struct AdvancedSettings: View {
             Section {
                 Toggle("Debug logging", isOn: $settings.debugLogging)
                 Button("Refresh Window Registry") {
-                    Task { await controller.registry.refresh(); status = "Refreshed: \(controller.registry.entries.count) windows." }
+                    Task { await controller.registry.refresh(); status = String(localized: "Refreshed: \(controller.registry.entries.count) windows.") }
                 }
-                Button("Reset Recent Usage") { controller.recents.reset(); status = "Recent usage cleared." }
+                Button("Reset Recent Usage") { controller.recents.reset(); status = String(localized: "Recent usage cleared.") }
                 if !status.isEmpty { Text(status).font(.footnote).foregroundStyle(.secondary) }
             } footer: {
                 Text("Debug logging writes the window list, with titles, to the system log (subsystem com.bastienff.swoop).")
@@ -339,7 +339,7 @@ private struct AdvancedSettings: View {
                 HStack {
                     Button("Save Diagnostics Report…") {
                         Task {
-                            if let url = await DiagnosticsReport.saveAndReveal(controller) { status = "Saved \(url.lastPathComponent)." }
+                            if let url = await DiagnosticsReport.saveAndReveal(controller) { status = String(localized: "Saved \(url.lastPathComponent).", comment: "%@ is a file name") }
                         }
                     }
                     Button("Show Reports Folder") {

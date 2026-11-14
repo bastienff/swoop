@@ -214,7 +214,7 @@ struct SupportCardView: View {
                         .resizable().frame(width: 44, height: 44)
                 }
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(switches >= 2 ? "Swoop has switched you \(switches.formatted()) times" : "Enjoying Swoop?")
+                    (switches >= 2 ? Text("Swoop has switched you \(switches.formatted()) times") : Text("Enjoying Swoop?"))
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(titleColor)
                     Text("It's free, has no ads, and is made by one person. If it saves you time, a coffee or a GitHub star keeps it going.")

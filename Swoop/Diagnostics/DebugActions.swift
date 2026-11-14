@@ -37,7 +37,6 @@ enum DebugActions {
 
     static func resetAllSettingsAndRelaunch() {
         UserDefaults.standard.removePersistentDomain(forName: bundleID)
-        UserDefaults.standard.set(true, forKey: "migratedFromLegacySwitcher") // don't re-import old data
         relaunch()
     }
 

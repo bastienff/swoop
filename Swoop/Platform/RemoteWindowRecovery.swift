@@ -23,7 +23,8 @@ final class RemoteWindowRecovery: Sendable {
     }
 
     private static let defaultsKey = "remoteWindowIDs.v1"
-    /// Work/pause slices: at most ~25% of one core, at utility QoS, and only while a sweep is pending.
+    /// Work/pause slices: at most ~25% of one core per app being swept, at utility QoS, and only while a sweep
+    /// is pending. Pauses are scheduled, not slept, so sweeps of different apps interleave on the serial queue.
     private static let sliceNanos: UInt64 = 8_000_000
     private static let pauseSeconds: TimeInterval = 0.024
 
@@ -100,38 +101,58 @@ final class RemoteWindowRecovery: Sendable {
             return true
         }
         guard start else { return }
-        queue.async { [self] in sweep(key: key, pid: pid, highWater: highWater, knownWindows: knownWindows) }
+        queue.async { [self] in
+            let skip = Set(knownWindows.compactMap(RemoteElements.windowNumber))
+            sweepSlice(SweepRun(key: key, pid: pid, highWater: highWater, skip: skip))
+        }
     }
 
-    private func sweep(key: String, pid: pid_t, highWater: UInt64, knownWindows: [AXElement]) {
-        let t0 = DispatchTime.now().uptimeNanoseconds
-        var skip = Set(knownWindows.compactMap(RemoteElements.windowNumber))
+    /// Progress of one app's sweep, carried from slice to slice.
+    private struct SweepRun: Sendable {
+        let key: String
+        let pid: pid_t
+        let highWater: UInt64
+        var skip: Set<CGWindowID>
         var found: [UInt64] = []
         var checked: UInt64 = 0
-        while kill(pid, 0) == 0 {
-            let range = state.withLock { s -> Range<UInt64>? in
-                guard let a = s.apps[key] else { return nil }
-                return RemoteRecoveryPolicy.nextSweepRange(cursor: a.cursor, highWater: highWater, swept: a.swept)
-            }
-            guard let range else { break }
-            let deadline = DispatchTime.now().uptimeNanoseconds + Self.sliceNanos
-            let next = RemoteElements.sweepWindows(pid: pid, range: range, skipWindows: skip, deadline: deadline) { id, e in
-                found.append(id)
-                if let wid = RemoteElements.windowNumber(of: e) { skip.insert(wid) }
-            }
-            checked += next - range.lowerBound
-            state.withLock { s in
-                s.apps[key]?.cursor = next
-                s.apps[key]?.swept += next - range.lowerBound
-            }
-            if next < range.upperBound { Thread.sleep(forTimeInterval: Self.pauseSeconds) }
+        let t0 = DispatchTime.now().uptimeNanoseconds
+    }
+
+    /// One work slice, then the next one is scheduled after a pause (the queue stays free in between, so
+    /// other apps' sweeps and saves interleave instead of waiting).
+    private func sweepSlice(_ run: SweepRun) {
+        var run = run
+        let (key, highWater) = (run.key, run.highWater)
+        let range = state.withLock { s -> Range<UInt64>? in
+            guard let a = s.apps[key] else { return nil }
+            return RemoteRecoveryPolicy.nextSweepRange(cursor: a.cursor, highWater: highWater, swept: a.swept)
         }
+        guard kill(run.pid, 0) == 0, let range else { finishSweep(run); return }
+        let deadline = DispatchTime.now().uptimeNanoseconds + Self.sliceNanos
+        let next = RemoteElements.sweepWindows(pid: run.pid, range: range, skipWindows: run.skip, deadline: deadline) { id, e in
+            run.found.append(id)
+            if let wid = RemoteElements.windowNumber(of: e) { run.skip.insert(wid) }
+        }
+        run.checked += next - range.lowerBound
+        state.withLock { s in
+            s.apps[key]?.cursor = next
+            s.apps[key]?.swept += next - range.lowerBound
+        }
+        if next < range.upperBound {
+            queue.asyncAfter(deadline: .now() + Self.pauseSeconds) { [self, run] in sweepSlice(run) }
+        } else {
+            queue.async { [self, run] in sweepSlice(run) } // range done: next range (or finish), no pause
+        }
+    }
+
+    private func finishSweep(_ run: SweepRun) {
+        let key = run.key
         state.withLock { $0.apps[key]?.sweeping = false }
-        let ms = (DispatchTime.now().uptimeNanoseconds - t0) / 1_000_000
-        log.info("sweep pid \(pid): \(checked) ids in \(ms) ms, \(found.count) windows")
-        guard !found.isEmpty else { scheduleSave(); return }
-        remember(key, found)
-        onFound(pid)
+        let ms = (DispatchTime.now().uptimeNanoseconds - run.t0) / 1_000_000
+        log.info("sweep pid \(run.pid): \(run.checked) ids in \(ms) ms, \(run.found.count) windows")
+        guard !run.found.isEmpty else { scheduleSave(); return }
+        remember(run.key, run.found)
+        onFound(run.pid)
     }
 
     private func scheduleSave() {

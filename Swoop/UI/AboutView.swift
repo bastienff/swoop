@@ -10,7 +10,7 @@ struct AboutView: View {
         VStack(spacing: 0) {
             BrandIcon(size: 84, softInLight: true)
                 .padding(.top, 46)
-            Text("Swoop")
+            Text(verbatim: "Swoop")
                 .font(.system(size: 24, weight: .bold))
                 .padding(.top, 12)
             Text("Version \(AppLinks.appVersion)")
@@ -43,7 +43,7 @@ struct AboutView: View {
         .background(BrandBackground(scale: 0.5).ignoresSafeArea())
     }
 
-    private func link(_ title: String, _ url: URL) -> some View {
+    private func link(_ title: LocalizedStringKey, _ url: URL) -> some View {
         Button(title) { NSWorkspace.shared.open(url) }
             .buttonStyle(.plain)
             .font(.system(size: 11.5))

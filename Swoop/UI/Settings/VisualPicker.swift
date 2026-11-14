@@ -264,5 +264,5 @@ struct IconSizeThumbnail: View {
 /// Position mode for the segmented control (backed by `AppSettings.panelDraggable`).
 enum PanelPositionMode: String, CaseIterable, Hashable {
     case centered, draggable
-    var label: String { self == .centered ? "Centered" : "Draggable" }
+    var label: String { self == .centered ? String(localized: "Centered", comment: "Switcher position") : String(localized: "Draggable", comment: "Switcher position") }
 }

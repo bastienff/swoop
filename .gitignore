@@ -70,10 +70,11 @@ AuthKey_*.p8
 # ── Private references (screenshots of a real desktop) ──────────
 references/
 
-# ── Markdown: only README.md for now ────────────────────────────
-# Undecided which docs to publish. Allow one later with a line like:  !docs/RELEASING.md
+# ── Markdown: only README.md and chosen docs ────────────────────
+# Other docs stay private. Allow one with a line like:  !/docs/RELEASING.md
 *.md
 !/README.md
+!/docs/ARCHITECTURE.md
 # Community files GitHub shows on the repo (contributing, conduct, security, issue/PR templates)
 !/CONTRIBUTING.md
 !/CODE_OF_CONDUCT.md

@@ -19,7 +19,7 @@ struct ShortcutRecorder: View {
         Button {
             recording ? stop() : start()
         } label: {
-            Text(recording ? "Type shortcut…" : shortcut.displayString)
+            Text(recording ? String(localized: "Type shortcut…") : shortcut.displayString)
                 .font(.system(size: large ? 22 : 13, weight: large ? .semibold : .medium, design: .rounded))
                 .frame(minWidth: large ? 240 : 120, minHeight: large ? 38 : nil)
         }
@@ -58,11 +58,11 @@ struct ShortcutRecorder: View {
         if s.modifiers.isEmpty && !functionKeys.contains(s.keyCode) {
             if s.isBareTab && allowBareKeys { return nil }
             return s.isBareTab
-                ? "Enable “Allow bare Tab” first: it intercepts Tab in every app."
-                : "Add at least one modifier (⌘, ⌥, ⌃ or ⇧)."
+                ? String(localized: "Enable “Allow bare Tab” first: it intercepts Tab in every app.")
+                : String(localized: "Add at least one modifier (⌘, ⌥, ⌃ or ⇧).")
         }
         if s.modifiers == [.shift] && !functionKeys.contains(s.keyCode) {
-            return "Shift alone would block typing that character. Add ⌘, ⌥ or ⌃."
+            return String(localized: "Shift alone would block typing that character. Add ⌘, ⌥ or ⌃.")
         }
         return nil
     }

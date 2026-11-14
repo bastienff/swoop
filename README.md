@@ -178,13 +178,13 @@ after every build.
 
 The code is split into a pure-Swift core (`Packages/SwoopCore`: search, grid, merging, ordering,
 fully unit-tested) and the app (`Swoop/`: Accessibility, activation, UI). Start with
-[`CLAUDE.md`](CLAUDE.md) for the rules that must not regress, and
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the why.
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): the rules that must not regress, and the verified
+platform facts behind them.
 
 Want to help? Read [`CONTRIBUTING.md`](CONTRIBUTING.md). Found a security issue? See [`SECURITY.md`](SECURITY.md).
 
-Publishing a new version (GitHub release + Homebrew) is automated; the one-time setup and the
-checklist are in [`docs/RELEASING.md`](docs/RELEASING.md).
+Publishing a new version is automated: a GitHub release builds the app and updates the Homebrew
+cask.
 
 ## Support
 

@@ -83,17 +83,17 @@ private struct EmptyResultsView: View {
 
     private var title: String {
         switch state {
-        case .searching: "Finding windows…"
-        case .noWindows: "No windows"
-        case .noMatches: "No matching windows"
+        case .searching: String(localized: "Finding windows…")
+        case .noWindows: String(localized: "No windows")
+        case .noMatches: String(localized: "No matching windows")
         }
     }
 
     private var hint: String {
         switch state {
-        case .searching: "Looking at your open apps."
-        case .noWindows: "Open a window in any app, then press the shortcut again."
-        case .noMatches: "Try an app name or part of a window title."
+        case .searching: String(localized: "Looking at your open apps.")
+        case .noWindows: String(localized: "Open a window in any app, then press the shortcut again.")
+        case .noMatches: String(localized: "Try an app name or part of a window title.")
         }
     }
 }
@@ -269,9 +269,9 @@ struct WindowGridItemView: View {
 
     private var helpText: String {
         var parts = ["\(entry.appName) — \(entry.title)"]
-        if entry.isMinimized { parts.append("Minimized") }
-        if entry.isNativeTab { parts.append("Native tab") }
-        if !entry.isOnCurrentSpace && !entry.isMinimized { parts.append("On another desktop") }
+        if entry.isMinimized { parts.append(String(localized: "Minimized", comment: "Window status")) }
+        if entry.isNativeTab { parts.append(String(localized: "Native tab", comment: "Window status")) }
+        if !entry.isOnCurrentSpace && !entry.isMinimized { parts.append(String(localized: "On another desktop", comment: "Window status")) }
         return parts.joined(separator: " · ")
     }
 }
