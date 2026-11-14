@@ -9,6 +9,8 @@ struct ShortcutRecorder: View {
     let allowBareKeys: Bool
     var onRecordingChange: (Bool) -> Void = { _ in }
     var onRejected: (String) -> Void = { _ in }
+    /// Onboarding: a big key-cap style button.
+    var large = false
 
     @State private var recording = false
     @State private var monitor: Any?
@@ -18,10 +20,11 @@ struct ShortcutRecorder: View {
             recording ? stop() : start()
         } label: {
             Text(recording ? "Type shortcut…" : shortcut.displayString)
-                .font(.system(size: 13, weight: .medium, design: .rounded))
-                .frame(minWidth: 120)
+                .font(.system(size: large ? 22 : 13, weight: large ? .semibold : .medium, design: .rounded))
+                .frame(minWidth: large ? 240 : 120, minHeight: large ? 38 : nil)
         }
         .buttonStyle(.bordered)
+        .controlSize(large ? .large : .regular)
         .tint(recording ? .accentColor : nil)
         .onDisappear { stop() }
         .accessibilityHint("Click, then press the new key combination. Escape cancels.")

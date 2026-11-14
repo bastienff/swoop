@@ -85,13 +85,16 @@ final class HostedWindowController<Content: View>: NSObject, NSWindowDelegate {
     /// Keep the window visible above other apps while it is open (permission onboarding), except
     /// above the windows the user needs to act in (`PermissionWindowLayering`).
     private let staysVisible: Bool
+    /// Content runs under a transparent title bar (onboarding); the window moves by its background.
+    private let chromeless: Bool
     private var activationObserver: NSObjectProtocol?
     private let focus = FocusReturner()
     var onClose: (() -> Void)?
 
-    init(title: String, staysVisible: Bool = false, content: @escaping () -> Content) {
+    init(title: String, staysVisible: Bool = false, chromeless: Bool = false, content: @escaping () -> Content) {
         self.title = title
         self.staysVisible = staysVisible
+        self.chromeless = chromeless
         self.makeContent = content
     }
 
@@ -104,8 +107,18 @@ final class HostedWindowController<Content: View>: NSObject, NSWindowDelegate {
             let w = EscapeClosableWindow(contentViewController: hosting)
             w.title = title
             w.styleMask = [.titled, .closable, .miniaturizable]
+            if chromeless {
+                w.styleMask.insert(.fullSizeContentView)
+                w.titlebarAppearsTransparent = true
+                w.titleVisibility = .hidden
+                w.isMovableByWindowBackground = true
+            }
             w.isReleasedWhenClosed = false
             w.delegate = self
+            // Size to the content before centering (SwiftUI reports its size after the first layout).
+            hosting.view.layoutSubtreeIfNeeded()
+            let fitting = hosting.view.fittingSize
+            if fitting.width > 0, fitting.height > 0 { w.setContentSize(fitting) }
             w.center()
             window = w
         }

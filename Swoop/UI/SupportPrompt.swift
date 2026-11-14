@@ -28,6 +28,12 @@ final class SupportPromptController {
 
     var isVisible: Bool { panel?.isVisible ?? false }
 
+    /// The user bought a coffee or starred the repo elsewhere (onboarding): don't ask again.
+    func markSupported() {
+        state = SupportPromptPolicy.resolve(state, .supported, now: Date())
+        save()
+    }
+
     /// Called after every successful switch; shows the card if it's due.
     func recordSwitch() {
         state.switches += 1

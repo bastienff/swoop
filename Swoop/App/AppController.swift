@@ -23,6 +23,8 @@ final class AppController {
     var selectSettingsPane: ((Int) -> Void)?
     var openOnboardingHandler: (() -> Void)?
     var closeOnboarding: (() -> Void)?
+    /// The open onboarding's state (nil when closed).
+    var onboardingModel: OnboardingModel?
     var onAccessibilityGranted: (() -> Void)?
 
     private let log = Logger(subsystem: "com.bastienff.swoop", category: "app")

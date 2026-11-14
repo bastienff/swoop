@@ -124,7 +124,16 @@ final class DebugCommands {
             // layout grid|compact|comfortable
             let map: [String: PanelLayout] = ["grid": .grid, "compact": .compactList, "comfortable": .comfortableList]
             if let l = map[arg] { controller.settings.panelLayout = l }
-        case "onboarding": controller.openOnboardingHandler?()
+        case "onboarding":
+            // onboarding [full]: "full" shows the first-run setup again (resets the completed flag).
+            if arg == "full" { controller.closeOnboarding?(); controller.settings.onboardingCompleted = false }
+            controller.openOnboardingHandler?()
+        case "onboardingdenied":
+            // onboardingdenied on|off: preview the "not granted" permissions state.
+            controller.onboardingModel?.previewNotGranted = arg != "off"
+        case "onboardingstep":
+            // onboardingstep <index>: jump to a step of the open onboarding.
+            if let i = Int(arg) { controller.onboardingModel?.go(to: i) }
         case "supportcard":
             // supportcard [png]: shows the support card; optionally captures it (dark fill behind).
             controller.supportPrompt.show()
