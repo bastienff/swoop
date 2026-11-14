@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Menu bar → Check for Updates… in the Swoop theme (Classic shows a standard alert instead).
+/// Menu bar → Check for Updates in the Swoop theme (Classic shows a standard alert instead).
 /// Opens right away and follows the check live: checking → up to date / new version / couldn't check.
 struct UpdateWindowView: View {
     let updates: UpdateChecker

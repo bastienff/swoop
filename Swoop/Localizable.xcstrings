@@ -55,7 +55,7 @@
     "Accessibility: Granted" : {
 
     },
-    "Accessibility: Not Granted — Fix…" : {
+    "Accessibility: Not Granted — Fix" : {
 
     },
     "Add at least one modifier (⌘, ⌥, ⌃ or ⇧)." : {
@@ -88,6 +88,9 @@
     "Asking GitHub for the latest version." : {
 
     },
+    "Asks GitHub for the latest version number once a week. Nothing about you or your windows is sent. Change how often in Settings → Behavior." : {
+
+    },
     "Attach the report to a bug report on GitHub. It has Swoop's version, settings and this session's log, and lists your windows' apps; titles are left out unless you include them. It stays on this Mac until you attach it." : {
 
     },
@@ -115,16 +118,19 @@
     "Centered" : {
       "comment" : "Switcher position"
     },
+    "Check" : {
+
+    },
     "Check Again" : {
 
     },
     "Check for Updates" : {
 
     },
-    "Check for Updates…" : {
+    "Check for updates automatically" : {
 
     },
-    "Check for updates automatically" : {
+    "Check for updates weekly" : {
 
     },
     "Checking for updates…" : {
@@ -162,6 +168,9 @@
     },
     "Cut" : {
       "comment" : "Main menu item"
+    },
+    "Daily" : {
+      "comment" : "Update check frequency"
     },
     "Dark" : {
 
@@ -363,6 +372,9 @@
     "Minimized" : {
       "comment" : "Window status"
     },
+    "Monthly" : {
+      "comment" : "Update check frequency"
+    },
     "Most recently used first, but the window you're in comes second, so the window you came from is selected: open Swoop and press Return to go back." : {
 
     },
@@ -486,9 +498,6 @@
     "Report a Problem" : {
 
     },
-    "Report a Problem…" : {
-      "comment" : "Menu bar menu"
-    },
     "Report a problem or suggest a feature" : {
 
     },
@@ -583,8 +592,8 @@
         }
       }
     },
-    "Suggest a Feature…" : {
-      "comment" : "Menu bar menu"
+    "Suggest a Feature" : {
+
     },
     "Supports the time that goes into fixes and new features." : {
 
@@ -598,7 +607,7 @@
     "Switch to the window" : {
 
     },
-    "Swoop %@ Is Available…" : {
+    "Swoop %@ Is Available" : {
       "comment" : "Menu bar menu; %@ is a version"
     },
     "Swoop %@ is available" : {
@@ -616,7 +625,7 @@
     "Swoop can see your windows" : {
 
     },
-    "Swoop connects to the internet only to check for updates, and only if you allow it: when you click Check for Updates, or once a day with automatic checks on. It asks GitHub for the latest version number; nothing about you or your windows is sent." : {
+    "Swoop connects to the internet only to check for updates, and only if you allow it: when you click Check for Updates, or on the schedule above with automatic checks on. It asks GitHub for the latest version number; nothing about you or your windows is sent." : {
 
     },
     "Swoop has switched you %@ times" : {
@@ -629,6 +638,9 @@
 
     },
     "Swoop needs Accessibility to list the windows of other apps and switch to the exact one you pick. Window information never leaves this Mac." : {
+
+    },
+    "Swoop, update available" : {
 
     },
     "Swooped you to the right window? Buy me a coffee ☕" : {
@@ -705,6 +717,9 @@
     },
     "Website" : {
 
+    },
+    "Weekly" : {
+      "comment" : "Update check frequency"
     },
     "Welcome to Swoop" : {
       "comment" : "Window title"

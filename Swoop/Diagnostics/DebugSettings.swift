@@ -103,8 +103,11 @@ struct DebugSettings: View {
                 }
                 info("State", controller.updates.debugSummary)
                 LabeledContent("Check") { UpdateStatusView(checker: controller.updates) }
-                action("Check for Updates… (menu window)") { controller.checkForUpdatesFromMenu() }
+                action("Check for Updates (menu window)") { controller.checkForUpdatesFromMenu() }
                 action("Forget Update State") { controller.updates.debugForget(); report("Update state forgotten.") }
+                action("Run Automatic Check in 5 s (turns auto on)") {
+                    controller.updates.debugRunAutomaticCheckSoon(); report("Automatic check runs in 5 s.")
+                }
             } header: {
                 Text("Update Check")
             } footer: {

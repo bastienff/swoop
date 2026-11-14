@@ -38,4 +38,13 @@ struct UpdatePolicyTests {
         // Clock moved backwards: don't wait for it to catch up.
         #expect(UpdatePolicy.isDue(lastCheck: t0, now: t0.addingTimeInterval(-3600)))
     }
+
+    @Test func weeklyAndMonthlyIntervals() {
+        let day: TimeInterval = 24 * 3600
+        let weekly = UpdatePolicy.Frequency.weekly.interval, monthly = UpdatePolicy.Frequency.monthly.interval
+        #expect(!UpdatePolicy.isDue(lastCheck: t0, now: t0.addingTimeInterval(6 * day), interval: weekly))
+        #expect(UpdatePolicy.isDue(lastCheck: t0, now: t0.addingTimeInterval(7 * day), interval: weekly))
+        #expect(!UpdatePolicy.isDue(lastCheck: t0, now: t0.addingTimeInterval(29 * day), interval: monthly))
+        #expect(UpdatePolicy.isDue(lastCheck: t0, now: t0.addingTimeInterval(30 * day), interval: monthly))
+    }
 }

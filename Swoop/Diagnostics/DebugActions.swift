@@ -102,8 +102,9 @@ enum DebugActions {
         let responseItem = NSMenuItem(title: "Update Check Response", action: nil, keyEquivalent: "")
         responseItem.submenu = responses
         m.addItem(responseItem)
-        item("Check for Updates… (menu window)") { c.checkForUpdatesFromMenu() }
+        item("Check for Updates (menu window)") { c.checkForUpdatesFromMenu() }
         item("Forget Update State") { c.updates.debugForget() }
+        item("Run Automatic Check in 5 s (turns auto on)") { c.updates.debugRunAutomaticCheckSoon() }
         m.addItem(.separator())
         item("Clear Recent Usage") { c.recents.reset() }
         item("Reveal Data Folder") { revealDataFolder() }

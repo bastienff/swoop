@@ -154,8 +154,8 @@ More detail: [`docs/ARCHITECTURE.md` §10](docs/ARCHITECTURE.md#10-known-limitat
 ## Privacy
 
 Swoop makes no network requests without your consent. The only one it can make is an update check:
-it asks GitHub for the latest version number when you click **Check for Updates**, or once a day if you
-turn on automatic checks (off by default). Nothing about you or your windows is sent, and it never
+it asks GitHub for the latest version number when you click **Check for Updates**, or daily, weekly or
+monthly if you turn on automatic checks (off by default; you can turn them on during setup or in Settings). Nothing about you or your windows is sent, and it never
 downloads or installs anything by itself. Your recent-windows history is stored in
 `~/Library/Application Support/Swoop/` and never leaves your Mac.
 

@@ -36,10 +36,19 @@ public struct AppVersion: Comparable, Hashable, Sendable, CustomStringConvertibl
 
 /// When the opt-in automatic update check runs, and what its answer means.
 public enum UpdatePolicy {
-    /// Automatic checks: at most one request per this interval.
-    public static let interval: TimeInterval = 24 * 3600
+    /// How often automatic checks run (the user's choice); at most one request per interval.
+    public enum Frequency: String, CaseIterable, Sendable {
+        case daily, weekly, monthly
+        public var interval: TimeInterval {
+            switch self {
+            case .daily: 24 * 3600
+            case .weekly: 7 * 24 * 3600
+            case .monthly: 30 * 24 * 3600
+            }
+        }
+    }
 
-    public static func isDue(lastCheck: Date?, now: Date) -> Bool {
+    public static func isDue(lastCheck: Date?, now: Date, interval: TimeInterval = Frequency.daily.interval) -> Bool {
         guard let lastCheck else { return true }
         // A clock set backwards would otherwise block checks until it catches up.
         return now.timeIntervalSince(lastCheck) >= interval || lastCheck > now

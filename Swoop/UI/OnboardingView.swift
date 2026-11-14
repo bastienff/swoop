@@ -324,15 +324,24 @@ private struct ShortcutStep: View {
             }
             .padding(.top, 10)
 
-            Toggle("Launch Swoop at login", isOn: $launchAtLogin)
-                .toggleStyle(.checkbox)
-                .padding(.top, 20)
-                .onChange(of: launchAtLogin) {
-                    LaunchAtLogin.set(launchAtLogin)
-                    launchAtLogin = LaunchAtLogin.isEnabled
-                }
+            HStack(spacing: 28) {
+                Toggle("Launch Swoop at login", isOn: $launchAtLogin)
+                    .onChange(of: launchAtLogin) {
+                        LaunchAtLogin.set(launchAtLogin)
+                        launchAtLogin = LaunchAtLogin.isEnabled
+                    }
+                // Off unless ticked here or in Settings: the only network request Swoop makes needs consent.
+                Toggle("Check for updates weekly", isOn: $settings.checkForUpdates)
+                    .help("Asks GitHub for the latest version number once a week. Nothing about you or your windows is sent. Change how often in Settings → Behavior.")
+            }
+            .toggleStyle(.checkbox)
+            .padding(.top, 20)
         }
         .onChange(of: settings.shortcut) { message = nil; controller.applyShortcut() }
+        .onChange(of: settings.checkForUpdates) {
+            if settings.checkForUpdates { settings.updateFrequency = .weekly }
+            controller.updates.applySetting()
+        }
     }
 }
 

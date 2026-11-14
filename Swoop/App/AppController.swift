@@ -67,6 +67,11 @@ final class AppController {
         menuBar.onSuggestFeature = { NSWorkspace.shared.open(AppLinks.newIssue(.featureRequest)) }
         menuBar.onCheckForUpdates = { [weak self] in self?.checkForUpdatesFromMenu() }
         menuBar.availableUpdate = { [weak self] in self?.updates.availableUpdate }
+        updates.onStatusChange = { [weak self] in
+            guard let self else { return }
+            menuBar.setUpdateAvailable(updates.availableUpdate != nil)
+        }
+        menuBar.setUpdateAvailable(updates.availableUpdate != nil) // known from an earlier launch
         updates.applySetting()
         menuBar.shortcutDisplay = { [weak self] in self?.settings.effectiveShortcut?.displayString ?? "" }
         menuBar.isAccessibilityTrusted = { [weak self] in self?.permissions.isAccessibilityTrusted ?? false }
@@ -100,7 +105,7 @@ final class AppController {
         }
     }
 
-    /// Menu → Check for Updates…: checks now. Swoop theme: a themed window that follows the check live.
+    /// Menu → Check for Updates: checks now. Swoop theme: a themed window that follows the check live.
     /// Classic: a standard alert with the result (like its standard About panel).
     func checkForUpdatesFromMenu() {
         if settings.theme == .swoop, let openUpdateWindowHandler {
@@ -150,7 +155,7 @@ final class AppController {
         NSWorkspace.shared.open(bugReportURL)
     }
 
-    /// Menu → Report a Problem…: offers to save a diagnostics report (revealed in Finder, to drag into
+    /// Menu → Report a Problem: offers to save a diagnostics report (revealed in Finder, to drag into
     /// the form) before opening the GitHub form.
     func reportProblem() {
         NSApp.activate()

@@ -202,6 +202,8 @@ final class DebugCommands {
         case "refresh": Task { await controller.registry.refresh() }
         case "checkupdates": Task { await controller.updates.check() } // same as the "Check for Updates" button
         case "menucheckupdates": controller.checkForUpdatesFromMenu() // same as the menu item
+        case "openmenu": controller.menuBar.debugOpenMenu() // opens the menu bar menu (blocks until closed)
+        case "autocheck5": controller.updates.debugRunAutomaticCheckSoon()
         case "updatemock": controller.updates.debugMock = UpdateChecker.DebugMock(rawValue: arg) ?? .off // off|newVersion|upToDate|offline
         case "autoupdates": controller.settings.checkForUpdates = arg == "on"; controller.updates.applySetting()
         case "select":

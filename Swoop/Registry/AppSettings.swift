@@ -94,6 +94,17 @@ enum SwitcherMode: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+extension UpdatePolicy.Frequency: Identifiable {
+    public var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .daily: String(localized: "Daily", comment: "Update check frequency")
+        case .weekly: String(localized: "Weekly", comment: "Update check frequency")
+        case .monthly: String(localized: "Monthly", comment: "Update check frequency")
+        }
+    }
+}
+
 /// User preferences persisted in `UserDefaults`.
 @MainActor
 @Observable
@@ -144,8 +155,9 @@ final class AppSettings {
     /// Diagnostics reports include window titles only when this is on.
     var diagnosticsIncludeTitles: Bool { didSet { save("diagnosticsIncludeTitles", diagnosticsIncludeTitles) } }
     var onboardingCompleted: Bool { didSet { save("onboardingCompleted", onboardingCompleted) } }
-    /// Daily automatic update check (one request to GitHub). Off by default: no network without consent.
+    /// Automatic update check (one request to GitHub per interval). Off by default: no network without consent.
     var checkForUpdates: Bool { didSet { save("checkForUpdates", checkForUpdates) } }
+    var updateFrequency: UpdatePolicy.Frequency { didSet { save("updateFrequency", updateFrequency.rawValue) } }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -178,6 +190,7 @@ final class AppSettings {
         diagnosticsIncludeTitles = b("diagnosticsIncludeTitles", false)
         onboardingCompleted = b("onboardingCompleted", false)
         checkForUpdates = b("checkForUpdates", false)
+        updateFrequency = UpdatePolicy.Frequency(rawValue: defaults.string(forKey: "updateFrequency") ?? "") ?? .weekly
     }
 
     /// Shortcut to register, or nil if disabled or a bare Tab without opt-in.

@@ -34,9 +34,23 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         statusItem.menu = menu
     }
 
+    #if DEBUG
+    func debugOpenMenu() { statusItem.button?.performClick(nil) }
+    #endif
+
+    /// The logo's orange, for update-available highlights in AppKit.
+    static let brandOrange = NSColor(srgbRed: 0.95, green: 0.42, blue: 0.16, alpha: 1)
+
+    /// Monochrome icon normally; the logo's orange while a newer version is known (quiet update hint).
+    func setUpdateAvailable(_ available: Bool) {
+        statusItem.button?.image = Self.statusImage(tint: available ? Self.brandOrange : nil)
+        statusItem.button?.setAccessibilityLabel(available ? String(localized: "Swoop, update available") : "Swoop")
+    }
+
     /// Template glyph matching the app icon: swap arrows (→ over ←) knocked out of a rounded square.
-    /// Drawn as vector so it stays crisp at any backing scale; tinted by the system for light/dark.
-    static func statusImage() -> NSImage {
+    /// Drawn as vector so it stays crisp at any backing scale; tinted by the system for light/dark,
+    /// or a `tint` square with white arrows like the app icon (not a template then).
+    static func statusImage(tint: NSColor? = nil) -> NSImage {
         let image = NSImage(size: NSSize(width: 18, height: 18), flipped: false) { rect in
             func arrow(from p: CGPoint, to q: CGPoint, width w: CGFloat, head h: CGFloat) -> NSBezierPath {
                 let bx = q.x - (q.x >= p.x ? 1 : -1) * h
@@ -51,15 +65,25 @@ final class MenuBarController: NSObject, NSMenuDelegate {
                 path.close()
                 return path
             }
-            let shape = NSBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), xRadius: 4, yRadius: 4)
-            shape.append(arrow(from: CGPoint(x: 4.5, y: 11), to: CGPoint(x: 13.5, y: 11), width: 1.8, head: 3.4))
-            shape.append(arrow(from: CGPoint(x: 13.5, y: 7), to: CGPoint(x: 4.5, y: 7), width: 1.8, head: 3.4))
-            shape.windingRule = .evenOdd
-            NSColor.black.setFill()
-            shape.fill()
+            let square = NSBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), xRadius: 4, yRadius: 4)
+            let arrows = arrow(from: CGPoint(x: 4.5, y: 11), to: CGPoint(x: 13.5, y: 11), width: 1.8, head: 3.4)
+            arrows.append(arrow(from: CGPoint(x: 13.5, y: 7), to: CGPoint(x: 4.5, y: 7), width: 1.8, head: 3.4))
+            if let tint {
+                // Like the app icon: colored square, white arrows.
+                tint.setFill()
+                square.fill()
+                NSColor.white.setFill()
+                arrows.fill()
+            } else {
+                // Template: arrows knocked out of the square, tinted by the system.
+                square.append(arrows)
+                square.windingRule = .evenOdd
+                NSColor.black.setFill()
+                square.fill()
+            }
             return true
         }
-        image.isTemplate = true
+        image.isTemplate = tint == nil
         image.accessibilityDescription = "Swoop"
         return image
     }
@@ -67,11 +91,16 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
         if let update = availableUpdate() {
-            let item = NSMenuItem(title: String(localized: "Swoop \(update.version) Is Available…", comment: "Menu bar menu; %@ is a version"),
-                                  action: #selector(openUpdatePage(_:)), keyEquivalent: "")
+            let title = String(localized: "Swoop \(update.version) Is Available", comment: "Menu bar menu; %@ is a version")
+            let item = NSMenuItem(title: title, action: #selector(openUpdatePage(_:)), keyEquivalent: "")
             item.target = self
             item.representedObject = update.page
-            item.image = NSImage(systemSymbolName: "arrow.down.circle.fill", accessibilityDescription: nil)
+            item.attributedTitle = NSAttributedString(string: title, attributes: [
+                .foregroundColor: Self.brandOrange,
+                .font: NSFont.menuFont(ofSize: 0).withWeight(.semibold),
+            ])
+            item.image = NSImage(systemSymbolName: "arrow.down.circle.fill", accessibilityDescription: nil)?
+                .withSymbolConfiguration(.init(paletteColors: [.white, Self.brandOrange]))
             menu.addItem(item)
             menu.addItem(.separator())
         }
@@ -83,7 +112,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         menu.addItem(.separator())
 
         let trusted = isAccessibilityTrusted()
-        let ax = NSMenuItem(title: trusted ? String(localized: "Accessibility: Granted") : String(localized: "Accessibility: Not Granted — Fix…"),
+        let ax = NSMenuItem(title: trusted ? String(localized: "Accessibility: Granted") : String(localized: "Accessibility: Not Granted — Fix"),
                             action: trusted ? nil : #selector(openPermissions), keyEquivalent: "")
         ax.target = self
         ax.image = NSImage(systemSymbolName: trusted ? "checkmark.circle.fill" : "exclamationmark.triangle.fill", accessibilityDescription: nil)
@@ -95,27 +124,27 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         menu.addItem(login)
         menu.addItem(.separator())
 
-        let settings = NSMenuItem(title: String(localized: "Settings…"), action: #selector(openSettings), keyEquivalent: ",")
+        let settings = NSMenuItem(title: String(localized: "Settings"), action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
         let about = NSMenuItem(title: String(localized: "About Swoop"), action: #selector(about), keyEquivalent: "")
         about.target = self
         menu.addItem(about)
-        let updates = NSMenuItem(title: String(localized: "Check for Updates…"), action: #selector(checkForUpdates), keyEquivalent: "")
+        let updates = NSMenuItem(title: String(localized: "Check for Updates"), action: #selector(checkForUpdates), keyEquivalent: "")
         updates.target = self
         menu.addItem(updates)
-        let report = NSMenuItem(title: String(localized: "Report a Problem…"), action: #selector(reportProblem), keyEquivalent: "")
+        let report = NSMenuItem(title: String(localized: "Report a Problem"), action: #selector(reportProblem), keyEquivalent: "")
         report.target = self
         report.image = NSImage(systemSymbolName: "exclamationmark.bubble", accessibilityDescription: nil)
         menu.addItem(report)
-        // ⌥ reveals it in place of "Report a Problem…" (standard alternate menu item).
+        // ⌥ reveals it in place of "Report a Problem" (standard alternate menu item).
         let diagnostics = NSMenuItem(title: String(localized: "Save Diagnostics Report"), action: #selector(saveDiagnostics), keyEquivalent: "")
         diagnostics.target = self
         diagnostics.image = NSImage(systemSymbolName: "doc.text.magnifyingglass", accessibilityDescription: nil)
         diagnostics.isAlternate = true
         diagnostics.keyEquivalentModifierMask = .option
         menu.addItem(diagnostics)
-        let suggest = NSMenuItem(title: String(localized: "Suggest a Feature…"), action: #selector(suggestFeature), keyEquivalent: "")
+        let suggest = NSMenuItem(title: String(localized: "Suggest a Feature"), action: #selector(suggestFeature), keyEquivalent: "")
         suggest.target = self
         suggest.image = NSImage(systemSymbolName: "lightbulb", accessibilityDescription: nil)
         menu.addItem(suggest)
@@ -175,5 +204,12 @@ enum LaunchAtLogin {
         } catch {
             return error
         }
+    }
+}
+
+private extension NSFont {
+    func withWeight(_ weight: NSFont.Weight) -> NSFont {
+        let d = fontDescriptor.addingAttributes([.traits: [NSFontDescriptor.TraitKey.weight: weight]])
+        return NSFont(descriptor: d, size: pointSize) ?? self
     }
 }

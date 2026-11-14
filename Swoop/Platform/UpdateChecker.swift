@@ -3,8 +3,8 @@ import OSLog
 import SwoopCore
 
 /// The only network code in Swoop: asks GitHub for the latest release's version number, only with the
-/// user's consent — when they click "Check for Updates", or once a day if they turned on automatic checks
-/// (off by default). One anonymous GET; no cookies, no cache, nothing about the user or their windows.
+/// user's consent — when they click "Check for Updates", or daily / weekly / monthly if they turned on
+/// automatic checks (off by default). One anonymous GET; no cookies, no cache, nothing about the user or their windows.
 /// It never downloads or installs anything: an update is shown as a link to its release page.
 @MainActor
 @Observable
@@ -17,11 +17,18 @@ final class UpdateChecker {
         case failed(String)
     }
 
-    private(set) var status: Status = .idle
-    /// The newest release known to be an update (also remembered across launches), for the menu bar.
+    private(set) var status: Status = .idle {
+        didSet { if status != oldValue { onStatusChange?() } }
+    }
+    /// Called on the main actor whenever `status` changes (the menu bar icon follows it).
+    @ObservationIgnored var onStatusChange: (() -> Void)?
+    /// The newest release known to be an update (remembered across launches and kept while a later check is
+    /// running or fails), for the menu bar item and icon.
     var availableUpdate: (version: String, page: URL)? {
-        if case .available(let v, let page) = status { return (v, page) }
-        return nil
+        _ = status // observed: changes whenever a check stores or clears the known version
+        guard let known = defaults.string(forKey: Self.knownVersionKey),
+              UpdatePolicy.isUpdate(latest: known, current: Self.currentVersion) else { return nil }
+        return (known, Self.releasePage(for: known))
     }
 
     private let settings: AppSettings
@@ -49,23 +56,32 @@ final class UpdateChecker {
         }
     }
 
-    /// Starts or stops the daily automatic check to match the setting. No request is made while it's off.
-    func applySetting() {
+    /// Starts or stops the automatic check to match the settings. No request is made while it's off. When on,
+    /// it wakes hourly and asks GitHub only once the chosen interval has passed (the frequency is read on each
+    /// wake). Already running → no change, unless `restart` (frequency changed, debug).
+    func applySetting(restart: Bool = false, firstRunAfter delay: Duration = .seconds(10)) {
+        guard settings.checkForUpdates else {
+            schedule?.cancel()
+            schedule = nil
+            return
+        }
+        guard schedule == nil || restart else { return }
         schedule?.cancel()
-        schedule = nil
-        guard settings.checkForUpdates else { return }
         schedule = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(10)) // not during launch
+            try? await Task.sleep(for: delay) // not during launch
             while !Task.isCancelled {
                 guard let self else { return }
                 let last = defaults.object(forKey: Self.lastCheckKey) as? Date
-                if UpdatePolicy.isDue(lastCheck: last, now: Date()) { await check() }
+                if UpdatePolicy.isDue(lastCheck: last, now: Date(), interval: settings.updateFrequency.interval) {
+                    log.info("automatic update check")
+                    await check()
+                }
                 try? await Task.sleep(for: .seconds(3600))
             }
         }
     }
 
-    /// One request to GitHub. Called by the user ("Check for Updates") or the daily schedule.
+    /// One request to GitHub. Called by the user ("Check for Updates") or the automatic schedule.
     func check() async {
         guard status != .checking else { return }
         let previous = status
@@ -142,6 +158,13 @@ final class UpdateChecker {
 
     var debugMock = DebugMock(rawValue: UserDefaults.standard.string(forKey: debugMockKey) ?? "") ?? .off {
         didSet { defaults.set(debugMock.rawValue, forKey: Self.debugMockKey); status = .idle }
+    }
+
+    /// Debug: the automatic check runs in 5 s as if its interval had passed (turns automatic checks on).
+    func debugRunAutomaticCheckSoon() {
+        defaults.removeObject(forKey: Self.lastCheckKey)
+        if !settings.checkForUpdates { settings.checkForUpdates = true }
+        applySetting(restart: true, firstRunAfter: .seconds(5))
     }
 
     /// Forgets the last check and any known update (as on a fresh install).

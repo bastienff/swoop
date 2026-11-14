@@ -249,13 +249,18 @@ private struct BehaviorSettings: View {
             }
             Section {
                 Toggle("Check for updates automatically", isOn: $settings.checkForUpdates)
+                if settings.checkForUpdates {
+                    Picker("Check", selection: $settings.updateFrequency) {
+                        ForEach(UpdatePolicy.Frequency.allCases) { Text($0.label).tag($0) }
+                    }
+                }
                 LabeledContent("Version \(UpdateChecker.currentVersion)") {
                     UpdateStatusView(checker: controller.updates)
                 }
             } header: {
                 Text("Updates")
             } footer: {
-                Text("Swoop connects to the internet only to check for updates, and only if you allow it: when you click Check for Updates, or once a day with automatic checks on. It asks GitHub for the latest version number; nothing about you or your windows is sent.")
+                Text("Swoop connects to the internet only to check for updates, and only if you allow it: when you click Check for Updates, or on the schedule above with automatic checks on. It asks GitHub for the latest version number; nothing about you or your windows is sent.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
         }
@@ -266,6 +271,7 @@ private struct BehaviorSettings: View {
         .onChange(of: settings.recoverOtherSpaceWindows) { refresh() }
         .onChange(of: settings.vscodeEnhancements) { refresh() }
         .onChange(of: settings.checkForUpdates) { controller.updates.applySetting() }
+        .onChange(of: settings.updateFrequency) { controller.updates.applySetting(restart: true) }
         .onAppear { launchAtLogin = LaunchAtLogin.isEnabled }
     }
 
