@@ -28,5 +28,5 @@ Useful context when assessing a report:
 - **Private API:** one documented, optional use of non-public Accessibility functions to rebuild window
   handles after a restart (Settings → Behavior → *Remember windows on other desktops*). It reads; it
   never moves windows.
-- **Release builds** are currently ad-hoc signed, not notarized. Only install Swoop from this repository's
-  Releases or the `bastienff/tap` Homebrew tap.
+- **Release builds** are signed with a Developer ID and notarized by Apple. Only install Swoop from this
+  repository's Releases or the `bastienff/tap` Homebrew tap.
