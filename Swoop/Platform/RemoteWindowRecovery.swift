@@ -6,7 +6,7 @@ import SwoopCore
 /// (ARCHITECTURE §2a). Element ids live inside the target app and survive Swoop restarts, so the ids
 /// are persisted: after a relaunch every previously known window is rebuilt directly, with no sweep.
 ///
-/// Cost policy (PRD §14): nothing runs unless an app has windows Swoop can't reach otherwise; a sweep
+/// Cost policy: nothing runs unless an app has windows Swoop can't reach otherwise; a sweep
 /// covers each id at most once per app process (resumable cursor), runs in short slices with pauses on a
 /// utility queue, and is capped (`RemoteRecoveryPolicy.sweepCap`).
 final class RemoteWindowRecovery: Sendable {

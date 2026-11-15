@@ -19,7 +19,7 @@ final class WindowRegistry {
     /// Window elements seen visible on some Space (learned anchors, ARCHITECTURE §2).
     @ObservationIgnored private var anchors: [pid_t: [AXElement]] = [:]
     @ObservationIgnored private var icons: [pid_t: NSImage] = [:]
-    /// Dock badge per pid (e.g. Slack unread count), shown on the icon like the references.
+    /// Dock badge per pid (e.g. Slack unread count), shown on the icon like the Dock does.
     private(set) var badges: [pid_t: String] = [:]
     /// Element recovery for windows on other Spaces (§2a); nil when the private symbols are unavailable.
     @ObservationIgnored private var recovery: RemoteWindowRecovery?

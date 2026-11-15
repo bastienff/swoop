@@ -9,7 +9,7 @@ final class SearchViewModel {
     var query = "" {
         didSet { if query != oldValue { selectedID = nil; scrollRequest += 1 } }
     }
-    /// Selection is tracked by id so registry refreshes don't reset it (PRD §7 "reset only when necessary").
+    /// Selection is tracked by id so registry refreshes don't reset it (reset only when necessary).
     var selectedID: String?
     /// Incremented to ask the grid to scroll the selection into view.
     private(set) var scrollRequest = 0
@@ -42,7 +42,7 @@ final class SearchViewModel {
 
     var showsSearchField: Bool { settings.alwaysShowSearchField || !query.isEmpty }
 
-    // MARK: Metrics (tuned against references/: ~96 pt icons, ~131 pt column pitch)
+    // MARK: Metrics (~96 pt icons, ~131 pt column pitch)
 
     var panelLayout: PanelLayout { settings.panelLayout }
 

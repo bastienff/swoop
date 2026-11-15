@@ -4,7 +4,7 @@ import OSLog
 
 /// Per-app Accessibility observers (ARCHITECTURE §2 "Event-driven updates").
 ///
-/// Cost policy (PRD §14 low idle CPU): focus changes only update recency (one cheap AX read);
+/// Cost policy (low idle CPU): focus changes only update recency (one cheap AX read);
 /// structural and title changes refresh just that app, coalesced by `WorkspaceObserver` (titles at a
 /// bounded rate), so the switcher opens already up to date. Opening the panel still refreshes everything.
 @MainActor

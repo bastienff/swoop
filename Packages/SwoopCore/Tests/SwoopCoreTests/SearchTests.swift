@@ -52,8 +52,8 @@ struct SearchScoringTests {
 
 @Suite("Search ranking")
 struct SearchRankingTests {
-    @Test func referenceImageHeronFilter() {
-        // Image 1: typing "heron" leaves Postman and the VS Code heron window.
+    @Test func queryLeavesOnlyMatchingWindows() {
+        // Typing "heron" leaves Postman and the VS Code heron window.
         let entries = [
             makeEntry("Slack", "monitoring (Channel) - Larkspur"),
             makeEntry("Postman", "https://finch-billing.heron.local/orders"),

@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 import SwoopCore
 
-/// Guided first-run setup (PRD §11): welcome → permissions → shortcut → look → support → done.
+/// Guided first-run setup: welcome → permissions → shortcut → look → support → done.
 /// Shown once; afterwards, a missing Accessibility grant reopens only the permissions step.
 @MainActor
 @Observable

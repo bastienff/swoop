@@ -257,7 +257,7 @@ final class AppController {
         activationTask?.cancel()
         activationTask = nil
         let pending = lastActivation.flatMap { Date().timeIntervalSince($0.at) < Self.activationSettleTime ? $0.pid : nil }
-        // Cached results appear immediately; refresh in the background (PRD §14).
+        // Cached results appear immediately; refresh in the background.
         panel.show(pendingFrontmost: pending)
         Task { await registry.refresh() }
     }

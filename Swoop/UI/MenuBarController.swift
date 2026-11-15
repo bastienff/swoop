@@ -1,7 +1,7 @@
 import AppKit
 import ServiceManagement
 
-/// Status-bar item and menu (PRD §10). Monochrome template image; no Dock icon.
+/// Status-bar item and menu. Monochrome template image; no Dock icon.
 @MainActor
 final class MenuBarController: NSObject, NSMenuDelegate {
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)

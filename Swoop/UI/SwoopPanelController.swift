@@ -83,7 +83,7 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
     func toggle() { isVisible ? dismiss(restorePrevious: true) : show() }
 
     /// The global shortcut was pressed. Opens the panel; while open, cycles the selection
-    /// (⇧ reverses). Escape or an outside click closes it (PRD §3).
+    /// (⇧ reverses). Escape or an outside click closes it.
     func shortcutPressed(reverse: Bool = false) {
         guard isVisible else { show(); return }
         model.step(reverse ? -1 : 1)
@@ -198,7 +198,7 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         panel.alphaValue = reduceMotion ? 1 : 0
         // Activate ourselves so the search field reliably receives typing; the previous app is
-        // restored on dismissal without selection (PRD §9).
+        // restored on dismissal without selection.
         if !NSApp.isActive {
             parkedWindows = NSApp.windows
                 .filter { $0 !== panel && $0.isVisible && $0.level == .normal && !($0 is NSPanel) }
@@ -291,7 +291,7 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         return panel
     }
 
-    /// Re-centers and resizes the panel whenever the result layout changes (Image 1 compact behavior).
+    /// Re-centers and resizes the panel whenever the result layout changes (compact for few results).
     private func observeLayout() {
         withObservationTracking {
             _ = model.layout
@@ -309,8 +309,8 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         let layout = model.layout
         let size = CGSize(width: layout.panelWidth.rounded(), height: layout.panelHeight.rounded())
         let v = screen.visibleFrame
-        // Centered horizontally; slightly above vertical center, like the references.
-        // Centered horizontally, slightly above vertical center (like the references), unless the user
+        // Centered horizontally; slightly above vertical center.
+        // Centered horizontally, slightly above vertical center, unless the user
         // dragged it somewhere on this display. It stays centered on that point as it grows/shrinks.
         var center = CGPoint(x: v.midX, y: v.midY + v.height * 0.06)
         if settings.panelDraggable, let saved = settings.panelCenter(display: Self.displayID(screen)) {

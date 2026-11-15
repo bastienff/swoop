@@ -12,7 +12,7 @@ name: Release
 #   - create the public repo bastienff/homebrew-tap
 #   - add a fine-grained token with "Contents: read and write" on that repo as the secret HOMEBREW_TAP_TOKEN
 #
-# Developer ID signing + notarization (docs/RELEASING.md), from six secrets:
+# Developer ID signing + notarization, from six secrets:
 #   DEVELOPER_ID_P12_BASE64, DEVELOPER_ID_P12_PASSWORD, APPLE_TEAM_ID,
 #   NOTARY_KEY_P8_BASE64, NOTARY_KEY_ID, NOTARY_ISSUER_ID
 # Without them the build falls back to ad-hoc signing (users then need "Open Anyway") and says so in a warning.

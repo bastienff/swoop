@@ -67,11 +67,8 @@ AuthKey_*.p8
 *.log
 *.tmp
 
-# ── Private references (screenshots of a real desktop) ──────────
-references/
-
 # ── Markdown: only README.md and chosen docs ────────────────────
-# Other docs stay private. Allow one with a line like:  !/docs/RELEASING.md
+# Other docs stay private. Allow one with a line like:  !/docs/<NAME>.md
 *.md
 !/README.md
 !/docs/ARCHITECTURE.md

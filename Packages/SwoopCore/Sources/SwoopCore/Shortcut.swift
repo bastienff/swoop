@@ -27,7 +27,7 @@ public struct Shortcut: Codable, Sendable, Hashable {
     public init(keyCode: UInt16, modifiers: Modifiers) { self.keyCode = keyCode; self.modifiers = modifiers }
 
     public static let tabKeyCode: UInt16 = 0x30
-    /// ⌥Tab — PRD default.
+    /// ⌥Tab, the default.
     public static let `default` = Shortcut(keyCode: tabKeyCode, modifiers: [.option])
 
     public var isBareTab: Bool { keyCode == Self.tabKeyCode && modifiers.isEmpty }

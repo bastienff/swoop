@@ -7,7 +7,6 @@ come from the code; file pointers in each section). When you change a visual, ch
   [`design/journeys.html`](design/journeys.html).
 - Design folder index and rules: [`design/README.md`](design/README.md). Logo (app icon, menu bar glyph,
   construction, archive): [`design/brand/`](design/brand/README.md).
-- Requirements and the original visual spec: the PRD (`docs/PRD.md`, kept locally) §1, §7–§12.
 - Screenshots: [`images/`](images/) (`swoop-grid.png`, `swoop-search.png`, `swoop-list-compact.png`,
   `swoop-list-comfortable.png`).
 
@@ -16,7 +15,7 @@ come from the code; file pointers in each section). When you change a visual, ch
 ## 1. Principles
 
 1. **Speed over decoration.** The switcher appears instantly and is typeable on the first keystroke. Motion is
-   short and never blocks input (PRD §9).
+   short and never blocks input.
 2. **Native first.** Real app icons, AppKit materials, SF Pro, SF Symbols, standard controls in Settings. Swoop
    should feel like part of macOS, not a web view.
 3. **Restraint.** Dim by default, bright when selected. One accent at a time. No chrome that doesn't carry
@@ -83,7 +82,7 @@ value is shared by two or more surfaces.
 it sets `scale = max(width, height) / 800`. Fixed small surfaces pass a scale (About/update 0.5, support card
 0.65, picker thumbnail 0.17).
 
-**Switcher text tones** (explicit, not vibrancy — matches the references):
+**Switcher text tones** (explicit, not vibrancy):
 
 | Role | Dark | Light |
 |---|---|---|

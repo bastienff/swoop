@@ -81,7 +81,7 @@ extension WindowOrder {
 
 /// What happens when the shortcut's modifier key is released.
 enum SwitcherMode: String, CaseIterable, Identifiable, Sendable {
-    /// The switcher stays open until you pick a window or dismiss it (PRD §3 default).
+    /// The switcher stays open until you pick a window or dismiss it (the default).
     case stayOpen
     /// Like macOS ⌘Tab: hold the modifier, press the key to cycle, release to switch.
     case switchOnRelease

@@ -1,7 +1,7 @@
 import ApplicationServices
 import Foundation
 
-/// The ONLY product code that uses private Accessibility SPI (ARCHITECTURE §2a, CLAUDE.md exception).
+/// The ONLY product code that uses private Accessibility SPI (the one exception, ARCHITECTURE §2a).
 ///
 /// An AX element of another process is addressed by a 20-byte "remote token":
 /// `pid (4) | 0 (4) | magic "coco" (4) | AXUIElementID (8)`, little-endian. Element ids are assigned by the

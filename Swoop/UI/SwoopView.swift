@@ -1,7 +1,7 @@
 import SwiftUI
 import SwoopCore
 
-/// Root content of the switcher panel: search pill + icon grid (references/ images 1 & 2).
+/// Root content of the switcher panel: search pill + icon grid.
 struct SwoopView: View {
     @Bindable var model: SearchViewModel
     @FocusState private var searchFocused: Bool
@@ -250,7 +250,7 @@ struct WindowGridItemView: View {
         .accessibilityAddTraits(isSelected ? [.isSelected, .isButton] : .isButton)
     }
 
-    // Explicit tones (instead of vibrancy) to match the references: dim names, bright selected name.
+    // Explicit tones (instead of vibrancy): dim names, bright selected name.
     private var nameColor: Color {
         let dark = scheme == .dark
         if isSelected { return dark ? .white : Color.black.opacity(0.88) }
@@ -261,7 +261,7 @@ struct WindowGridItemView: View {
         scheme == .dark ? Color.white.opacity(isSelected ? 0.62 : 0.45) : Color.black.opacity(isSelected ? 0.6 : 0.45)
     }
 
-    /// Small state indicator (PRD §7.5), used sparingly like the references.
+    /// Small state indicator, used sparingly.
     private var stateSymbol: String? {
         if entry.isMinimized { return "minus.square" }
         if entry.isFullScreen { return "arrow.up.left.and.arrow.down.right" }

@@ -44,7 +44,7 @@ struct GridLayoutTests {
 
 @Suite("Grid navigation")
 struct GridNavigatorTests {
-    // 11 columns, 26 items → rows of 11, 11, 4 (like reference image 2). Last row centered (offset 3.5).
+    // 11 columns, 26 items → rows of 11, 11, 4. Last row centered (offset 3.5).
     let nav = GridNavigator(count: 26, columns: 11)
 
     @Test func leftRightClampAtEnds() {
