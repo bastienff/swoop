@@ -47,45 +47,61 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         statusItem.button?.setAccessibilityLabel(available ? String(localized: "Swoop, update available") : "Swoop")
     }
 
-    /// Template glyph matching the app icon: swap arrows (→ over ←) knocked out of a rounded square.
-    /// Drawn as vector so it stays crisp at any backing scale; tinted by the system for light/dark,
-    /// or a `tint` square with white arrows like the app icon (not a template then).
+    /// Template glyph matching the app icon: swap arrows (→ over ←, round tails tapering into swept heads)
+    /// knocked out of a rounded square. Drawn as vector so it stays crisp at any backing scale; tinted by the
+    /// system for light/dark, or a `tint` square with white arrows like the app icon (not a template then).
+    /// Same arrow as `Tools/make_icon.swift`, slightly heavier for 18 pt (docs/design/brand/README.md).
     static func statusImage(tint: NSColor? = nil) -> NSImage {
         let image = NSImage(size: NSSize(width: 18, height: 18), flipped: false) { rect in
-            func arrow(from p: CGPoint, to q: CGPoint, width w: CGFloat, head h: CGFloat) -> NSBezierPath {
-                let bx = q.x - (q.x >= p.x ? 1 : -1) * h
-                let path = NSBezierPath()
-                path.move(to: CGPoint(x: p.x, y: p.y + w / 2))
-                path.line(to: CGPoint(x: bx, y: q.y + w / 2))
-                path.line(to: CGPoint(x: bx, y: q.y + h * 0.8))
-                path.line(to: q)
-                path.line(to: CGPoint(x: bx, y: q.y - h * 0.8))
-                path.line(to: CGPoint(x: bx, y: q.y - w / 2))
-                path.line(to: CGPoint(x: p.x, y: p.y - w / 2))
-                path.close()
-                return path
-            }
-            let square = NSBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), xRadius: 4, yRadius: 4)
-            let arrows = arrow(from: CGPoint(x: 4.5, y: 11), to: CGPoint(x: 13.5, y: 11), width: 1.8, head: 3.4)
-            arrows.append(arrow(from: CGPoint(x: 13.5, y: 7), to: CGPoint(x: 4.5, y: 7), width: 1.8, head: 3.4))
-            if let tint {
-                // Like the app icon: colored square, white arrows.
-                tint.setFill()
-                square.fill()
-                NSColor.white.setFill()
-                arrows.fill()
-            } else {
-                // Template: arrows knocked out of the square, tinted by the system.
-                square.append(arrows)
-                square.windingRule = .evenOdd
-                NSColor.black.setFill()
-                square.fill()
+            guard let ctx = NSGraphicsContext.current?.cgContext else { return false }
+            let square = CGPath(roundedRect: rect.insetBy(dx: 1, dy: 1), cornerWidth: 4, cornerHeight: 4, transform: nil)
+            var turn = CGAffineTransform(a: -1, b: 0, c: 0, d: -1, tx: rect.width, ty: rect.height)
+            let arrow = swapArrow(y: 11.3, tail: 4.4, headStart: 11, tailWidth: 1.3, headWidth: 2, headLength: 3.1,
+                                  headSpan: 5, sweep: 1.1)
+            ctx.addPath(square)
+            ctx.setFillColor(tint?.cgColor ?? NSColor.black.cgColor)
+            ctx.fillPath()
+            // Template: arrows knocked out of the square. Tinted: white arrows on the colored square.
+            if tint == nil { ctx.setBlendMode(.clear) }
+            ctx.setFillColor(NSColor.white.cgColor); ctx.setStrokeColor(NSColor.white.cgColor)
+            for path in [arrow, arrow.copy(using: &turn)!] {
+                ctx.addPath(path); ctx.fillPath()
+                ctx.addPath(path); ctx.setLineWidth(0.35); ctx.setLineJoin(.round); ctx.strokePath() // rounded corners
             }
             return true
         }
         image.isTemplate = tint == nil
         image.accessibilityDescription = "Swoop"
         return image
+    }
+
+    /// A right-pointing swap arrow: round tail of `tailWidth` tapering to `headWidth`, then a head `headLength`
+    /// long and `headSpan` tall with barbs swept back by `sweep`. Two subpaths with the same winding (shaft,
+    /// head), so a nonzero fill is their union.
+    private static func swapArrow(y: CGFloat, tail x0: CGFloat, headStart xe: CGFloat, tailWidth w0: CGFloat,
+                                  headWidth w1: CGFloat, headLength head: CGFloat, headSpan: CGFloat, sweep: CGFloat) -> CGPath {
+        let p = CGMutablePath()
+        p.move(to: CGPoint(x: x0, y: y - w0 / 2))
+        p.addLine(to: CGPoint(x: xe, y: y - w1 / 2))
+        p.addLine(to: CGPoint(x: xe, y: y + w1 / 2))
+        p.addLine(to: CGPoint(x: x0, y: y + w0 / 2))
+        p.addArc(center: CGPoint(x: x0, y: y), radius: w0 / 2, startAngle: .pi / 2, endAngle: -.pi / 2, clockwise: false)
+        p.closeSubpath()
+        let tip = CGPoint(x: xe + head, y: y), notch = CGPoint(x: xe - sweep * 0.2, y: y)
+        let top = CGPoint(x: xe - sweep, y: y + headSpan / 2), bottom = CGPoint(x: xe - sweep, y: y - headSpan / 2)
+        let cx = (2 * top.x + tip.x) / 3
+        func mid(_ a: CGPoint, _ b: CGPoint) -> CGPoint { CGPoint(x: (a.x + b.x) / 2, y: (a.y + b.y) / 2) }
+        func outward(_ a: CGPoint, _ b: CGPoint) -> CGPoint {
+            let m = mid(a, b); return CGPoint(x: m.x + (m.x - cx) * 0.1, y: m.y + (m.y - y) * 0.1)
+        }
+        func inward(_ a: CGPoint, _ b: CGPoint) -> CGPoint { let m = mid(a, b); return CGPoint(x: m.x + sweep * 0.7, y: m.y) }
+        p.move(to: notch)
+        p.addQuadCurve(to: bottom, control: inward(notch, bottom))
+        p.addQuadCurve(to: tip, control: outward(bottom, tip))
+        p.addQuadCurve(to: top, control: outward(tip, top))
+        p.addQuadCurve(to: notch, control: inward(top, notch))
+        p.closeSubpath()
+        return p
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {

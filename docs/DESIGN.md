@@ -5,6 +5,8 @@ come from the code; file pointers in each section). When you change a visual, ch
 
 - Visual pages (open in a browser): [`design/design-system.html`](design/design-system.html) and
   [`design/journeys.html`](design/journeys.html).
+- Design folder index and rules: [`design/README.md`](design/README.md). Logo (app icon, menu bar glyph,
+  construction, archive): [`design/brand/`](design/brand/README.md).
 - Requirements and the original visual spec: the PRD (`docs/PRD.md`, kept locally) §1, §7–§12.
 - Screenshots: [`images/`](images/) (`swoop-grid.png`, `swoop-search.png`, `swoop-list-compact.png`,
   `swoop-list-comfortable.png`).
@@ -233,7 +235,7 @@ Always honor `accessibilityReduceMotion`.
 | **Visual picker** | `VisualPicker` + thumbnails | Picture tiles 96 × 60 (drawn 128 × 80 at 75 %), 118 pt columns, accent border 2.5 pt when selected (`themeAccent`). Thumbnails are vector and follow light/dark. |
 | **Themed switch** | `ThemedSwitchStyle` | Standard switch, orange tint in Swoop. |
 | **Onboarding blocks** | `OnboardingView` | `StepHeader`, `SymbolBadge` (64 pt, color @ 14 %), `Card`, `ChoiceCard` (orange 2 pt border selected), `LinkRow`, `Keycap`, `StepDots`. |
-| **Menu bar icon** | `MenuBarController.statusImage` | 18 pt vector template: swap arrows knocked out of a rounded square. With an update available: orange square, white arrows (not a template). |
+| **Menu bar icon** | `MenuBarController.statusImage` | 18 pt vector template: the logo's swap arrows (round tail, tapered shaft, swept head) knocked out of a rounded square. With an update available: orange square, white arrows (not a template). Spec: `design/brand/README.md`. |
 
 When a component is needed in a second place, move it to `Theme/` (or a shared file) rather than copying it.
 
