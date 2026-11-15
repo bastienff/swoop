@@ -81,3 +81,12 @@ references/
 !/CODE_OF_CONDUCT.md
 !/SECURITY.md
 !/.github/**/*.md
+
+# ── Design folder
+/docs/design/*
+!/docs/design/README.md
+!/docs/design/design-system.html
+!/docs/design/journeys.html
+!/docs/design/style.css
+!/docs/design/brand/
+!/docs/design/brand/**
