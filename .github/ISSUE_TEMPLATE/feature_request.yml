@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Swoop stays small on purpose: it's a window switcher and nothing else. Ideas that make **switching**
-        better are very welcome. Previews, tiling, desktop management, browser tabs, plugins and themes are
+        better are very welcome. Previews, tiling, desktop management, browser tabs, plugins and custom themes are
         out of scope (see [What Swoop won't do](https://github.com/bastienff/swoop#what-swoop-wont-do)).
 
   - type: textarea

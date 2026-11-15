@@ -85,7 +85,10 @@ body:
     attributes:
       label: Diagnostics report
       description: |
-        Helps a lot. Menu-bar icon → **Report a Problem** → **Save Report & Open GitHub** saves one and shows it
+        **Strongly recommended.** Most window-switching bugs depend on your setup (desktops, apps, settings), and
+        the report usually holds the clue we can't get any other way. Without it, many reports can't be reproduced
+        and end up closed; with it, they usually get fixed.
+        Menu-bar icon → **Report a Problem** → **Save Report & Open GitHub** saves one and shows it
         in Finder (or Settings → Advanced → **Save Diagnostics Report**). Drag the `.txt` file here.
         It has Swoop's version, settings, this session's log and your windows' apps, **without window titles**
         unless you turned on "Include window titles in reports". If possible, reproduce the problem first:
