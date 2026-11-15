@@ -16,7 +16,7 @@ struct RemoteRecoveryTests {
     }
 
     @Test func knownHiddenTabTitleIsHidden() {
-        // Real case: VS Code "wren-cache" recovered by id, no tab bar, listed as value=0 in the main group.
+        // Real case: a VS Code window recovered by id, no tab bar, listed as value=0 in the main group.
         #expect(P.classify(title: "wren-cache", selectedTabTitle: nil, knownHiddenTabTitles: ["wren-cache"],
                            windowsSharingFrame: 16, accountedSharingFrame: 16) == .hiddenTab)
     }

@@ -335,7 +335,7 @@ final class DebugCommands {
     /// captured by cacheDisplay, so a dark fill is composited behind it.
     private func loadDemo() { Self.loadDemo(into: controller.registry) }
 
-    /// Generic demo windows (no real titles) using icons of apps installed on this Mac.
+    /// Invented demo windows (fictional company and projects, never real titles) using icons of apps installed on this Mac.
     static func loadDemo(into registry: WindowRegistry) {
         typealias W = WindowRegistry.DemoWindow
         let code = "/Applications/Visual Studio Code.app"

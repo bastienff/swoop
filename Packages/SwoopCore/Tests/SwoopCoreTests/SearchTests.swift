@@ -39,8 +39,8 @@ struct SearchScoringTests {
     }
 
     @Test func scatteredSubsequenceIsRejected() {
-        // Real case: "heron" must not match "Native macOS Universal Window" (n-a-t…u…r…a).
-        #expect(WindowSearchEngine.score(query: "heron", in: "# Build a Native macOS Universal Window • Untitled-2 — finch-billing") == nil)
+        // "nature" must not match "Native macOS Universal Window • Untitled" (n-a-t…u…r…e).
+        #expect(WindowSearchEngine.score(query: "nature", in: "# Build a Native macOS Universal Window • Untitled-2 — finch-billing") == nil)
         #expect(WindowSearchEngine.score(query: "hap", in: "heron-api-proxy") != nil)   // acronym
         #expect(WindowSearchEngine.score(query: "hron", in: "heron") != nil)            // compact fuzzy
     }
@@ -56,7 +56,7 @@ struct SearchRankingTests {
         // Typing "heron" leaves Postman and the VS Code heron window.
         let entries = [
             makeEntry("Slack", "monitoring (Channel) - Larkspur"),
-            makeEntry("Postman", "https://finch-billing.heron.local/orders"),
+            makeEntry("Postman", "https://api.example.com/heron/status"),
             makeEntry("Code", ".env — heron-api-proxy", bundle: "com.microsoft.VSCode"),
             makeEntry("Code", "wren-cache", bundle: "com.microsoft.VSCode"),
             makeEntry("Notes", "Notes – 42 notes"),
