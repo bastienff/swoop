@@ -59,6 +59,14 @@ final class DebugCommands {
                 e?.flags = []
                 e?.post(tap: .cghidEventTap)
             }
+        case "holdtype":
+            // holdtype <keycode,keycode,…> [holdSeconds]: hold the shortcut's modifiers, press the shortcut,
+            // type the key codes with the modifiers still held, wait, then release (hold-and-type).
+            let a = arg.split(separator: " ")
+            let codes = (a.first ?? "").split(separator: ",").compactMap { CGKeyCode($0) }
+            let hold = a.count > 1 ? Double(a[1]) ?? 1 : 1
+            let s = controller.settings.shortcut
+            Task { await Self.holdAndType(s, codes, hold: hold) }
         case "cmdtab":
             // cmdtab: a real ⌘Tab (macOS app switcher) through the HID event stream.
             let src = CGEventSource(stateID: .hidSystemState)
@@ -249,6 +257,28 @@ final class DebugCommands {
         if s.contains("s") { m.insert(.shift) }
         if s.contains("x") { m.insert(.control) }
         return m
+    }
+
+    static func holdAndType(_ s: Shortcut, _ codes: [CGKeyCode], hold: Double) async {
+        let src = CGEventSource(stateID: .hidSystemState)
+        let keys: [(Shortcut.Modifiers, CGKeyCode, CGEventFlags)] = [
+            (.control, 59, .maskControl), (.option, 58, .maskAlternate), (.shift, 56, .maskShift), (.command, 55, .maskCommand)]
+        let pressed = keys.filter { s.modifiers.contains($0.0) }
+        func send(_ code: CGKeyCode, _ down: Bool, _ f: CGEventFlags) {
+            let e = CGEvent(keyboardEventSource: src, virtualKey: code, keyDown: down)
+            e?.flags = f
+            e?.post(tap: .cghidEventTap)
+        }
+        var held: CGEventFlags = []
+        for (_, code, flag) in pressed { held.insert(flag); send(code, true, held) }
+        send(CGKeyCode(s.keyCode), true, held); send(CGKeyCode(s.keyCode), false, held)
+        try? await Task.sleep(for: .milliseconds(400))
+        for c in codes {
+            send(c, true, held); send(c, false, held)
+            try? await Task.sleep(for: .milliseconds(120))
+        }
+        try? await Task.sleep(for: .seconds(hold))
+        for (_, code, flag) in pressed.reversed() { held.remove(flag); send(code, false, held) }
     }
 
     static func post(_ keyCode: UInt16, _ m: Shortcut.Modifiers) {

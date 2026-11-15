@@ -127,7 +127,7 @@ private struct KeyboardSettings: View {
             if hold.isEmpty {
                 return String(localized: "A shortcut without a modifier key can't be held, so the switcher stays open. Record a shortcut with ⌘, ⌥ or ⌃ to switch on release.")
             }
-            return String(localized: "Keep \(hold) held and press the shortcut again (or keep it pressed) to move through the windows; add ⇧ to go back. Release \(hold) to switch to the selected window. Escape cancels.", comment: "%@ is a modifier key such as ⌥")
+            return String(localized: "Keep \(hold) held and press the shortcut again (or keep it pressed) to move through the windows; add ⇧ to go back. Type while holding \(hold) to search. Release \(hold) to switch to the selected window. Escape cancels.", comment: "%@ is a modifier key such as ⌥")
         }
     }
 

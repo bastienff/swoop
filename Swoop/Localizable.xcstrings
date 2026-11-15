@@ -289,13 +289,13 @@
     "Just a window switcher. Window information never leaves this Mac." : {
 
     },
-    "Keep %@ held and press the shortcut again (or keep it pressed) to move through the windows; add ⇧ to go back. Release %@ to switch to the selected window. Escape cancels." : {
+    "Keep %@ held and press the shortcut again (or keep it pressed) to move through the windows; add ⇧ to go back. Type while holding %@ to search. Release %@ to switch to the selected window. Escape cancels." : {
       "comment" : "%@ is a modifier key such as ⌥",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Keep %1$@ held and press the shortcut again (or keep it pressed) to move through the windows; add ⇧ to go back. Release %2$@ to switch to the selected window. Escape cancels."
+            "value" : "Keep %1$@ held and press the shortcut again (or keep it pressed) to move through the windows; add ⇧ to go back. Type while holding %2$@ to search. Release %3$@ to switch to the selected window. Escape cancels."
           }
         }
       }
@@ -333,7 +333,7 @@
     "Light" : {
 
     },
-    "Like ⌘Tab: hold the modifier, tap to move, let go." : {
+    "Like ⌘Tab: hold the modifier, tap or type to find, let go." : {
 
     },
     "List · Comfortable" : {

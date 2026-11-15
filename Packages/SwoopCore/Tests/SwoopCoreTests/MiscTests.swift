@@ -189,3 +189,20 @@ struct FocusStealPolicyTests {
         #expect(decide(reclaims: FocusStealPolicy.maxReclaims) == .respect)
     }
 }
+
+@Suite("Hold-and-type")
+struct HoldToTypeTests {
+    @Test func plainCharactersType() {
+        #expect(HoldToType.text("a") == "a")
+        #expect(HoldToType.text("A") == "A")       // ⇧ held too (reverse cycling)
+        #expect(HoldToType.text("7") == "7")
+        #expect(HoldToType.text(" ") == " ")       // multi-word queries
+        #expect(HoldToType.text("ñ") == "ñ")       // layouts with their own letters
+    }
+
+    @Test func nonTypingKeysDont() {
+        for chars in [nil, "", "\r", "\u{1B}", "\t", "\u{7F}", "\u{8}", "\u{F702}", "\u{F703}", "\u{F704}"] as [String?] {
+            #expect(HoldToType.text(chars) == nil)
+        }
+    }
+}

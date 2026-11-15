@@ -267,6 +267,7 @@ learned anchors); there is no separate Space service because no public Space API
 **DEBUG builds** also listen for `Tools/swctl` commands (distributed notification
 `com.bastienff.swoop.debug`): `show`, `hide`, `type <q>`, `key left|right|up|down|return|escape`,
 `hotkey` (posts the configured shortcut as a real HID event), `post <keyCode> <mods>`,
+`holdtype <keyCode,…> [holdSeconds]` (holds the shortcut's modifiers, presses it, types with them held, then releases: hold-and-type),
 `setshortcut <keyCode> <mods>`, `dump <file>`, `diagnostics <file>` (the diagnostics report), `snapshot <png>`, `snapwin <png> <title>`,
 `appearance system|light|dark`, `refresh`, `settings`, `checkupdates` / `menucheckupdates` (button / menu
 path), `updatemock off|newVersion|upToDate|offline`, `autoupdates on|off`, `autocheck5` (automatic check in 5 s), `openmenu [cmdcomma]` (menu bar menu; optionally presses ⌘, in it), `scrollsettings <y>`, `demo` (fixed generic windows for README

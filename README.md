@@ -101,7 +101,7 @@ Swoop learn about windows as they open.
 | | |
 |---|---|
 | Open | <kbd>⌥</kbd> <kbd>Tab</kbd> (you can change it) |
-| Search | Just type |
+| Search | Just type. With *Switch to the selected window*, keep <kbd>⌥</kbd> (your shortcut's modifier) held while you type, then release to switch to the top match |
 | Move | <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd>, <kbd>Tab</kbd> / <kbd>⇧</kbd> <kbd>Tab</kbd>, or <kbd>⌥</kbd> <kbd>Tab</kbd> / <kbd>⌥</kbd> <kbd>⇧</kbd> <kbd>Tab</kbd> again |
 | Switch | <kbd>Return</kbd> or click |
 | Close | <kbd>Esc</kbd> or click outside |
@@ -158,6 +158,10 @@ More detail: [`docs/ARCHITECTURE.md` §10](docs/ARCHITECTURE.md#10-known-limitat
   <kbd>⇧</kbd> selection. To fix a typo, use <kbd>Delete</kbd>, or <kbd>⌃</kbd> <kbd>B</kbd> / <kbd>⌃</kbd>
   <kbd>F</kbd> to move the cursor and <kbd>⌃</kbd> <kbd>A</kbd> / <kbd>⌃</kbd> <kbd>E</kbd> to jump to the
   start or end. A fix is planned.
+- **Delete may not work while you hold the shortcut's modifier.** With *Switch to the selected window*, if
+  another app uses <kbd>⌥</kbd> <kbd>Delete</kbd> (or your shortcut's modifier + <kbd>Delete</kbd>) as a
+  global shortcut, that app gets the key first and Swoop never sees it. Press <kbd>Esc</kbd> and start
+  again, or change that app's shortcut.
 
 ## Privacy
 

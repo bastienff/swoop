@@ -317,7 +317,7 @@ private struct ShortcutStep: View {
                            systemImage: "rectangle.grid.3x2", selected: settings.switcherMode == .stayOpen) {
                     settings.switcherMode = .stayOpen
                 }
-                ChoiceCard(title: "Switch on release", detail: "Like ⌘Tab: hold the modifier, tap to move, let go.",
+                ChoiceCard(title: "Switch on release", detail: "Like ⌘Tab: hold the modifier, tap or type to find, let go.",
                            systemImage: "hand.point.up.left", selected: settings.switcherMode == .switchOnRelease) {
                     settings.switcherMode = .switchOnRelease
                 }

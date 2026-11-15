@@ -412,6 +412,22 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
                 return true
             }
         }
+        // Hold-and-type: while switch-on-release waits for the modifier, keys type their plain character
+        // (⌥A → "a", not "å"; ⌘/⌃ letters aren't commands), Delete removes one, and the release switches
+        // to the top match. The shortcut key itself (above) and Escape, Return, Tab, arrows (below) keep
+        // their jobs.
+        if releaseWatch != nil, let s = settings.effectiveShortcut, s.isHeld(by: GlobalShortcutManager.modifiers(from: flags)) {
+            // Through the search field's editor, like normal typing, so the field and the query stay in step.
+            let editor = panel?.firstResponder as? NSTextView
+            if event.keyCode == 51 {                                          // Delete
+                if let editor { editor.deleteBackward(nil) } else if !model.query.isEmpty { model.query.removeLast() }
+                return true
+            }
+            if let text = HoldToType.text(event.charactersIgnoringModifiers) {
+                if let editor { editor.insertText(text, replacementRange: editor.selectedRange()) } else { model.query += text }
+                return true
+            }
+        }
         // ⌘, opens Settings, like in any Mac app. Matched by character so it works on every keyboard layout.
         if flags == .command, event.charactersIgnoringModifiers == "," {
             dismiss(restorePrevious: false)
