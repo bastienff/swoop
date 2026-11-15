@@ -33,6 +33,9 @@ final class DebugCommands {
             let s = controller.settings.shortcut
             Self.post(s.keyCode, s.modifiers)
         case "dump": dump(to: arg)
+        case "diagnostics":
+            // diagnostics <path>: the user-facing diagnostics report, written to <path>.
+            Task { [controller] in try? await DiagnosticsReport.make(controller).write(toFile: arg, atomically: true, encoding: .utf8) }
         case "snapshot":
             // snapshot <path> [clear]: "clear" renders only the content, on a transparent background.
             let a = arg.split(separator: " ").map(String.init)

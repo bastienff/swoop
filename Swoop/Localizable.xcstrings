@@ -607,10 +607,10 @@
     "Swoop Away" : {
 
     },
-    "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, this session's log and your windows' apps, including window titles — check it for anything private. Nothing is sent until you submit the report." : {
+    "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, the macOS settings and other apps that affect switching, this session's log and your windows' apps, including window titles — check it for anything private. Nothing is sent until you submit the report." : {
 
     },
-    "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, this session's log and your windows' apps, without window titles. Nothing is sent until you submit the report." : {
+    "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, the macOS settings and other apps that affect switching, this session's log and your windows' apps, without window titles. Nothing is sent until you submit the report." : {
 
     },
     "Swoop can see your windows" : {

@@ -29,6 +29,9 @@ final class AXObserverHub {
 
     func removeAll() { for pid in Array(observers.keys) { remove(pid) } }
 
+    /// Apps with a live observer (diagnostics: an app without one only updates when the switcher opens).
+    var observedPIDs: Set<pid_t> { Set(observers.keys) }
+
     private func add(_ pid: pid_t) {
         var observer: AXObserver?
         let callback: AXObserverCallback = { _, element, notification, refcon in

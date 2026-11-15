@@ -35,6 +35,10 @@ struct AppSnapshot: Sendable {
     var mayHaveHiddenTabs = false
     /// False if the app didn't answer AX (unresponsive / no permission).
     var responsive = true
+    /// Error reading the app's window list, if any (diagnostics).
+    var windowsError: AXError?
+    /// How long this app's discovery took (diagnostics: slow or hung apps).
+    var duration: TimeInterval = 0
 }
 
 /// Window frames of every app on every Space from the window server (no permission needed for frames).
@@ -108,11 +112,19 @@ enum WindowDiscoveryService {
 
     /// Single-app discovery. Synchronous AX IPC; call off the main thread.
     static func discover(app: AppInfo, anchors: [AXElement], recovery: RemoteWindowRecovery?, census: WindowCensus) -> AppSnapshot {
+        let start = Date()
+        var snap = discoverSources(app: app, anchors: anchors, recovery: recovery, census: census)
+        snap.duration = Date().timeIntervalSince(start)
+        return snap
+    }
+
+    private static func discoverSources(app: AppInfo, anchors: [AXElement], recovery: RemoteWindowRecovery?, census: WindowCensus) -> AppSnapshot {
         var snap = AppSnapshot(app: app)
         let axApp = AXElement.application(app.pid)
 
         // 1. Visible windows (current Space + minimized). F1.
         let (err, value) = axApp.raw(kAXWindowsAttribute)
+        if err != .success { snap.windowsError = err }
         // Unresponsive app: keep going with the other sources (they may also time out quickly).
         if err == .cannotComplete { snap.responsive = false }
         let windows = (value as? [AnyObject])?.compactMap { v -> AXElement? in

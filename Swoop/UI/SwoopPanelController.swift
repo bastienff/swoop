@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import OSLog
 import SwiftUI
 import SwoopCore
 
@@ -25,6 +26,7 @@ final class PanelBackgroundView: NSVisualEffectView {
 @MainActor
 final class SwoopPanelController: NSObject, NSWindowDelegate {
     static let cornerRadius: CGFloat = 36
+    private let log = Logger(subsystem: "com.bastienff.swoop", category: "panel")
 
     let model: SearchViewModel
     private let settings: AppSettings
@@ -478,6 +480,10 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         // take it back. A click outside, a shortcut the user pressed, or system UI is respected.
         if isVisible, focusWasStolen() {
             focusReclaims += 1
+            let front = NSWorkspace.shared.frontmostApplication
+            let taker = front?.bundleIdentifier ?? front?.localizedName ?? "unknown app"
+            SessionStats.shared.focusTaken(by: taker)
+            log.info("\(taker, privacy: .public) took focus from the open switcher; taking it back (\(self.focusReclaims))")
             reclaimFocus()
             return
         }

@@ -267,7 +267,7 @@ learned anchors); there is no separate Space service because no public Space API
 **DEBUG builds** also listen for `Tools/swctl` commands (distributed notification
 `com.bastienff.swoop.debug`): `show`, `hide`, `type <q>`, `key left|right|up|down|return|escape`,
 `hotkey` (posts the configured shortcut as a real HID event), `post <keyCode> <mods>`,
-`setshortcut <keyCode> <mods>`, `dump <file>`, `snapshot <png>`, `snapwin <png> <title>`,
+`setshortcut <keyCode> <mods>`, `dump <file>`, `diagnostics <file>` (the diagnostics report), `snapshot <png>`, `snapwin <png> <title>`,
 `appearance system|light|dark`, `refresh`, `settings`, `checkupdates` / `menucheckupdates` (button / menu
 path), `updatemock off|newVersion|upToDate|offline`, `autoupdates on|off`, `autocheck5` (automatic check in 5 s), `openmenu [cmdcomma]` (menu bar menu; optionally presses ⌘, in it), `scrollsettings <y>`, `demo` (fixed generic windows for README
 images; pauses discovery), `snapshot <png> clear` (content only, transparent, @2x). Build with
@@ -280,6 +280,18 @@ onboarding, system prompt, forget anchors (simulates a relaunch for recovery tes
 windows, refresh, open registry dump, update check response (real / mock new version / mock up to date /
 mock offline) + forget update state + run the automatic check in 5 s, demo windows on/off, show switcher/test HUD, clear recents, reveal
 data folder, reset all settings, relaunch, quit.
+
+**Diagnostics report** (all builds; menu → Report a Problem, or Settings → Advanced; `DiagnosticsReport`,
+`DiagnosticsInfo`, `SessionStats`): plain text, no window titles unless opted in. Sections: install (path,
+translocation, signature kind/team, other copies, Homebrew, login item), status (Accessibility, shortcut
+and key code, keyboard layout, Secure Keyboard Entry and its owner, element recovery, Swoop CPU/memory),
+this session (shortcut presses, opens, switch outcomes with route and duration, apps that took focus from the
+open switcher), macOS settings that change switching (switch-to-desktop-on-activate, rearrange desktops,
+separate desktops per display, Stage Manager, tabbing mode, reduce motion/transparency), known
+switchers/window managers/remappers running (fixed process-name list), Swoop settings, displays, per-app
+discovery (AX responsiveness and errors, timing, observer, windows here vs in the window server, Window
+menu, tab groups, anchors, listed entries by source), apps with windows Swoop doesn't list, the window
+list, and this session's log (switch outcomes and focus steals are logged without titles).
 
 ### Probes
 

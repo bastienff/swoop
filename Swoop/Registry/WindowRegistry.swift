@@ -319,6 +319,36 @@ final class WindowRegistry {
 
     /// Debug description for Settings → Advanced and diagnostics.
     /// `includeTitles: false` replaces titles with their length (diagnostics reports without opt-in).
+    /// One line per app from the last discovery pass, front to back (diagnostics report). No titles.
+    /// `census` is the window server's view (every Space), `observed` the apps with live AX observers.
+    func appDiagnostics(census: WindowCensus, observed: Set<pid_t>) -> [String] {
+        let pids = snapshots.keys.sorted { (zOrder[$0] ?? Int.max, $0) < (zOrder[$1] ?? Int.max, $1) }
+        return pids.compactMap { pid -> String? in
+            guard let snap = snapshots[pid] else { return nil }
+            let app = NSRunningApplication(processIdentifier: pid)
+            let listed = entries.filter { $0.pid == pid }
+            let bySource = Dictionary(grouping: listed, by: { "\($0.source)" }).map { "\($0.key) \($0.value.count)" }.sorted()
+            let tabs = snap.tabGroups.reduce(0) { $0 + $1.tabTitles.count }
+            var s = "\(snap.app.name) [\(snap.app.bundleID ?? "no bundle id")\(DiagnosticsInfo.appVersion(app).map { " \($0)" } ?? "")"
+            s += DiagnosticsInfo.isElectron(app) ? ", Electron" : ""
+            s += "] pid \(pid)"
+            if let launched = snap.app.launchDate { s += ", running \(DiagnosticsInfo.duration(Date().timeIntervalSince(launched)))" }
+            s += "\n    AX: \(snap.responsive ? "responds" : "NOT RESPONDING")"
+            if let e = snap.windowsError { s += " (window list error \(DiagnosticsInfo.axErrorName(e)))" }
+            s += ", \(Int(snap.duration * 1000)) ms, observer \(observed.contains(pid) ? "on" : "OFF")"
+            s += ", refreshes \(appRefreshCounts[snap.app.name] ?? 0)"
+            s += "\n    windows: \(snap.visible.count) on this desktop, \(census.windowCount(pid)) in window server (all desktops)"
+            s += ", Window menu \(snap.menuTitles.isEmpty ? "none" : "\(snap.menuTitles.count) items")"
+            s += ", tab groups \(snap.tabGroups.count)\(snap.tabGroups.isEmpty ? "" : " (\(tabs) tabs)")"
+            s += ", anchors \(anchors[pid]?.count ?? 0)\(snap.mayHaveHiddenTabs ? ", may have hidden tabs" : "")"
+            s += "\n    listed: \(listed.count)\(bySource.isEmpty ? "" : " (\(bySource.joined(separator: ", ")))")"
+            return s
+        }
+    }
+
+    /// Pids of the apps the last discovery pass covered.
+    var discoveredPIDs: Set<pid_t> { Set(snapshots.keys) }
+
     func dump(includeTitles: Bool = true) -> String {
         var s = "Registry @ \(lastRefresh.map { "\($0)" } ?? "never") — \(entries.count) entries, full refresh \(Int(lastRefreshDuration * 1000)) ms\n"
         if !appRefreshCounts.isEmpty {

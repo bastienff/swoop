@@ -162,8 +162,8 @@ final class AppController {
         let alert = NSAlert()
         alert.messageText = String(localized: "Report a Problem")
         alert.informativeText = settings.diagnosticsIncludeTitles
-            ? String(localized: "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, this session's log and your windows' apps, including window titles — check it for anything private. Nothing is sent until you submit the report.")
-            : String(localized: "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, this session's log and your windows' apps, without window titles. Nothing is sent until you submit the report.")
+            ? String(localized: "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, the macOS settings and other apps that affect switching, this session's log and your windows' apps, including window titles — check it for anything private. Nothing is sent until you submit the report.")
+            : String(localized: "Swoop can save a diagnostics report and show it in Finder, so you can drag it into the report on GitHub. It has Swoop's version and settings, the macOS settings and other apps that affect switching, this session's log and your windows' apps, without window titles. Nothing is sent until you submit the report.")
         alert.addButton(withTitle: String(localized: "Save Report & Open GitHub"))
         alert.addButton(withTitle: String(localized: "Open GitHub Only"))
         alert.addButton(withTitle: String(localized: "Cancel"))
@@ -194,6 +194,7 @@ final class AppController {
 
     /// Global hotkey: open, or (while open) cycle the selection.
     private func shortcutPressed() {
+        SessionStats.shared.shortcutPressed()
         if panel.isVisible {
             panel.shortcutPressed()
         } else {
@@ -210,9 +211,14 @@ final class AppController {
     func showPanel() {
         permissions.refresh()
         guard permissions.isAccessibilityTrusted else {
+            SessionStats.shared.openBlocked()
+            log.info("switcher not opened: Accessibility not granted")
             openOnboardingHandler?()
             return
         }
+        SessionStats.shared.panelOpened()
+        let age = registry.lastRefresh.map { "\(Int(Date().timeIntervalSince($0)))s ago" } ?? "never"
+        log.info("switcher opened: \(self.registry.entries.count) windows cached, last refresh \(age, privacy: .public)")
         activationTask?.cancel()
         activationTask = nil
         let pending = lastActivation.flatMap { Date().timeIntervalSince($0.at) < Self.activationSettleTime ? $0.pid : nil }
@@ -232,11 +238,24 @@ final class AppController {
         registry.recordUse(of: entry)
         lastActivation = (target.pid, Date())
         activationTask?.cancel()
+        let start = Date()
         activationTask = Task {
             let result = await activation.activate(target)
-            if result == .activated { supportPrompt.recordSwitch() }
-            if case .failed(let message) = result {
-                log.error("activation failed: \(message, privacy: .private)")
+            let ms = Int(Date().timeIntervalSince(start) * 1000)
+            let route = target.route.kind
+            switch result {
+            case .activated:
+                supportPrompt.recordSwitch()
+                SessionStats.shared.activation(app: target.appName, route: route, outcome: "activated", since: start)
+                log.info("switched to \(target.appName, privacy: .public) (route=\(route, privacy: .public)) in \(ms) ms")
+            case .cancelled:
+                SessionStats.shared.activation(app: target.appName, route: route, outcome: "cancelled", since: start)
+                log.info("switch to \(target.appName, privacy: .public) cancelled after \(ms) ms")
+            case .failed(let message):
+                // The message names the window: keep the title out of the log (it's public there).
+                let redacted = target.title.isEmpty ? message : message.replacingOccurrences(of: target.title, with: "‹title›")
+                SessionStats.shared.activation(app: target.appName, route: route, outcome: "failed", since: start)
+                log.error("switch to \(target.appName, privacy: .public) failed (route=\(route, privacy: .public)) after \(ms) ms: \(redacted, privacy: .public)")
                 hud.show(message)
                 await registry.refresh()
             }
@@ -249,6 +268,7 @@ final class AppController {
 final class WorkspaceObserver {
     private let registry: WindowRegistry
     private let hub = AXObserverHub()
+    var observedPIDs: Set<pid_t> { hub.observedPIDs }
     private var tokens: [NSObjectProtocol] = []
     private var fullRefresh: Task<Void, Never>?
     private var appRefresh: [pid_t: Task<Void, Never>] = [:]
