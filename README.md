@@ -33,8 +33,8 @@ That's it. No tiling, no window management, no plugins.
 
 - **Every window, one grid.** All apps, all desktops (Spaces), minimized windows, and native
   window tabs. Ten VS Code windows show up as ten entries.
-- **Type to find.** Fuzzy search across app names, window titles and tab titles. The grid shrinks to
-  the matches as you type.
+- **Type to find.** Fuzzy search across app names, window titles and tab titles, including initials
+  (`gc` finds Google Chrome, `hw` finds heron-web). The grid shrinks to the matches as you type.
 
   <p align="center"><img src="docs/images/swoop-search.png" width="420" alt="Searching for “heron” leaves three matching windows"></p>
 

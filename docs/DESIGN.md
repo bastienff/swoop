@@ -141,7 +141,7 @@ SF Pro (system font) everywhere; SF Pro Rounded only for keycaps and the shortcu
 | List chips | 10.5 medium |
 
 Search matches are emphasized in place: the matched range turns bold (regular → bold, semibold → heavy) and
-primary color. In Settings, use the system text styles (`.headline`, `.callout`, `.footnote`).
+primary color. For an initials match (`gc` → Google Chrome) each matched initial is emphasized. In Settings, use the system text styles (`.headline`, `.callout`, `.footnote`).
 
 ### 3.4 Shape (corner radii)
 

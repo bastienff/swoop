@@ -186,14 +186,17 @@ struct WindowListRow: View {
     /// Bolds the first case-insensitive occurrence of the query.
     private func highlighted(_ text: String, size: Double, weight: Font.Weight, color: Color) -> Text {
         let base = Font.system(size: size, weight: weight)
-        let q = query.trimmingCharacters(in: .whitespaces)
-        guard !q.isEmpty, let r = text.range(of: q, options: [.caseInsensitive, .diacriticInsensitive]) else {
-            return Text(text).font(base).foregroundColor(color)
-        }
+        // The matched substring, or each matched initial ("vsc" → Visual Studio Code).
+        let ranges = WindowSearchEngine.matchRanges(query: query, in: text)
+        guard !ranges.isEmpty else { return Text(text).font(base).foregroundColor(color) }
         let strong = Font.system(size: size, weight: weight == .regular ? .bold : .heavy)
-        return Text(text[..<r.lowerBound]).font(base).foregroundColor(color)
-            + Text(text[r]).font(strong).foregroundColor(primary)
-            + Text(text[r.upperBound...]).font(base).foregroundColor(color)
+        var result = Text(""), cursor = text.startIndex
+        for r in ranges {
+            result = result + Text(text[cursor..<r.lowerBound]).font(base).foregroundColor(color)
+                + Text(text[r]).font(strong).foregroundColor(primary)
+            cursor = r.upperBound
+        }
+        return result + Text(text[cursor...]).font(base).foregroundColor(color)
     }
 
     private var dark: Bool { scheme == .dark }

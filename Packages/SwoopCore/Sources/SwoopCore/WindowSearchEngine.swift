@@ -14,9 +14,12 @@ public enum WindowOrder: String, CaseIterable, Identifiable, Sendable {
 
 /// Case- and diacritic-insensitive fuzzy ranking of window entries.
 ///
-/// Tiers (higher wins): exact (1000) > prefix (800) > word prefix (700) > substring (500)
-/// > fuzzy subsequence (100…400). A VS Code project-name match adds a small bonus that never
-/// crosses a tier. Ties break by the chosen order (recency or name), then by input order.
+/// Tiers (higher wins): exact (1000) > prefix (800) > word prefix (700) > initials (600…650)
+/// > initials run (550…590) > substring (420…549) > initials subsequence (~360) > fuzzy (100…400).
+/// "Initials" are the first letters of words, where words also split at camelCase
+/// (`vsc` → Visual Studio Code, `hw` → heron-web or HeronWeb). A VS Code project-name match
+/// adds a small bonus that can't lift a match past the next tier. Ties break by the chosen order
+/// (recency or name), then by input order.
 public enum WindowSearchEngine {
     public struct Options: Sendable {
         public var projectBoost: Double
@@ -35,20 +38,82 @@ public enum WindowSearchEngine {
 
     /// Scores `query` against `text`; nil if no match. Both are normalized internally.
     public static func score(query rawQuery: String, in rawText: String) -> Double? {
+        evaluate(rawQuery, rawText)?.score
+    }
+
+    /// The parts of `text` to emphasize for `query`: the matched initials when an initials match
+    /// ranks the text, otherwise the first occurrence of the query. Empty for other fuzzy matches.
+    public static func matchRanges(query rawQuery: String, in text: String) -> [Range<String.Index>] {
+        guard let match = evaluate(rawQuery, text) else { return [] }
+        if let initials = match.initials {
+            return initials.map { $0..<text.index(after: $0) }
+        }
+        let q = rawQuery.trimmingCharacters(in: .whitespaces)
+        return text.range(of: q, options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive]).map { [$0] } ?? []
+    }
+
+    private struct Match {
+        var score: Double
+        /// Where the matched initials are in the raw text, when the score comes from them.
+        var initials: [String.Index]?
+    }
+
+    private static func evaluate(_ rawQuery: String, _ rawText: String) -> Match? {
         let q = normalize(rawQuery).trimmingCharacters(in: .whitespaces)
         let t = normalize(rawText)
         guard !q.isEmpty, !t.isEmpty else { return nil }
-        if t == q { return 1000 }
-        if t.hasPrefix(q) { return 800 + lengthBonus(q, t) }
+        if t == q { return Match(score: 1000) }
+        if t.hasPrefix(q) { return Match(score: 800 + lengthBonus(q, t)) }
+        let starts = wordStarts(rawText)
+        let acronym = initialsMatch(Array(q), starts)
         if let r = t.range(of: q) {
             let start = r.lowerBound
             if start == t.startIndex || isBoundary(t[t.index(before: start)]) {
-                return 700 + lengthBonus(q, t)
+                return Match(score: 700 + lengthBonus(q, t))
             }
+            // Mid-word hit: initials beat it ("hw" → heron-web over "touchwood").
             let offset = Double(t.distance(from: t.startIndex, to: start))
-            return 500 - min(offset, 80) + lengthBonus(q, t)
+            let substring = 500 - min(offset, 80) + lengthBonus(q, t)
+            if let acronym, acronym.score > substring { return acronym }
+            return Match(score: substring)
         }
-        return fuzzy(Array(q), Array(t))
+        if let acronym { return acronym }
+        return fuzzy(Array(q), Array(t), starts: starts)
+    }
+
+    /// Initials tiers: the query is the start of the initials (600…650, 650 = every initial), or a
+    /// run of them further in (550…590). Single letters and multi-word queries don't count.
+    private static func initialsMatch(_ q: [Character], _ starts: [(index: String.Index, char: Character)]) -> Match? {
+        guard q.count >= 2, !q.contains(" "), starts.count >= q.count else { return nil }
+        let chars = starts.map(\.char), coverage = Double(q.count) / Double(chars.count)
+        for offset in 0...(chars.count - q.count) where Array(chars[offset..<offset + q.count]) == q {
+            let indices = starts[offset..<offset + q.count].map(\.index)
+            return Match(score: offset == 0 ? 600 + 50 * coverage : 550 + 40 * coverage, initials: indices)
+        }
+        return nil
+    }
+
+    /// The first character of each word, normalized, with its index in `text`. Words start after any
+    /// non-alphanumeric character, at a lowercase→uppercase step ("HeronWeb"), at the last capital
+    /// of a capital run followed by lowercase ("VSCode" → V, C), and at a letter→digit step ("iTerm2").
+    static func wordStarts(_ text: String) -> [(index: String.Index, char: Character)] {
+        var out: [(index: String.Index, char: Character)] = []
+        let chars = Array(text.indices)
+        for (i, idx) in chars.enumerated() {
+            let c = text[idx]
+            guard c.isLetter || c.isNumber else { continue }
+            var start = i == 0
+            if !start {
+                let prev = text[chars[i - 1]]
+                let next: Character? = i + 1 < chars.count ? text[chars[i + 1]] : nil
+                start = !(prev.isLetter || prev.isNumber)
+                    || (c.isUppercase && prev.isLowercase)
+                    || (c.isUppercase && prev.isUppercase && next?.isLowercase == true)
+                    || (c.isNumber && prev.isLetter)
+            }
+            if start { out.append((idx, normalize(String(c)).first ?? c)) }
+        }
+        return out
     }
 
     private static func lengthBonus(_ q: String, _ t: String) -> Double {
@@ -56,12 +121,12 @@ public enum WindowSearchEngine {
         50 * Double(q.count) / Double(max(t.count, q.count))
     }
 
-    private static func isBoundary(_ c: Character) -> Bool {
-        c == " " || c == "-" || c == "_" || c == "." || c == "/" || c == "—" || c == "(" || c == "[" || c == ":" || c == "·"
-    }
+    /// Words are separated by anything that isn't a letter or digit (space, -, _, ., /, #, —, …),
+    /// the same rule `wordStarts` uses for initials.
+    private static func isBoundary(_ c: Character) -> Bool { !(c.isLetter || c.isNumber) }
 
     /// Greedy subsequence match rewarding contiguity and word-boundary hits.
-    private static func fuzzy(_ q: [Character], _ t: [Character]) -> Double? {
+    private static func fuzzy(_ q: [Character], _ t: [Character], starts: [(index: String.Index, char: Character)]) -> Match? {
         if q.contains(" ") {
             // Multi-word query: every word must match somewhere; score by the weakest word.
             let words = String(q).split(separator: " ").map(String.init)
@@ -70,12 +135,11 @@ public enum WindowSearchEngine {
                 guard let s = score(query: w, in: String(t)) else { return nil }
                 worst = min(worst, s)
             }
-            return min(worst, 400) * 0.9
+            return Match(score: min(worst, 400) * 0.9)
         }
-        // Acronym pass over word initials ("hap" → heron-api-proxy).
-        let initials = t.indices.filter { $0 == 0 || isBoundary(t[$0 - 1]) }.map { t[$0] }
-        if q.count >= 2, isSubsequence(q, of: initials) {
-            return 360 - 5 * Double(max(initials.count - q.count, 0)).squareRoot()
+        // Initials in order with gaps ("vc" → Visual Studio Code).
+        if q.count >= 2, let picked = subsequence(q, of: starts) {
+            return Match(score: 360 - 5 * Double(max(starts.count - q.count, 0)).squareRoot(), initials: picked)
         }
         var qi = 0, ti = 0
         var run = 0, bestRun = 0, boundaryHits = 0, gaps = 0
@@ -99,13 +163,14 @@ public enum WindowSearchEngine {
         if q.count >= 3 && !isAcronym && span > max(q.count * 2, q.count + 4) { return nil }
         let contiguity = Double(bestRun) / Double(q.count)
         let s = 100 + 200 * contiguity + 20 * Double(boundaryHits) - 5 * min(Double(gaps), 20)
-        return min(max(s, 100), 400)
+        return Match(score: min(max(s, 100), 400))
     }
 
-    private static func isSubsequence(_ q: [Character], of t: [Character]) -> Bool {
-        var i = 0
-        for c in t where i < q.count && c == q[i] { i += 1 }
-        return i == q.count
+    /// Indices of the word starts that spell `q` in order (greedy), or nil.
+    private static func subsequence(_ q: [Character], of starts: [(index: String.Index, char: Character)]) -> [String.Index]? {
+        var picked: [String.Index] = []
+        for s in starts where picked.count < q.count && s.char == q[picked.count] { picked.append(s.index) }
+        return picked.count == q.count ? picked : nil
     }
 
     public static func score(entry: WindowEntry, query: String, options: Options = .init()) -> Double? {
@@ -118,8 +183,9 @@ public enum WindowSearchEngine {
         consider(entry.title)
         consider(entry.detail)
         if let project = entry.projectName, let s = score(query: query, in: project) {
-            // Bonus stays inside the tier (tiers are ≥100 apart; bonus < 100).
-            best = max(best ?? -.infinity, s + min(options.projectBoost, 90))
+            // Capped so it can lift a match past weaker scores of the next tier at most, never two
+            // tiers up (e.g. a substring hit never passes an initials match of the whole name).
+            best = max(best ?? -.infinity, s + min(options.projectBoost, 45))
         }
         // Whole "app title" phrase, so "code heron" matches "Code — heron.config.js".
         consider("\(entry.appName) \(entry.projectName ?? "") \(entry.title)")
