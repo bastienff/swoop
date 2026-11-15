@@ -16,7 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let controller = AppController()
         self.controller = controller
         let settingsWindow = SettingsWindowController(controller: controller)
-        // First launch: the guided setup. Afterwards (e.g. Accessibility revoked, or "Fix…" in the menu),
+        // First launch: the guided setup. Afterwards (e.g. Accessibility revoked, or "Fix" in the menu),
         // only its permissions step.
         let onboarding = HostedWindowController(title: String(localized: "Welcome to Swoop"), staysVisible: true, chromeless: true, translucent: true) { [weak controller] () -> OnboardingView in
             let c = controller!

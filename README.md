@@ -106,7 +106,7 @@ Swoop learn about windows as they open.
 | Switch | <kbd>Return</kbd> or click |
 | Close | <kbd>Esc</kbd> or click outside |
 
-**Settings** (menu-bar icon → Settings…) cover the shortcut, layout (grid or list), light/dark
+**Settings** (menu-bar icon → Settings) cover the shortcut, layout (grid or list), light/dark
 appearance, icon size, number of rows, which display the panel opens on, and which windows to include.
 
 ## What Swoop won't do

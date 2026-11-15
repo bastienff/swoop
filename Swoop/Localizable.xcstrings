@@ -136,9 +136,6 @@
     "Checking for updates…" : {
 
     },
-    "Checking…" : {
-
-    },
     "Classic" : {
       "comment" : "Theme name"
     },
@@ -519,9 +516,6 @@
     "Save Diagnostics Report" : {
       "comment" : "Menu bar menu"
     },
-    "Save Diagnostics Report…" : {
-
-    },
     "Save Report & Open GitHub" : {
 
     },
@@ -542,9 +536,6 @@
     },
     "Settings" : {
 
-    },
-    "Settings…" : {
-      "comment" : "Main menu item\nMenu bar menu"
     },
     "Shift alone would block typing that character. Add ⌘, ⌥ or ⌃." : {
 

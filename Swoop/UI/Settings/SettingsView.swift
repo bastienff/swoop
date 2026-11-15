@@ -355,7 +355,7 @@ private struct AdvancedSettings: View {
             Section("Diagnostics") {
                 Toggle("Include window titles in reports", isOn: $settings.diagnosticsIncludeTitles)
                 HStack {
-                    Button("Save Diagnostics Report…") {
+                    Button("Save Diagnostics Report") {
                         Task {
                             if let url = await DiagnosticsReport.saveAndReveal(controller) { status = String(localized: "Saved \(url.lastPathComponent).", comment: "%@ is a file name") }
                         }

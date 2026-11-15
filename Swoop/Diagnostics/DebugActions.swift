@@ -111,7 +111,7 @@ enum DebugActions {
         item("Reset All Settings & Relaunch") { resetAllSettingsAndRelaunch() }
         item("Relaunch Swoop") { relaunch() }
         m.addItem(.separator())
-        item("Open Debug Settings…") {
+        item("Open Debug Settings") {
             c.openSettingsHandler?()
             c.selectSettingsPane?(SettingsPane.allCases.firstIndex(of: .debug) ?? 0)
         }

@@ -85,8 +85,8 @@ body:
     attributes:
       label: Diagnostics report
       description: |
-        Helps a lot. Menu-bar icon → **Report a Problem…** → **Save Report & Open GitHub** saves one and shows it
-        in Finder (or Settings → Advanced → **Save Diagnostics Report…**). Drag the `.txt` file here.
+        Helps a lot. Menu-bar icon → **Report a Problem** → **Save Report & Open GitHub** saves one and shows it
+        in Finder (or Settings → Advanced → **Save Diagnostics Report**). Drag the `.txt` file here.
         It has Swoop's version, settings, this session's log and your windows' apps, **without window titles**
         unless you turned on "Include window titles in reports". If possible, reproduce the problem first:
         the log only covers Swoop's current session.

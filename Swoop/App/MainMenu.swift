@@ -10,7 +10,7 @@ enum MainMenu {
 
         let appItem = NSMenuItem()
         let app = NSMenu(title: "Swoop")
-        let settings = NSMenuItem(title: String(localized: "Settings…"), action: openSettings, keyEquivalent: ",")
+        let settings = NSMenuItem(title: String(localized: "Settings"), action: openSettings, keyEquivalent: ",")
         settings.target = target
         app.addItem(settings)
         app.addItem(.separator())

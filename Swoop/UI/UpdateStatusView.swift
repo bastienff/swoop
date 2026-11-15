@@ -17,7 +17,7 @@ struct UpdateStatusView: View {
                 checkButton(String(localized: "Check for Updates"))
             case .checking:
                 ProgressView().controlSize(.small)
-                Text("Checking…").foregroundStyle(.secondary)
+                Text("Checking for updates…").foregroundStyle(.secondary)
             case .upToDate:
                 Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
                 Text("Swoop is up to date")
