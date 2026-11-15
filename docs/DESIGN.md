@@ -300,7 +300,9 @@ front, even on another desktop. Escape or click outside closes and returns to wh
 *Switch on release* mode: hold the modifier, tap to move, release to switch (like ⌘Tab).
 
 ### 6.3 Customizing
-Menu bar → Settings (⌘,). Changes apply live, including the theme on the open Settings window.
+Menu bar → Settings (⌘,). Changes apply live, including the theme on the open Settings window. The window is 560 pt wide and
+each pane sizes to its content, up to 700 pt (≈ 780 pt window; less on short displays: 85 % of the usable
+height minus the toolbar). Taller panes (Behavior) scroll under the toolbar (`CappedHeight`).
 
 ### 6.4 Updates
 Opt-in only. Menu bar → Check for Updates shows the result (Swoop: update window that follows the check live;

@@ -277,10 +277,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         if window == nil {
             let tabs = NSTabViewController()
             tabs.tabStyle = .toolbar
+            let maxHeight = Self.maxPaneHeight(on: NSScreen.main)
             for pane in SettingsPane.allCases {
-                let hosting = NSHostingController(rootView: pane.content(controller)
-                    .frame(width: 560)
-                    .fixedSize(horizontal: false, vertical: true)
+                let hosting = NSHostingController(rootView: CappedHeight(maxHeight: maxHeight) {
+                    pane.content(controller).frame(width: 560)
+                }
                     .modifier(SettingsThemeStyle(settings: controller.settings)))
                 hosting.sizingOptions = [.preferredContentSize]
                 hosting.title = pane.title
@@ -330,6 +331,14 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         }
     }
 
+    /// Tallest a pane gets before it scrolls: 700 pt of content (≈ 780 pt window with the toolbar, so every
+    /// pane but Behavior fits on a 14" MacBook Pro), less on short displays so the window never fills the screen.
+    static let paneHeightLimit: CGFloat = 700
+    static func maxPaneHeight(on screen: NSScreen?) -> CGFloat {
+        guard let visible = screen?.visibleFrame.height else { return paneHeightLimit }
+        return min(paneHeightLimit, visible * 0.85 - 80) // 80 ≈ title bar + toolbar tabs
+    }
+
     /// Selects a pane by index (used by the debug driver).
     func select(_ index: Int) {
         guard let tabs, tabs.tabViewItems.indices.contains(index) else { return }
@@ -363,5 +372,21 @@ enum BringToFront {
             guard window.isVisible else { return }
             window.makeKeyAndOrderFront(nil)
         }
+    }
+}
+
+/// Sizes a settings pane to its content like `fixedSize`, but never taller than `maxHeight`; above that the
+/// pane gets `maxHeight` and its Form scrolls. Short panes keep their compact height (standard macOS style).
+struct CappedHeight: Layout {
+    var maxHeight: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard let content = subviews.first else { return .zero }
+        let ideal = content.sizeThatFits(ProposedViewSize(width: proposal.width, height: nil))
+        return CGSize(width: ideal.width, height: min(ideal.height, maxHeight))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        subviews.first?.place(at: bounds.origin, proposal: ProposedViewSize(bounds.size))
     }
 }
