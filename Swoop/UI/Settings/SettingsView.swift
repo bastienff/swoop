@@ -98,6 +98,15 @@ private struct KeyboardSettings: View {
             }
 
             Section {
+                AppListEditor(list: $settings.shortcutIgnoredApps)
+            } header: {
+                Text("Ignore the shortcut in these apps")
+            } footer: {
+                Text("While one of these apps is in front, Swoop lets it have the shortcut — useful for games, virtual machines and remote desktops. The menu bar icon still opens Swoop.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
+
+            Section {
                 Toggle("Allow bare Tab as the shortcut", isOn: $settings.allowBareTab)
                 if settings.allowBareTab {
                     Button("Use bare Tab") { settings.shortcut = Shortcut(keyCode: Shortcut.tabKeyCode, modifiers: []) }
@@ -110,6 +119,7 @@ private struct KeyboardSettings: View {
         }
         .formStyle(.grouped)
         .onChange(of: settings.shortcut) { message = nil; controller.applyShortcut() }
+        .onChange(of: settings.shortcutIgnoredApps) { controller.updateShortcutSuspension() }
         .onChange(of: settings.shortcutEnabled) { controller.applyShortcut() }
         .onChange(of: settings.allowBareTab) {
             if !settings.allowBareTab && settings.shortcut.isUnmodified { settings.shortcut = .default }
@@ -243,6 +253,14 @@ private struct BehaviorSettings: View {
                     Text("Keeps windows on desktops you visited reachable after Swoop restarts. Uses non-public macOS accessibility functions; turn off if a macOS update misbehaves.")
                 }
             }
+            Section {
+                AppListEditor(list: $settings.hiddenApps)
+            } header: {
+                Text("Hidden apps")
+            } footer: {
+                Text("Windows of these apps never appear in the switcher. You can also right-click a window in the switcher to hide its app.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
             Section("Visual Studio Code") {
                 Toggle("Show project names", isOn: $settings.vscodeEnhancements)
                 Toggle("Boost project-name matches in search", isOn: $settings.vscodeSearchBoost)
@@ -270,6 +288,7 @@ private struct BehaviorSettings: View {
         .onChange(of: settings.nativeTabDiscovery) { refresh() }
         .onChange(of: settings.recoverOtherSpaceWindows) { refresh() }
         .onChange(of: settings.vscodeEnhancements) { refresh() }
+        .onChange(of: settings.hiddenApps) { refresh() }
         .onChange(of: settings.checkForUpdates) { controller.updates.applySetting() }
         .onChange(of: settings.updateFrequency) { controller.updates.applySetting(restart: true) }
         .onAppear { launchAtLogin = LaunchAtLogin.isEnabled }

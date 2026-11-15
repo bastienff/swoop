@@ -58,6 +58,12 @@
     "Accessibility: Not Granted — Fix" : {
 
     },
+    "Add" : {
+
+    },
+    "Add App" : {
+
+    },
     "Add at least one modifier (⌘, ⌥, ⌃ or ⇧)." : {
 
     },
@@ -134,6 +140,9 @@
 
     },
     "Checking for updates…" : {
+
+    },
+    "Choose App…" : {
 
     },
     "Classic" : {
@@ -262,10 +271,19 @@
     "Helps other people discover it." : {
 
     },
+    "Hidden apps" : {
+
+    },
+    "Hide %@ from Swoop" : {
+
+    },
     "Hide Swoop" : {
       "comment" : "Main menu item"
     },
     "Icon size" : {
+
+    },
+    "Ignore the shortcut in these apps" : {
 
     },
     "In System Settings → Privacy & Security → Accessibility, turn on **Swoop**. This screen updates by itself; no restart needed." : {
@@ -393,6 +411,9 @@
     "No ads, no tracking, no account. If Swoop saves you time, here's how you can help it grow." : {
 
     },
+    "No apps" : {
+
+    },
     "No matching windows" : {
 
     },
@@ -490,6 +511,9 @@
 
     },
     "Remember windows on other desktops" : {
+
+    },
+    "Remove %@" : {
 
     },
     "Report a Problem" : {
@@ -718,10 +742,16 @@
     "When you release the shortcut" : {
 
     },
+    "While one of these apps is in front, Swoop lets it have the shortcut — useful for games, virtual machines and remote desktops. The menu bar icon still opens Swoop." : {
+
+    },
     "Window" : {
       "comment" : "Main menu"
     },
     "Windows" : {
+
+    },
+    "Windows of these apps never appear in the switcher. You can also right-click a window in the switcher to hide its app." : {
 
     },
     "You have %@. Download the new version from GitHub, or run “brew upgrade” if you installed Swoop with Homebrew." : {

@@ -189,6 +189,12 @@ Decision tree for target `T` of app `A`:
 
 - Carbon `RegisterEventHotKey` / `InstallEventHandler` (F12). Default **⌥Tab**. No Input Monitoring.
 - Re-registered dynamically when settings change; old registration is removed first.
+- **Ignored apps** (Settings → Keyboard): a Carbon hotkey always consumes the press, it can't be passed on
+  for some apps. So while an app from "Ignore the shortcut in these apps" is frontmost
+  (`NSWorkspace.didActivateApplicationNotification`), Swoop unregisters the hotkey and registers it again
+  when another app comes forward (`AppController.updateShortcutSuspension`, rule in
+  `ShortcutSuspension`). Only the frontmost app is read, never keystrokes. Verified on the dev Mac
+  (Ghostty listed: ⌥Tab doesn't open Swoop there, does from Finder).
 - Pressing the shortcut while the switcher is open toggles it closed. While the panel is key, Tab /
   ⇧Tab also move selection (handled locally, not globally).
 - **Bare Tab** is opt-in (Settings → Keyboard), with a warning: it swallows Tab system-wide while

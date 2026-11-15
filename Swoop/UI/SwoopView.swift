@@ -162,6 +162,7 @@ struct WindowGridView: View {
                                                    cellWidth: metrics.cellWidth, cellHeight: metrics.cellHeight)
                                     .id(entry.id)
                                     .onTapGesture { model.activate(entry) }
+                                    .contextMenu { HideAppMenuItem(entry: entry, model: model) }
                             }
                         }
                         .frame(maxWidth: .infinity) // centers the incomplete last row

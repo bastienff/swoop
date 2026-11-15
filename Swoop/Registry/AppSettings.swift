@@ -143,6 +143,10 @@ final class AppSettings {
     var alwaysShowSearchField: Bool { didSet { save("alwaysShowSearchField", alwaysShowSearchField) } }
 
     var dismissOnOutsideClick: Bool { didSet { save("dismissOnOutsideClick", dismissOnOutsideClick) } }
+    /// Apps whose windows never appear in the switcher.
+    var hiddenApps: AppList { didSet { saveCodable("hiddenApps", hiddenApps) } }
+    /// Apps that get the shortcut themselves while in front (games, VMs, remote desktops).
+    var shortcutIgnoredApps: AppList { didSet { saveCodable("shortcutIgnoredApps", shortcutIgnoredApps) } }
     var showMinimized: Bool { didSet { save("showMinimized", showMinimized) } }
     var includeFullScreen: Bool { didSet { save("includeFullScreen", includeFullScreen) } }
     var vscodeEnhancements: Bool { didSet { save("vscodeEnhancements", vscodeEnhancements) } }
@@ -177,6 +181,9 @@ final class AppSettings {
         panelPositions = defaults.dictionary(forKey: "panelPositions") as? [String: [Double]] ?? [:]
         alwaysShowSearchField = b("alwaysShowSearchField", true)
         dismissOnOutsideClick = b("dismissOnOutsideClick", true)
+        func apps(_ k: String) -> AppList { defaults.data(forKey: k).flatMap { try? JSONDecoder().decode(AppList.self, from: $0) } ?? AppList() }
+        hiddenApps = apps("hiddenApps")
+        shortcutIgnoredApps = apps("shortcutIgnoredApps")
         showMinimized = b("showMinimized", true)
         includeFullScreen = b("includeFullScreen", true)
         vscodeEnhancements = b("vscodeEnhancements", true)

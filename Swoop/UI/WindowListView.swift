@@ -33,6 +33,7 @@ struct WindowListView: View {
                                           compact: compact, query: query, height: metrics.cellHeight)
                                 .id(entry.id)
                                 .onTapGesture { model.activate(entry) }
+                                .contextMenu { HideAppMenuItem(entry: entry, model: model) }
                         }
                     }
                     .background(GeometryReader { g in

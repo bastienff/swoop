@@ -122,7 +122,7 @@ final class WindowRegistry {
         if let pid, !knownApps.isEmpty {
             // One app: look up only that one; everything else comes from the last full refresh.
             guard let app = NSRunningApplication(processIdentifier: pid), !app.isTerminated, app.activationPolicy == .regular,
-                  pid != ProcessInfo.processInfo.processIdentifier else { return }
+                  pid != ProcessInfo.processInfo.processIdentifier, !settings.hiddenApps.contains(app.bundleIdentifier) else { return }
             let known = KnownApp(app)
             if let i = knownApps.firstIndex(where: { $0.info.pid == pid }) { knownApps[i] = known } else { knownApps.append(known) }
             apps = [known.info]
@@ -130,6 +130,8 @@ final class WindowRegistry {
         } else {
             knownApps = NSWorkspace.shared.runningApplications
                 .filter { $0.activationPolicy == .regular && $0.processIdentifier != ProcessInfo.processInfo.processIdentifier && !$0.isTerminated }
+                // Hidden apps (Settings → Behavior) aren't enumerated at all.
+                .filter { !settings.hiddenApps.contains($0.bundleIdentifier) }
                 .map(KnownApp.init)
             apps = knownApps.map(\.info).filter { pid == nil || $0.pid == pid }
         }

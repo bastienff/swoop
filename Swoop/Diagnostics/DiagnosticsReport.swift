@@ -92,6 +92,8 @@ enum DiagnosticsReport {
         line("layout=\(s.panelLayout.rawValue), icon size=\(s.iconSize.rawValue), max rows=\(s.maxVisibleRows)/\(s.maxVisibleListRows) (grid/list)")
         line("theme=\(s.theme.rawValue), appearance=\(s.appearance.rawValue), display=\(s.panelDisplay.rawValue), draggable=\(s.panelDraggable), always show search=\(s.alwaysShowSearchField)")
         line("dismiss on outside click=\(s.dismissOnOutsideClick), show minimized=\(s.showMinimized), include full screen=\(s.includeFullScreen)")
+        line("hidden apps=\(s.hiddenApps.isEmpty ? "none" : s.hiddenApps.apps.map(\.bundleID).joined(separator: ", "))")
+        line("shortcut ignored in=\(s.shortcutIgnoredApps.isEmpty ? "none" : s.shortcutIgnoredApps.apps.map(\.bundleID).joined(separator: ", ")), released now=\(c.shortcutSuspended)")
         line("native tabs=\(s.nativeTabDiscovery), remember other desktops=\(s.recoverOtherSpaceWindows), VS Code names=\(s.vscodeEnhancements), VS Code boost=\(s.vscodeSearchBoost)")
         line("update checks=\(s.checkForUpdates ? s.updateFrequency.rawValue : "manual"), onboarding completed=\(s.onboardingCompleted), debug logging=\(s.debugLogging)")
 

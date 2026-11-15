@@ -33,6 +33,9 @@ final class AppController {
 
     private let log = Logger(subsystem: "com.bastienff.swoop", category: "app")
     private(set) var shortcutError: String?
+    /// The shortcut is released while an app from "Ignore the shortcut in these apps" is in front.
+    private(set) var shortcutSuspended = false
+    private var frontmostObserver: NSObjectProtocol?
     /// The activation in flight; cancelled when the switcher opens again so its focus guard
     /// doesn't pull the previous target back over the new panel.
     private var activationTask: Task<Void, Never>?
@@ -44,11 +47,21 @@ final class AppController {
     func start() {
         hotkeys.onPress = { [weak self] in self?.shortcutPressed() }
         hotkeys.onRelease = { [weak self] in self?.panel.endKeyRepeat() }
+        shortcutSuspended = shouldSuspendShortcut(for: NSWorkspace.shared.frontmostApplication)
         applyShortcut()
+        frontmostObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { [weak self] note in
+            let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            MainActor.assumeIsolated { self?.updateShortcutSuspension(frontmost: app) }
+        }
 
         searchModel.onActivate = { [weak self] entry in self?.activate(entry) }
         observers.isPanelVisible = { [weak self] in self?.panel.isVisible ?? false }
         searchModel.onDismiss = { [weak self] in self?.panel.dismiss(restorePrevious: true) }
+        searchModel.onHideApp = { [weak self] entry in
+            guard let bundleID = entry.bundleID else { return }
+            self?.hideApp(bundleID: bundleID, name: entry.appName)
+        }
         panel.onOpenSettings = { [weak self] in self?.openSettingsHandler?() }
 
         menuBar.onOpenSwoop = { [weak self] in self?.showPanel() }
@@ -142,12 +155,34 @@ final class AppController {
     /// (Re)registers the global shortcut from settings. Old registration is removed first.
     func applyShortcut() {
         do {
-            try hotkeys.register(settings.effectiveShortcut)
+            try hotkeys.register(shortcutSuspended ? nil : settings.effectiveShortcut)
             shortcutError = nil
         } catch {
             shortcutError = error.description
             log.error("shortcut: \(error.description, privacy: .public)")
         }
+    }
+
+    /// Releases the shortcut while an ignored app is in front, so that app receives the key (Carbon hotkeys
+    /// can't pass a press through), and takes it back when another app comes forward. No keystrokes are read:
+    /// only which app is frontmost.
+    func updateShortcutSuspension(frontmost: NSRunningApplication? = NSWorkspace.shared.frontmostApplication) {
+        let suspend = shouldSuspendShortcut(for: frontmost)
+        guard suspend != shortcutSuspended else { return }
+        shortcutSuspended = suspend
+        log.info("shortcut \(suspend ? "released" : "taken back", privacy: .public) for \(frontmost?.bundleIdentifier ?? "?", privacy: .public)")
+        applyShortcut()
+    }
+
+    private func shouldSuspendShortcut(for app: NSRunningApplication?) -> Bool {
+        ShortcutSuspension.shouldSuspend(frontmostBundleID: app?.bundleIdentifier, ownBundleID: Bundle.main.bundleIdentifier,
+                                         ignored: settings.shortcutIgnoredApps)
+    }
+
+    /// Hides an app's windows from the switcher (switcher context menu); undo in Settings → Behavior.
+    func hideApp(bundleID: String, name: String) {
+        settings.hiddenApps.add(AppList.App(bundleID: bundleID, name: name))
+        Task { await registry.refresh() }
     }
 
     /// GitHub's bug report form, pre-filled with version, system and layout (no window titles).

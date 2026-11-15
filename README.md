@@ -46,6 +46,8 @@ That's it. No tiling, no window management, no plugins.
   (*Comfortable*) rows that also show if a window is a tab, minimized, or on another desktop.
   [See both lists below](#grid-or-list).
 - **Most recent first.** With an empty search, the window you used last comes first.
+- **Leave apps out.** Hide apps you never switch to (right-click a window → *Hide from Swoop*), and let
+  games, virtual machines or remote desktops keep <kbd>⌥</kbd> <kbd>Tab</kbd> while they're in front.
 - **Made for VS Code.** Project names are pulled out of window titles, so you can type
   `api` and see projects, not file names. Works great with `"window.nativeTabs": true`.
 - **Light.** Native Swift and AppKit. No dependencies and no polling: Swoop only wakes up when a window changes, so it sits at 0% CPU while nothing is happening.
@@ -107,7 +109,7 @@ Swoop learn about windows as they open.
 | Close | <kbd>Esc</kbd> or click outside |
 
 **Settings** (menu-bar icon → Settings) cover the shortcut, layout (grid or list), light/dark
-appearance, icon size, number of rows, which display the panel opens on, and which windows to include.
+appearance, icon size, number of rows, which display the panel opens on, which windows to include, apps to hide, and apps that keep the shortcut for themselves.
 
 ## What Swoop won't do
 

@@ -26,6 +26,8 @@ final class SearchViewModel {
     @ObservationIgnored let settings: AppSettings
     @ObservationIgnored var onActivate: ((WindowEntry) -> Void)?
     @ObservationIgnored var onDismiss: (() -> Void)?
+    /// Context menu → "Hide … from Swoop".
+    @ObservationIgnored var onHideApp: ((WindowEntry) -> Void)?
 
     init(registry: WindowRegistry, settings: AppSettings) {
         self.registry = registry

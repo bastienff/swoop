@@ -235,6 +235,7 @@ Always honor `accessibilityReduceMotion`.
 | **Visual picker** | `VisualPicker` + thumbnails | Picture tiles 96 × 60 (drawn 128 × 80 at 75 %), 118 pt columns, accent border 2.5 pt when selected (`themeAccent`). Thumbnails are vector and follow light/dark. |
 | **Themed switch** | `ThemedSwitchStyle` | Standard switch, orange tint in Swoop. |
 | **Onboarding blocks** | `OnboardingView` | `StepHeader`, `SymbolBadge` (64 pt, color @ 14 %), `Card`, `ChoiceCard` (orange 2 pt border selected), `LinkRow`, `Keycap`, `StepDots`. |
+| **App list editor** | `AppListEditor` | Settings rows for an app list (Hidden apps, Ignore the shortcut in these apps): 20 pt app icon (placeholder `app.dashed` when not installed), name, borderless `minus.circle.fill` remove button; "No apps" when empty; an *Add App* menu of running apps (16 pt icons) + *Choose App…* (open panel in /Applications). Section footer explains the effect. |
 | **Menu bar icon** | `MenuBarController.statusImage` | 18 pt vector template: the logo's swap arrows (round tail, tapered shaft, swept head) knocked out of a rounded square. With an update available: orange square, white arrows (not a template). Spec: `design/brand/README.md`. |
 
 When a component is needed in a second place, move it to `Theme/` (or a shared file) rather than copying it.
