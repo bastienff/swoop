@@ -151,6 +151,14 @@ hidden tab from an app's Window menu pulls the whole tab group onto your current
 
 More detail: [`docs/ARCHITECTURE.md` §10](docs/ARCHITECTURE.md#10-known-limitations).
 
+## Known issues
+
+- **The arrow keys don't move the cursor in the search field.** <kbd>←</kbd> <kbd>→</kbd> always move
+  between windows, even while you're typing, and that includes <kbd>⌥</kbd>/<kbd>⌘</kbd> + arrows and
+  <kbd>⇧</kbd> selection. To fix a typo, use <kbd>Delete</kbd>, or <kbd>⌃</kbd> <kbd>B</kbd> / <kbd>⌃</kbd>
+  <kbd>F</kbd> to move the cursor and <kbd>⌃</kbd> <kbd>A</kbd> / <kbd>⌃</kbd> <kbd>E</kbd> to jump to the
+  start or end. A fix is planned.
+
 ## Privacy
 
 Swoop makes no network requests without your consent. The only one it can make is an update check:
