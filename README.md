@@ -40,14 +40,19 @@ That's it. No tiling, no window management, no plugins.
 
 - **Goes to the window, doesn't move it.** Swoop jumps to the desktop the window lives on.
   It never pulls windows onto your current desktop, and never pulls a tab out of its group.
-- **Keyboard first.** The panel stays open after you let go of the keys. Use arrows, Tab, or
-  <kbd>⌥</kbd> <kbd>Tab</kbd> again to move, <kbd>Return</kbd> to switch, <kbd>Esc</kbd> to close.
+- **Keyboard first, your way.** By default the panel stays open after you let go of the keys: use
+  arrows, Tab, or <kbd>⌥</kbd> <kbd>Tab</kbd> again to move, <kbd>Return</kbd> to switch, <kbd>Esc</kbd>
+  to close. Prefer <kbd>⌘</kbd> <kbd>Tab</kbd> style? Choose *Switch to the selected window*: hold
+  <kbd>⌥</kbd>, tap <kbd>Tab</kbd> to move or just type to search, and let go to switch.
 - **Grid or list.** Big icons in a grid, or a list with one-line (*Compact*) or two-line
   (*Comfortable*) rows that also show if a window is a tab, minimized, or on another desktop.
   [See both lists below](#grid-or-list).
-- **Most recent first.** With an empty search, the window you used last comes first.
+- **Back in one keystroke.** With an empty search, the window you came from is already selected, so
+  <kbd>⌥</kbd> <kbd>Tab</kbd> <kbd>Return</kbd> takes you back. Prefer plain recent use, or by name?
+  Both are a setting away.
 - **Leave apps out.** Hide apps you never switch to (right-click a window → *Hide from Swoop*), and let
   games, virtual machines or remote desktops keep <kbd>⌥</kbd> <kbd>Tab</kbd> while they're in front.
+- **Two looks.** *Swoop*, a frosted brand look, or *Classic*, plain macOS. Both follow light and dark mode.
 - **Made for VS Code.** Project names are pulled out of window titles, so you can type
   `api` and see projects, not file names. Works great with `"window.nativeTabs": true`.
 - **Light.** Native Swift and AppKit. No dependencies and no polling: Swoop only wakes up when a window changes, so it sits at 0% CPU while nothing is happening.
@@ -91,12 +96,13 @@ To hear about new versions, click **Check for Updates** in Settings → Behavior
 
 ### First launch
 
-Swoop lives in the menu bar. The first time you open it, macOS asks for **Accessibility**
-access (System Settings → Privacy & Security → Accessibility). Swoop needs it to see your
-windows and bring them forward. Then press <kbd>⌥</kbd> <kbd>Tab</kbd>.
+Swoop lives in the menu bar. The first time you open it, a short setup walks you through
+**Accessibility** access (System Settings → Privacy & Security → Accessibility; Swoop needs it to
+see your windows and bring them forward), your shortcut and how it behaves, the layout, launching at
+login, and update checks. Then press <kbd>⌥</kbd> <kbd>Tab</kbd>.
 
-Turn on **Launch at login** in Settings → Behavior so Swoop is always ready. It also lets
-Swoop learn about windows as they open.
+Keep **Launch at login** on (Settings → Behavior) so Swoop is always ready. It also lets Swoop learn
+about windows as they open.
 
 ## Usage
 
@@ -107,9 +113,18 @@ Swoop learn about windows as they open.
 | Move | <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd>, <kbd>Tab</kbd> / <kbd>⇧</kbd> <kbd>Tab</kbd>, or <kbd>⌥</kbd> <kbd>Tab</kbd> / <kbd>⌥</kbd> <kbd>⇧</kbd> <kbd>Tab</kbd> again |
 | Switch | <kbd>Return</kbd> or click |
 | Close | <kbd>Esc</kbd> or click outside |
+| Hide an app | Right-click one of its windows → *Hide from Swoop* |
 
-**Settings** (menu-bar icon → Settings) cover the shortcut, layout (grid or list), light/dark
-appearance, icon size, number of rows, which display the panel opens on, which windows to include, apps to hide, and apps that keep the shortcut for themselves.
+**Settings** (menu-bar icon → Settings, or <kbd>⌘</kbd> <kbd>,</kbd> while the switcher is open):
+
+- **Keyboard:** the shortcut, what happens when you release it, apps that keep the shortcut for
+  themselves (games, virtual machines, remote desktops), and bare <kbd>Tab</kbd> as the shortcut.
+- **Appearance:** theme, grid or list, icon size, light/dark, rows before scrolling, which display the
+  switcher opens on, centered or where you last left it, and whether the search field is always shown.
+- **Behavior:** launch at login, closing on outside clicks, window order (Smart, Recent use, Name),
+  which windows to include (minimized, full screen, native tabs, other desktops), hidden apps, VS Code
+  project names, and update checks.
+- **Advanced:** diagnostics report and debug logging.
 
 ## What Swoop won't do
 
@@ -122,7 +137,9 @@ politely declined:
 - Browser tabs, or tabs that apps draw themselves
 - Plugins, scripting, custom themes (there are two built in: Swoop and Classic)
 
-Bug reports and anything that makes **switching** faster or more reliable are very welcome.
+Bug reports and anything that makes **switching** faster or more reliable are very welcome. Menu-bar
+icon → **Report a Problem** saves a diagnostics report (no window titles unless you allow them) to
+attach to the issue.
 
 ## How it works
 
@@ -171,7 +188,8 @@ Swoop makes no network requests without your consent. The only one it can make i
 it asks GitHub for the latest version number when you click **Check for Updates**, or daily, weekly or
 monthly if you turn on automatic checks (off by default; you can turn them on during setup or in Settings). Nothing about you or your windows is sent, and it never
 downloads or installs anything by itself. Your recent-windows history is stored in
-`~/Library/Application Support/Swoop/` and never leaves your Mac.
+`~/Library/Application Support/Swoop/` and never leaves your Mac. Diagnostics reports are saved to
+`~/Library/Logs/Swoop/` only when you ask for one, and go nowhere unless you attach them yourself.
 
 ## Build from source
 
@@ -185,9 +203,10 @@ scripts/test.sh               # unit tests (Packages/SwoopCore)
 open build/Swoop.app       # launch with `open` so macOS attributes permissions to the app
 ```
 
-README images are made from the real panel with demo windows: run a Debug build, then
-`build/swctl demo`, `build/swctl show`, `build/swctl snapshot <png> clear`, and composite with
-`Tools/make_readme_assets.swift`. Never capture your real windows: their titles end up public.
+README and onboarding images are made from the real panel with invented demo windows, in the default
+look (Swoop theme, dark): run a Debug build, then `build/swctl demo`, `build/swctl show`,
+`build/swctl snapshot <png> clear`, and composite with `Tools/make_readme_assets.swift`. Never capture
+your real windows: their titles end up public.
 
 `scripts/build.sh` signs with your first *Apple Development* certificate, so the Accessibility
 permission survives rebuilds. Without one, it signs ad hoc and macOS asks for the permission again

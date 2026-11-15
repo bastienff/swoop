@@ -21,12 +21,16 @@ from [Releases](https://github.com/bastienff/swoop/releases/latest).
 
 Useful context when assessing a report:
 
-- **One permission:** Accessibility. Swoop never asks for Screen Recording or Input Monitoring.
+- **One permission:** Accessibility. Swoop never asks for Screen Recording or Input Monitoring, and never
+  reads keystrokes outside its own switcher: ignoring the shortcut in chosen apps only looks at which app is
+  in front.
 - **No network without consent:** the only request Swoop can make is an update check (an anonymous GET of
   the latest release from the GitHub API), when the user clicks *Check for Updates* or, if they turned it on,
   daily, weekly or monthly. It sends nothing about the user or their windows and never downloads or installs anything.
-- **Local data only:** recent-window history in `~/Library/Application Support/Swoop/`, and settings and
-  remembered window ids in its preferences.
+- **Local data only:** recent-window history in `~/Library/Application Support/Swoop/`; settings (including
+  the hidden-app and shortcut-ignored app lists) and remembered window ids in its preferences; diagnostics
+  reports in `~/Library/Logs/Swoop/`, written only when the user asks for one (window titles left out unless
+  they allow them).
 - **Private API:** one documented, optional use of non-public Accessibility functions to rebuild window
   handles after a restart (Settings → Behavior → *Remember windows on other desktops*). It reads; it
   never moves windows.

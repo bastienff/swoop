@@ -211,15 +211,20 @@ Decision tree for target `T` of app `A`:
   `.popUpMenu`, `collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient,
   .ignoresCycle]` (applies only to *our* panel). Being non-activating, the previously active app
   stays active, so dismissing without selection leaves focus where it was.
-- Content: SwiftUI (`SwoopView` → search pill + `WindowGridView`) in an `NSHostingView` over an
-  `NSVisualEffectView` (`.hudWindow`, `.behindWindow`, rounded ~28 pt, hairline border, shadow).
-- Keyboard: local `NSEvent` monitor while key (arrows, Return, Escape, Tab); typing goes to the
-  search field, which is focused on open.
+- Content: SwiftUI (`SwoopView` → search pill + `WindowGridView`, or `WindowListView` for the Compact and
+  Comfortable lists) in an `NSHostingView` over an `NSVisualEffectView` (`.hudWindow`, `.behindWindow`,
+  rounded ~28 pt, hairline border, shadow); the Swoop theme adds a frosted brand tint. A right-click on a
+  window offers "Hide … from Swoop" (Hidden apps, skipped during discovery).
+- Keyboard: local `NSEvent` monitor while key (arrows, Return, Escape, Tab, ⌘,); typing goes to the
+  search field, which is focused on open. In *Switch to the selected window* mode, keys typed while the
+  shortcut's modifier is held add their plain character (`SwoopCore.HoldToType`), and releasing the
+  modifier (read from the current modifier state, no Input Monitoring) switches to the selection.
 - Dismissal: Escape, toggle shortcut, `resignKey`, and a global left/right-mouse-down monitor
   (mouse global monitors need no extra permission) for outside clicks.
 - Sizing: computed by `SwoopCore.GridLayout` from result count, icon size, and the target
   screen's `visibleFrame`; max width ≈ 90 % of screen, fixed max rows, scroll beyond. Shown on the
-  active display (screen with key window/mouse, configurable).
+  display with the active window, the mouse, or the primary display (setting); centered, or draggable
+  and reopened where it was left on each display.
 - Swoop's own windows left open behind other apps (Settings, About, …) would come forward when the panel
   activates Swoop: they're ordered out while it's open and put back at their exact z-position afterwards
   (above the CG window that was below them), without activating Swoop.
@@ -229,9 +234,12 @@ Decision tree for target `T` of app `A`:
 ## 6. Search (`SwoopCore.WindowSearchEngine`)
 
 Case/diacritic-insensitive. Fields: app name, window title, VS Code project, tab title. Score tiers:
-exact > prefix (field or word) > contiguous substring > fuzzy subsequence (gap/word-boundary
-weighted). VS Code project matches get a small bonus (never enough to jump a tier). Ties → recency.
-Empty query → MRU order.
+exact > prefix (field, then word) > initials (the query spells the first letters of the words, which
+also split at camelCase: `hw` → heron-web / HeronWeb; the start of the initials beats a run further in) >
+contiguous substring > fuzzy subsequence (gap/word-boundary weighted). VS Code project matches get a
+small bonus that can't lift a match two tiers. Ties and the empty query follow the *Order windows by*
+setting: Smart (most recent, with the window you're in second, so Return goes back), Recent use, or
+Name. Lists bold the matched substring, or each matched initial.
 
 ## 7. VS Code adapter (`VSCodeProjectAdapter`)
 
@@ -246,16 +254,21 @@ editor tabs inside VS Code are never enumerated (not exposed as windows).
 ```
 Packages/SwoopCore   (pure Swift, no AppKit; `swift test`)
   WindowEntry, WindowMerger, WindowSearchEngine, GridLayout/GridNavigator, RecentUsage, Shortcut,
-  VSCodeTitleParser
+  HoldToType, AppList (+ ShortcutSuspension), VSCodeTitleParser, FocusStealPolicy, RefreshScheduler,
+  RemoteRecoveryPolicy, UpdatePolicy, SupportPromptPolicy
 Swoop (app target)
-  App/        main, AppDelegate, AppController (composition root) + WorkspaceObserver, WindowControllers
+  App/        main, AppDelegate, AppController (composition root) + WorkspaceObserver, WindowControllers,
+              MainMenu, AppLinks
   Platform/   AXElement (Sendable wrapper), WindowDiscoveryService, WindowActivationService,
-              AXObserverHub, PermissionManager, GlobalShortcutManager, UpdateChecker (opt-in, §Rules)
+              AXObserverHub, PermissionManager, GlobalShortcutManager, UpdateChecker (opt-in, §Rules),
+              RemoteElements + RemoteWindowRecovery (§2a)
   Registry/   WindowRegistry (@MainActor, @Observable), RecentWindowsStore, AppSettings
-  UI/         SwoopPanelController, SwoopView (+ WindowGridView, WindowGridItemView),
+  UI/         SwoopPanelController, SwoopView (+ WindowGridView, WindowGridItemView), WindowListView,
               SearchViewModel, MenuBarController (+ LaunchAtLogin), HUDController, OnboardingView,
-              Settings/ (SettingsView, ShortcutRecorder)
-  Diagnostics/Probe (research probes), DebugCommands (DEBUG only)
+              AboutView, UpdateWindowView, UpdateStatusView, SupportPrompt, Theme/ (SwoopTheme),
+              Settings/ (SettingsView, ShortcutRecorder, AppListEditor, VisualPicker)
+  Diagnostics/DiagnosticsReport + DiagnosticsInfo + SessionStats, Probe (research probes),
+              DebugCommands, DebugActions, DebugSettings (DEBUG only)
 ```
 Space awareness is folded into `WorkspaceObserver` (`activeSpaceDidChangeNotification` → refresh →
 learned anchors); there is no separate Space service because no public Space API exists.

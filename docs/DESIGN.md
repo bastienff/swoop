@@ -296,7 +296,9 @@ If Accessibility is revoked later, only the permissions step reopens.
 Press shortcut → panel fades in with the previous window selected (Smart order) → type to filter (matches
 bold) → arrows / shortcut again to move → Return or click to switch → panel closes and the target is in
 front, even on another desktop. Escape or click outside closes and returns to where you were.
-*Switch on release* mode: hold the modifier, tap to move, release to switch (like ⌘Tab).
+*Switch on release* mode: hold the modifier, tap to move or type to search (letters stay plain while the
+modifier is held), release to switch (like ⌘Tab). Right-click a window → *Hide … from Swoop* to drop an app
+from the switcher (undo in Settings → Behavior → Hidden apps).
 
 ### 6.3 Customizing
 Menu bar → Settings (⌘,). Changes apply live, including the theme on the open Settings window. The window is 560 pt wide and

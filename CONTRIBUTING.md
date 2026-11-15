@@ -9,7 +9,7 @@ valuable thing you can send.
 - **Bugs:** open an issue with the bug form. Say which app's window misbehaved and how your desktops are set
   up (Spaces, full screen, native tabs).
 - **Features:** open a feature request first, so we can agree it fits before you write code. Out of scope:
-  window previews, tiling or snapping, managing desktops, browser tabs, plugins, themes. See
+  window previews, tiling or snapping, managing desktops, browser tabs, plugins, custom themes. See
   [What Swoop won't do](README.md#what-swoop-wont-do).
 - **Small fixes** (typos, obvious bugs): just send a pull request.
 
@@ -35,8 +35,9 @@ onboarding, load demo windows, simulate a relaunch, and more.
 
 ## How the code is organized
 
-- `Packages/SwoopCore/`: pure Swift with no AppKit: search, grid and list layout, window merging, recent
-  order, the support card schedule. **Anything that can be tested goes here, with tests** (Swift Testing).
+- `Packages/SwoopCore/`: pure Swift with no AppKit: search and ranking, grid and list layout, window
+  merging, recent order, the shortcut model and hold-to-type, app lists, update and support-card policies,
+  focus and refresh policies. **Anything that can be tested goes here, with tests** (Swift Testing).
 - `Swoop/`: the app: Accessibility, window discovery and activation, hotkey, UI.
   New files are picked up automatically (folder-synchronized Xcode project).
 
