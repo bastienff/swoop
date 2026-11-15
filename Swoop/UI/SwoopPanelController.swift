@@ -63,6 +63,14 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
     static let pendingActivationGrace: TimeInterval = 1.0
     private var targetScreen: NSScreen?
     private(set) var isVisible = false
+    /// Switching desktops (trackpad swipe) while open hands focus to an app on the new desktop; the panel
+    /// is on every desktop, so it keeps focus instead of closing. Not counted as a focus steal.
+    private var spaceObserver: NSObjectProtocol?
+    private var lastSpaceChange: Date?
+    static let spaceChangeWindow: TimeInterval = 1.0
+    /// How long a focus loss with no click or shortcut behind it waits for a desktop switch before closing:
+    /// the focus change can arrive before the Space-change notification.
+    static let spaceChangeGrace: Duration = .milliseconds(300)
 
     init(model: SearchViewModel, settings: AppSettings) {
         self.model = model
@@ -185,6 +193,7 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         lastOtherModifier = nil
         watchModifiers()
         observeLayout()
+        observeSpaceChanges()
 
         let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         panel.alphaValue = reduceMotion ? 1 : 0
@@ -217,6 +226,9 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
         pendingActivation = nil
         modifierWatch?.cancel()
         modifierWatch = nil
+        if let spaceObserver { NSWorkspace.shared.notificationCenter.removeObserver(spaceObserver) }
+        spaceObserver = nil
+        lastSpaceChange = nil
         endKeyRepeat()
         disarmSwitchOnRelease()
         removeMonitors()
@@ -476,6 +488,11 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
             reclaimFocus()
             return
         }
+        if isVisible, spaceChangedRecently, !userMovedFocus {
+            log.info("Desktop changed while the switcher was open; keeping it open")
+            reclaimFocus()
+            return
+        }
         // Another app grabbed focus on its own (it launched, answered a script, or opened a window):
         // take it back. A click outside, a shortcut the user pressed, or system UI is respected.
         if isVisible, focusWasStolen() {
@@ -488,7 +505,50 @@ final class SwoopPanelController: NSObject, NSWindowDelegate {
             return
         }
         guard isVisible, settings.dismissOnOutsideClick else { return }
-        dismiss(restorePrevious: false)
+        if userMovedFocus {
+            dismiss(restorePrevious: false)
+            return
+        }
+        // Nothing the user did explains it yet: a desktop swipe may be under way.
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: Self.spaceChangeGrace)
+            guard let self, self.isVisible, let panel = self.panel, !panel.isKeyWindow else { return }
+            if self.spaceChangedRecently {
+                self.log.info("Desktop changed while the switcher was open; keeping it open")
+                self.reclaimFocus()
+            } else {
+                self.dismiss(restorePrevious: false)
+            }
+        }
+    }
+
+    private var spaceChangedRecently: Bool {
+        lastSpaceChange.map { Date().timeIntervalSince($0) < Self.spaceChangeWindow } ?? false
+    }
+
+    /// A recent outside click or a held/recent modifier (⌘Tab, ⌃→, a launcher hotkey): the user left on purpose.
+    private var userMovedFocus: Bool {
+        let held = GlobalShortcutManager.modifiers(from: NSEvent.modifierFlags)
+        noteModifiers(held)
+        let ownHold: Shortcut.Modifiers = releaseWatch != nil ? (settings.effectiveShortcut?.holdModifiers ?? []) : []
+        if let click = lastOutsideClick, Date().timeIntervalSince(click) < FocusStealPolicy.clickWindow { return true }
+        if !held.subtracting(.shift).subtracting(ownHold).isEmpty { return true }
+        if let m = lastOtherModifier, Date().timeIntervalSince(m) < FocusStealPolicy.modifierWindow { return true }
+        return false
+    }
+
+    private func observeSpaceChanges() {
+        lastSpaceChange = nil
+        guard spaceObserver == nil else { return }
+        spaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.isVisible else { return }
+                self.lastSpaceChange = Date()
+                // Focus already moved to the new desktop's app (and wasn't the user's doing): take it back.
+                if let panel = self.panel, !panel.isKeyWindow, !self.userMovedFocus { self.reclaimFocus() }
+            }
+        }
     }
 
     private func focusWasStolen() -> Bool {
