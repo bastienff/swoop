@@ -16,7 +16,16 @@ Press <kbd>⌥</kbd> <kbd>Tab</kbd>, type a few letters, hit <kbd>Return</kbd>. 
 [![GitHub stars](https://img.shields.io/github/stars/bastienff/swoop?style=flat&logo=github&label=Stars&color=181717)](https://github.com/bastienff/swoop/stargazers)
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%99%A5-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/bastienff)
 
-<br>
+**[Install](#install)** &nbsp;·&nbsp;
+**[Features](#features)** &nbsp;·&nbsp;
+**[Grid or list](#grid-or-list)** &nbsp;·&nbsp;
+**[Usage](#usage)** &nbsp;·&nbsp;
+**[How it works](#how-it-works)** &nbsp;·&nbsp;
+**[Limitations](#limitations)** &nbsp;·&nbsp;
+**[Privacy](#privacy)** &nbsp;·&nbsp;
+**[Build from source](#build-from-source)** &nbsp;·&nbsp;
+**[Support](#support)**
+
 <img src="docs/images/swoop-grid.png" width="860" alt="Swoop showing every open window in a grid">
 
 </div>
