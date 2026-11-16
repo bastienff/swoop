@@ -77,20 +77,23 @@ can set 3 to 20.
 
 ## Install
 
-### Homebrew
+Swoop runs on Apple silicon Macs with macOS 14 or later. Pick either option:
+
+### Option 1 — Homebrew
 
 ```sh
 brew install --cask bastienff/tap/swoop
 ```
 
-> Swoop runs on Apple silicon Macs with macOS 14 or later. Each GitHub release also updates the
-> Homebrew tap, so `brew upgrade` picks up new versions.
+Each release also updates the Homebrew tap, so `brew upgrade` picks up new versions.
 
-### Download
+### Option 2 — Download the DMG
 
-Grab the latest `Swoop.dmg` from [Releases](https://github.com/bastienff/swoop/releases), open it,
-and drag **Swoop** to **Applications**. (`Swoop.zip` has the same app, if you prefer a zip.)
+1. Download [**Swoop.dmg**](https://github.com/bastienff/swoop/releases/latest/download/Swoop.dmg).
+2. Open it and drag **Swoop** to **Applications**.
+
 Releases are signed with a Developer ID and notarized by Apple, so macOS opens Swoop without warnings.
+Prefer a zip, or need an older version? See [all releases](https://github.com/bastienff/swoop/releases).
 To hear about new versions, click **Check for Updates** in Settings → Behavior or About, or turn on
 *Check for updates automatically* there (off by default).
 
