@@ -93,7 +93,7 @@ struct DebugSettings: View {
             } header: {
                 Text("Support Card")
             } footer: {
-                footnote("First card after \(SupportPromptPolicy.firstPromptSwitches) switches or 2 days (with ≥ \(SupportPromptPolicy.minimumSwitches) switches), whichever comes first. Coffee/star or \"Don't ask again\" stops it for good; ✕ / Maybe later / ignoring it postpones 2 days.")
+                footnote("First card after \(SupportPromptPolicy.firstPromptSwitches) switches or 2 days (with ≥ \(SupportPromptPolicy.minimumSwitches) switches), whichever comes first. Sponsor/star or \"Don't ask again\" stops it for good; ✕ / Maybe later / ignoring it postpones 2 days.")
             }
 
             Section {

@@ -45,7 +45,7 @@ appearance combinations.
 | Settings window | Brand gradient behind the form (opaque window), transparent toolbar, orange switches, orange picker selection. | Standard macOS Settings window, untouched. |
 | About | Custom About window (`AboutView`). | Standard macOS About panel, frosted (blur under its content). |
 | Check for Updates | Custom update window (`UpdateWindowView`). | Standard `NSAlert`. |
-| Support card | Brand surface, follows Light/Dark, orange coffee button. | Always dark HUD, yellow coffee button. |
+| Support card | Brand surface, follows Light/Dark, orange sponsor button. | Always dark HUD, GitHub Sponsors pink sponsor button. |
 | Onboarding | Brand (always). | Brand (always) — onboarding is the brand's first impression. |
 | Switcher content | Identical: icons, highlight, search field, text tones. | Identical. |
 
@@ -287,7 +287,7 @@ Short non-activating bubble for safe activation failures, 3 s, lower part of the
    (Keep open / Switch on release), Launch at login and opt-in weekly update check (off by default).
 4. **Look** — layout picker with a live demo screenshot, appearance segmented control. The window previews
    the choice.
-5. **Support** — free and open source; coffee, GitHub star, report/suggest. Thank-you state after use.
+5. **Support** — free and open source; sponsor on GitHub, GitHub star, report/suggest. Thank-you state after use.
 6. **Done** — "You're all set", a cheat sheet of keys, primary *Swoop Away →* opens the switcher.
 
 If Accessibility is revoked later, only the permissions step reopens.

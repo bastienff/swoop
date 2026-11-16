@@ -28,7 +28,7 @@ struct AboutView: View {
                 .multilineTextAlignment(.center)
                 .padding(.top, 12)
             HStack(spacing: 8) {
-                Button("Buy me a coffee") { NSWorkspace.shared.open(AppLinks.buyMeACoffee) }
+                Button("Sponsor Swoop") { NSWorkspace.shared.open(AppLinks.sponsor) }
                     .buttonStyle(BrandButtonStyle(softInLight: true, height: 30))
                 Button("Star on GitHub") { NSWorkspace.shared.open(AppLinks.repository) }
                     .buttonStyle(BrandButtonStyle(prominent: false, height: 30))

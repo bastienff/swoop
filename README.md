@@ -14,7 +14,7 @@ Press <kbd>⌥</kbd> <kbd>Tab</kbd>, type a few letters, hit <kbd>Return</kbd>. 
 ![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 [![GitHub stars](https://img.shields.io/github/stars/bastienff/swoop?style=flat&logo=github&label=Stars&color=181717)](https://github.com/bastienff/swoop/stargazers)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/bastienff)
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%99%A5-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/bastienff)
 
 <br>
 <img src="docs/images/swoop-grid.png" width="860" alt="Swoop showing every open window in a grid">
@@ -229,16 +229,16 @@ cask.
 **Did Swoop just swoop you to the right window?**
 
 Swoop is free, has no ads and no tracking, and it stays that way.
-If it saves you a few hundred <kbd>⌘</kbd> <kbd>Tab</kbd>s a day, swoop by and gift me a coffee.
-It keeps the switcher fast and the developer awake. ☕
+If it saves you a few hundred <kbd>⌘</kbd> <kbd>Tab</kbd>s a day, swoop by and sponsor it on GitHub,
+once or monthly. It keeps the switcher fast and the developer awake. ♥
 
-<a href="https://buymeacoffee.com/bastienff"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="52" alt="Buy Me a Coffee"></a>
+<a href="https://github.com/sponsors/bastienff"><img src="https://img.shields.io/badge/Sponsor%20Swoop-%E2%99%A5-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white" height="32" alt="Sponsor Swoop on GitHub"></a>
 
-No coffee budget? A star is free and helps other Mac users find Swoop. ⭐
+Not right now? A star is free and helps other Mac users find Swoop. ⭐
 
 <a href="https://github.com/bastienff/swoop"><img src="https://img.shields.io/github/stars/bastienff/swoop?style=for-the-badge&logo=github&label=Star%20on%20GitHub&color=181717" height="24" alt="Star Swoop on GitHub"></a>
 
-The coffee link also lives in the menu bar (**Buy Me a Coffee ♥**), and both show up now and then in a small card after a switch.
+The sponsor link also lives in the menu bar (**Sponsor Swoop ♥**), and both show up now and then in a small card after a switch.
 
 </div>
 

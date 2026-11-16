@@ -1,6 +1,6 @@
 import Foundation
 
-/// Persistent state of the "buy me a coffee / star on GitHub" card.
+/// Persistent state of the "sponsor / star on GitHub" card.
 public struct SupportPromptState: Codable, Equatable, Sendable {
     /// When Swoop first ran (first prompt is not before `firstSeen + interval`).
     public var firstSeen: Date

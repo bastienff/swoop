@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 import SwoopCore
 
-/// The occasional "buy me a coffee / star on GitHub" card (SupportPromptPolicy): a small non-activating
+/// The occasional "sponsor / star on GitHub" card (SupportPromptPolicy): a small non-activating
 /// card under the menu-bar icon, shown right after a successful switch. It never takes focus from the
 /// window the user just switched to, and any choice is one click.
 @MainActor
@@ -30,7 +30,7 @@ final class SupportPromptController {
 
     var isVisible: Bool { panel?.isVisible ?? false }
 
-    /// The user bought a coffee or starred the repo elsewhere (onboarding): don't ask again.
+    /// The user sponsored or starred the repo elsewhere (onboarding): don't ask again.
     func markSupported() {
         state = SupportPromptPolicy.resolve(state, .supported, now: Date())
         save()
@@ -93,8 +93,8 @@ final class SupportPromptController {
     private func handle(_ action: SupportCardView.Action) {
         autoHide?.cancel()
         switch action {
-        case .coffee:
-            NSWorkspace.shared.open(AppLinks.buyMeACoffee)
+        case .sponsor:
+            NSWorkspace.shared.open(AppLinks.sponsor)
             state = SupportPromptPolicy.resolve(state, .supported, now: Date())
         case .star:
             NSWorkspace.shared.open(AppLinks.repository)
@@ -177,9 +177,9 @@ private final class SupportPanel: NSPanel {
 }
 
 struct SupportCardView: View {
-    enum Action { case coffee, star, later, never }
+    enum Action { case sponsor, star, later, never }
     let switches: Int
-    /// Swoop theme: brand surface, follows Light/Dark, orange coffee button. Classic: as before.
+    /// Swoop theme: brand surface, follows Light/Dark, orange sponsor button. Classic: GitHub Sponsors pink.
     var swoop = false
     let act: (Action) -> Void
     @Environment(\.colorScheme) private var scheme
@@ -203,7 +203,7 @@ struct SupportCardView: View {
                     (switches >= 2 ? Text("Swoop has switched you \(switches.formatted()) times") : Text("Enjoying Swoop?"))
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(titleColor)
-                    Text("It's free, has no ads, and is made by one person. If it saves you time, a coffee or a GitHub star keeps it going.")
+                    Text("It's free, has no ads, and is made by one person. If it saves you time, sponsoring it or starring it on GitHub keeps it going.")
                         .font(.system(size: 12))
                         .foregroundStyle(bodyColor)
                         .fixedSize(horizontal: false, vertical: true)
@@ -219,20 +219,20 @@ struct SupportCardView: View {
                 .help("Maybe later")
             }
             HStack(spacing: 8) {
-                Button { act(.coffee) } label: {
+                Button { act(.sponsor) } label: {
                     if swoop {
-                        Label("Buy me a coffee", systemImage: "cup.and.saucer.fill")
+                        Label("Sponsor", systemImage: "heart.fill")
                             .font(.system(size: 12.5, weight: .semibold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity).padding(.vertical, 7)
                             .background(Capsule().fill(LinearGradient(colors: [Brand.orangeLight, Brand.orange], startPoint: .top, endPoint: .bottom)))
                             .shadow(color: Brand.orange.opacity(dark ? 0.35 : 0.16), radius: dark ? 7 : 4, y: 2)
                     } else {
-                        Label("Buy me a coffee", systemImage: "cup.and.saucer.fill")
+                        Label("Sponsor", systemImage: "heart.fill")
                             .font(.system(size: 12.5, weight: .semibold))
-                            .foregroundStyle(.black)
+                            .foregroundStyle(.white)
                             .frame(maxWidth: .infinity).padding(.vertical, 7)
-                            .background(Capsule().fill(Color(red: 1, green: 0.867, blue: 0)))
+                            .background(Capsule().fill(Color(red: 0.86, green: 0.38, blue: 0.64))) // GitHub Sponsors pink
                     }
                 }
                 .buttonStyle(.plain)

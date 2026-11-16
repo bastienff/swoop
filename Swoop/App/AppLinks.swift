@@ -2,7 +2,7 @@ import Foundation
 
 /// Public links shown in the app (menu bar, About) and the README.
 enum AppLinks {
-    static let buyMeACoffee = URL(string: "https://buymeacoffee.com/bastienff")!
+    static let sponsor = URL(string: "https://github.com/sponsors/bastienff")!
     static let repository = URL(string: "https://github.com/bastienff/swoop")!
 
     /// The repository's issue forms (`.github/ISSUE_TEMPLATE`). Field ids must match the form's `id`s.

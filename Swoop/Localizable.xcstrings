@@ -112,12 +112,6 @@
     "Boost project-name matches in search" : {
 
     },
-    "Buy Me a Coffee ♥" : {
-      "comment" : "Menu bar menu"
-    },
-    "Buy me a coffee" : {
-
-    },
     "Cancel" : {
 
     },
@@ -298,7 +292,7 @@
     "Input Monitoring" : {
 
     },
-    "It's free, has no ads, and is made by one person. If it saves you time, a coffee or a GitHub star keeps it going." : {
+    "It's free, has no ads, and is made by one person. If it saves you time, sponsoring it or starring it on GitHub keeps it going." : {
 
     },
     "Just a window switcher. Window\ninformation never leaves this Mac." : {
@@ -591,6 +585,18 @@
     "Software Update" : {
 
     },
+    "Sponsor" : {
+
+    },
+    "Sponsor Swoop" : {
+
+    },
+    "Sponsor Swoop on GitHub" : {
+
+    },
+    "Sponsor Swoop ♥" : {
+
+    },
     "Star Swoop on GitHub" : {
 
     },
@@ -658,7 +664,7 @@
     "Swoop, update available" : {
 
     },
-    "Swooped you to the right window? Buy me a coffee ☕" : {
+    "Swooped you to the right window? Sponsor Swoop ♥" : {
 
     },
     "Tab" : {

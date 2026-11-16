@@ -164,10 +164,10 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         suggest.target = self
         suggest.image = NSImage(systemSymbolName: "lightbulb", accessibilityDescription: nil)
         menu.addItem(suggest)
-        let coffee = NSMenuItem(title: String(localized: "Buy Me a Coffee ♥"), action: #selector(buyMeACoffee), keyEquivalent: "")
-        coffee.target = self
-        coffee.image = NSImage(systemSymbolName: "cup.and.saucer.fill", accessibilityDescription: nil)
-        menu.addItem(coffee)
+        let sponsor = NSMenuItem(title: String(localized: "Sponsor Swoop ♥"), action: #selector(openSponsor), keyEquivalent: "")
+        sponsor.target = self
+        sponsor.image = NSImage(systemSymbolName: "heart.fill", accessibilityDescription: nil)
+        menu.addItem(sponsor)
         if let debugMenu {
             menu.addItem(.separator())
             let debug = NSMenuItem(title: "Debug", action: nil, keyEquivalent: "")
@@ -192,7 +192,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     @objc private func openUpdatePage(_ sender: NSMenuItem) {
         if let url = sender.representedObject as? URL { NSWorkspace.shared.open(url) }
     }
-    @objc private func buyMeACoffee() { NSWorkspace.shared.open(AppLinks.buyMeACoffee) }
+    @objc private func openSponsor() { NSWorkspace.shared.open(AppLinks.sponsor) }
     @objc private func about() {
         if let onAbout { onAbout() } else { Self.showStandardAbout() }
     }
@@ -201,8 +201,8 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     static func showStandardAbout() {
         NSApp.activate()
         let credits = NSMutableAttributedString(string: String(localized: "Just a window switcher. Window information never leaves this Mac.") + "\n\n")
-        credits.append(NSAttributedString(string: String(localized: "Swooped you to the right window? Buy me a coffee ☕"),
-                                          attributes: [.link: AppLinks.buyMeACoffee]))
+        credits.append(NSAttributedString(string: String(localized: "Swooped you to the right window? Sponsor Swoop ♥"),
+                                          attributes: [.link: AppLinks.sponsor]))
         let centered = NSMutableParagraphStyle()
         centered.alignment = .center
         credits.addAttributes([.paragraphStyle: centered, .font: NSFont.systemFont(ofSize: 11)],

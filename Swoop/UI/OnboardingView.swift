@@ -13,7 +13,7 @@ final class OnboardingModel {
     private(set) var index = 0
     /// Direction of the last move, for the slide transition.
     private(set) var forward = true
-    /// The coffee/star links were used (shows the thank-you state).
+    /// The sponsor/star links were used (shows the thank-you state).
     var supported = false
     #if DEBUG
     /// Debug: show the "not granted" state on a Mac that already granted Accessibility.
@@ -407,9 +407,9 @@ private struct SupportStep: View {
                            : "No ads, no tracking, no account. If Swoop saves you time, here's how you can help it grow.")
 
             VStack(spacing: 10) {
-                LinkRow(systemImage: "cup.and.saucer.fill", color: Brand.orange, title: "Buy me a coffee",
+                LinkRow(systemImage: "heart.fill", color: .pink, title: "Sponsor Swoop on GitHub",
                         detail: "Supports the time that goes into fixes and new features.") {
-                    open(AppLinks.buyMeACoffee)
+                    open(AppLinks.sponsor)
                 }
                 LinkRow(systemImage: "star.fill", color: .yellow, title: "Star Swoop on GitHub",
                         detail: "Helps other people discover it.") {
