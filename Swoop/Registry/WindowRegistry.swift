@@ -240,6 +240,10 @@ final class WindowRegistry {
         targets = newTargets
     }
 
+    /// Element-recovery and anchor counts, for the Diagnostics report and the Debug pane.
+    var recoveryStats: (apps: Int, ids: Int)? { recovery?.stats }
+    var anchorCount: Int { anchors.values.reduce(0) { $0 + $1.count } }
+
     #if DEBUG
     /// Fixed, generic windows for README screenshots (`swctl demo`). Real discovery is paused.
     @ObservationIgnored private var demoMode = false
@@ -252,8 +256,6 @@ final class WindowRegistry {
     }
 
     var isDemo: Bool { demoMode }
-    var recoveryStats: (apps: Int, ids: Int)? { recovery?.stats }
-    var anchorCount: Int { anchors.values.reduce(0) { $0 + $1.count } }
 
     /// Leaves demo mode and rediscovers real windows.
     func exitDemo() async {
